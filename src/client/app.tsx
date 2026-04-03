@@ -1,17 +1,10 @@
 import { createBrowserRouter, RouterProvider, Navigate } from "react-router"
 import { ConnectionPage } from "./components/connection/connection-page"
-
-function ChatPage() {
-  return (
-    <div className="flex items-center justify-center h-screen">
-      <p className="text-muted-foreground">Chat coming in Phase 2</p>
-    </div>
-  )
-}
+import { ChatLayout } from "./components/chat/chat-layout"
 
 const router = createBrowserRouter([
   { path: "/", element: <ConnectionPage /> },
-  { path: "/chat", element: <ChatPage /> },
+  { path: "/chat", element: <ChatLayout /> },
   { path: "*", element: <Navigate to="/" replace /> },
 ])
 
