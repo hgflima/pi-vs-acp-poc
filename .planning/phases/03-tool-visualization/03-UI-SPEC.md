@@ -34,10 +34,8 @@ Declared values (from project design-tokens.json, Tailwind standard scale):
 | Token | Value | Usage in Phase 3 |
 |-------|-------|-------------------|
 | 1 | 4px | Icon-to-text gap in tool card headers |
-| 1.5 | 6px | Vertical padding in compact tool card headers |
-| 2 | 8px | Inline padding in status badges, gap between icon and label |
-| 3 | 12px | Horizontal padding inside tool card content areas |
-| 4 | 16px | Default padding inside tool cards (px-4), vertical margin between cards |
+| 2 | 8px | Inline padding in status badges, gap between icon and label, vertical padding in tool card headers |
+| 4 | 16px | Default padding inside tool cards (px-4), horizontal padding inside tool card content areas, vertical margin between tool cards and surrounding content |
 | 6 | 24px | Outer margin between tool cards and surrounding text segments |
 | 8 | 32px | Not used in Phase 3 |
 
@@ -144,15 +142,15 @@ Source: design-tokens.json color.tool.*, globals.css :root variables, RESEARCH.m
 
 ```
 +-- border-radius: rounded-lg (8px) ---------------------------------+
-| HEADER: icon + label + tool-specific info + ToolStatusIcon    py-1.5 px-3 |
+| HEADER: icon + label + tool-specific info + ToolStatusIcon    py-2 px-4 |
 +---------------------------------------------------------------------+
-| CONTENT: variant-specific content area                     py-2 px-3 |
+| CONTENT: variant-specific content area                     py-2 px-4 |
 |   (only visible when result/output exists or status != running)      |
 |   max-height: 256px (max-h-64), overflow-y: auto                    |
 +---------------------------------------------------------------------+
 ```
 
-- **Vertical margin:** `my-3` (12px above and below each tool card)
+- **Vertical margin:** `my-4` (16px above and below each tool card)
 - **Border radius:** `rounded-lg` (0.5rem / 8px)
 - **Overflow:** `overflow-hidden` on outer container
 - **Content max-height:** `max-h-64` (256px) with `overflow-auto` for scrollable output
