@@ -4,6 +4,20 @@ import { storeCredentials } from "../lib/credentials"
 
 const authRoutes = new Hono()
 
+function mapErrorMessage(raw: string): string {
+  const lower = raw.toLowerCase()
+  if (raw.includes("401") || lower.includes("invalid") || lower.includes("unauthorized") || lower.includes("authentication")) {
+    return "Invalid API key. Please check your key and try again."
+  }
+  if (raw.includes("429") || lower.includes("rate")) {
+    return "Rate limited. Please wait a moment and try again."
+  }
+  if (raw.includes("ECONNREFUSED") || raw.includes("ENOTFOUND") || lower.includes("network")) {
+    return "Could not reach the provider. Check your internet connection."
+  }
+  return "Could not validate API key. Please try again."
+}
+
 authRoutes.post("/apikey", async (c) => {
   const { provider, key } = await c.req.json<{
     provider: "anthropic" | "openai"
@@ -30,29 +44,29 @@ authRoutes.post("/apikey", async (c) => {
       { apiKey: key }
     )
 
-    // Consume stream to completion to validate the key works
-    await stream.result()
+    const result = await stream.result()
 
-    // Store credentials in-memory (per AUTH-03: never returned to frontend)
+    // pi-ai sets stopReason to "error" and errorMessage when the provider throws (e.g., 401)
+    if (result.stopReason === "error" || result.stopReason === "aborted") {
+      const errorMsg = result.errorMessage || "API key validation failed"
+      return c.json({ status: "error", message: mapErrorMessage(errorMsg) }, 401)
+    }
+
+    // Belt-and-suspenders: if the stream "succeeded" but returned nothing, the key is likely invalid
+    if (result.content.length === 0 && result.usage.totalTokens === 0) {
+      return c.json({
+        status: "error",
+        message: "Invalid API key. Please check your key and try again."
+      }, 401)
+    }
+
+    // Only store credentials if validation actually passed
     storeCredentials(provider, key)
 
     return c.json({ status: "ok", provider })
   } catch (error: unknown) {
     const raw = error instanceof Error ? error.message : String(error)
-
-    // Map known API error patterns to user-friendly messages
-    let message: string
-    if (raw.includes("401") || raw.toLowerCase().includes("invalid") || raw.toLowerCase().includes("unauthorized") || raw.toLowerCase().includes("authentication")) {
-      message = "Invalid API key. Please check your key and try again."
-    } else if (raw.includes("429") || raw.toLowerCase().includes("rate")) {
-      message = "Rate limited. Please wait a moment and try again."
-    } else if (raw.includes("ECONNREFUSED") || raw.includes("ENOTFOUND") || raw.toLowerCase().includes("network")) {
-      message = "Could not reach the provider. Check your internet connection."
-    } else {
-      message = "Could not validate API key. Please try again."
-    }
-
-    return c.json({ status: "error", message }, 401)
+    return c.json({ status: "error", message: mapErrorMessage(raw) }, 401)
   }
 })
 
