@@ -29,12 +29,12 @@ Decimal phases appear between their surrounding integers in numeric order.
   3. After successful connection, user is navigated to the chat page (empty state)
   4. API Key is stored only on the backend -- never returned to or visible in the frontend
   5. A standalone spike script validates pi-agent-core Agent creation, event subscription, and stream lifecycle before the main app is built
-**Plans**: TBD
+**Plans:** 3 plans
 
 Plans:
-- [ ] 01-01: TBD
-- [ ] 01-02: TBD
-- [ ] 01-03: TBD
+- [ ] 01-01-PLAN.md -- Scaffold project (Vite + React + Hono + Tailwind + shadcn), shared types, dev workflow, routing
+- [ ] 01-02-PLAN.md -- pi-agent-core validation spike (Agent, events, tool execution)
+- [ ] 01-03-PLAN.md -- API Key auth flow (backend endpoint + frontend connection page)
 
 **UI hint**: yes
 
