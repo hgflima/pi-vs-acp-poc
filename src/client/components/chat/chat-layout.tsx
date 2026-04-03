@@ -65,7 +65,7 @@ export function ChatLayout() {
             onSend={handleSend}
             onStop={stopGeneration}
             streaming={streaming}
-            disabled={!auth.provider}
+            disabled={false}
           />
         </div>
       </div>
