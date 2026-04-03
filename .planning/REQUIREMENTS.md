@@ -24,12 +24,12 @@ Requirements para a validacao tecnica. Cada um mapeia para fases do roadmap.
 
 ### Streaming Chat
 
-- [ ] **CHAT-01**: Usuario pode enviar mensagem e ver tokens chegando em tempo real via streaming
+- [x] **CHAT-01**: Usuario pode enviar mensagem e ver tokens chegando em tempo real via streaming
 - [ ] **CHAT-02**: Backend executa agent loop via pi-agent-core e emite AgentEvents como SSE
-- [ ] **CHAT-03**: Frontend parseia SSE stream via fetch + ReadableStream (nao EventSource)
+- [x] **CHAT-03**: Frontend parseia SSE stream via fetch + ReadableStream (nao EventSource)
 - [ ] **CHAT-04**: Respostas renderizadas em Markdown com syntax highlighting em code blocks
 - [ ] **CHAT-05**: Indicador de "pensando..." antes do primeiro token (latencia < 500ms)
-- [ ] **CHAT-06**: Botao de stop generation que aborta o stream via AbortController
+- [x] **CHAT-06**: Botao de stop generation que aborta o stream via AbortController
 - [ ] **CHAT-07**: Auto-scroll para baixo durante streaming, pause quando usuario scrolla para cima
 - [ ] **CHAT-08**: Diferenciacao visual entre mensagens do usuario e do assistant
 - [ ] **CHAT-09**: Error handling inline com botao de retry
@@ -117,12 +117,12 @@ Deferred para apos validacao do POC. Tracked mas nao no roadmap atual.
 | AUTH-03 | Phase 1 | Pending |
 | AUTH-04 | Phase 1 | Complete |
 | AUTH-05 | Phase 1 | Pending |
-| CHAT-01 | Phase 2 | Pending |
+| CHAT-01 | Phase 2 | Complete |
 | CHAT-02 | Phase 2 | Pending |
-| CHAT-03 | Phase 2 | Pending |
+| CHAT-03 | Phase 2 | Complete |
 | CHAT-04 | Phase 2 | Pending |
 | CHAT-05 | Phase 2 | Pending |
-| CHAT-06 | Phase 2 | Pending |
+| CHAT-06 | Phase 2 | Complete |
 | CHAT-07 | Phase 2 | Pending |
 | CHAT-08 | Phase 2 | Pending |
 | CHAT-09 | Phase 2 | Pending |
