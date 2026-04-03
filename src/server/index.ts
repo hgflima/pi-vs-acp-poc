@@ -1,11 +1,13 @@
 import { serve } from "@hono/node-server"
 import { Hono } from "hono"
 import { authRoutes } from "./routes/auth"
+import { chatRoutes } from "./routes/chat"
 
 const app = new Hono()
 
 // Auth routes
 app.route("/api/auth", authRoutes)
+app.route("/api/chat", chatRoutes)
 
 // Health check
 app.get("/api/health", (c) => c.json({ status: "ok" }))
