@@ -30,10 +30,10 @@ Requirements para a validacao tecnica. Cada um mapeia para fases do roadmap.
 - [x] **CHAT-04**: Respostas renderizadas em Markdown com syntax highlighting em code blocks
 - [x] **CHAT-05**: Indicador de "pensando..." antes do primeiro token (latencia < 500ms)
 - [x] **CHAT-06**: Botao de stop generation que aborta o stream via AbortController
-- [ ] **CHAT-07**: Auto-scroll para baixo durante streaming, pause quando usuario scrolla para cima
+- [x] **CHAT-07**: Auto-scroll para baixo durante streaming, pause quando usuario scrolla para cima
 - [x] **CHAT-08**: Diferenciacao visual entre mensagens do usuario e do assistant
-- [ ] **CHAT-09**: Error handling inline com botao de retry
-- [ ] **CHAT-10**: Input de mensagem com Enter para enviar e Shift+Enter para newline
+- [x] **CHAT-09**: Error handling inline com botao de retry
+- [x] **CHAT-10**: Input de mensagem com Enter para enviar e Shift+Enter para newline
 
 ### Tool Call Visualization
 
@@ -123,10 +123,10 @@ Deferred para apos validacao do POC. Tracked mas nao no roadmap atual.
 | CHAT-04 | Phase 2 | Complete |
 | CHAT-05 | Phase 2 | Complete |
 | CHAT-06 | Phase 2 | Complete |
-| CHAT-07 | Phase 2 | Pending |
+| CHAT-07 | Phase 2 | Complete |
 | CHAT-08 | Phase 2 | Complete |
-| CHAT-09 | Phase 2 | Pending |
-| CHAT-10 | Phase 2 | Pending |
+| CHAT-09 | Phase 2 | Complete |
+| CHAT-10 | Phase 2 | Complete |
 | TOOL-01 | Phase 3 | Pending |
 | TOOL-02 | Phase 3 | Pending |
 | TOOL-03 | Phase 3 | Pending |

@@ -56,7 +56,7 @@ Plans:
 - [x] 02-01-PLAN.md -- Install Phase 2 deps + backend streaming pipeline (Agent factory, SSE adapter, chat route)
 - [x] 02-02-PLAN.md -- Frontend streaming infrastructure (SSE parser + useChat hook with reducer)
 - [x] 02-03-PLAN.md -- Message rendering components (markdown + Shiki code blocks, user/assistant messages, indicators)
-- [ ] 02-04-PLAN.md -- Chat page assembly (input, header, empty state, message list, error handling, app wiring + human verify)
+- [x] 02-04-PLAN.md -- Chat page assembly (input, header, empty state, message list, error handling, app wiring + human verify)
 
 **UI hint**: yes
 
