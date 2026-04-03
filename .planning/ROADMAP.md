@@ -29,13 +29,14 @@ Decimal phases appear between their surrounding integers in numeric order.
   3. After successful connection, user is navigated to the chat page (empty state)
   4. API Key is stored only on the backend -- never returned to or visible in the frontend
   5. A standalone spike script validates pi-agent-core Agent creation, event subscription, and stream lifecycle before the main app is built
-**Plans:** 4 plans
+**Plans:** 5 plans
 
 Plans:
 - [x] 01-01-PLAN.md -- Scaffold project (Vite + React + Hono + Tailwind + shadcn), shared types, dev workflow, routing
 - [x] 01-02-PLAN.md -- pi-agent-core validation spike (Agent, events, tool execution)
 - [x] 01-03-PLAN.md -- API Key auth flow (backend endpoint + frontend connection page)
 - [x] 01-04-PLAN.md -- Fix invalid API key error handling (gap closure from UAT)
+- [ ] 01-05-PLAN.md -- Fix invalid key detection via AssistantMessage inspection + spike human verification (gap closure from verification)
 
 **UI hint**: yes
 
@@ -100,7 +101,7 @@ Phases execute in numeric order: 1 -> 2 -> 3 -> 4
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
-| 1. Foundation + Connection | 3/4 | In progress | - |
+| 1. Foundation + Connection | 4/5 | In progress | - |
 | 2. Streaming Chat | 0/3 | Not started | - |
 | 3. Tool Visualization | 0/2 | Not started | - |
 | 4. Configuration | 0/3 | Not started | - |
