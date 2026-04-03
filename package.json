@@ -1,0 +1,39 @@
+{
+  "name": "pi-ai-poc",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "concurrently -n fe,be -c blue,green \"npm run dev:frontend\" \"npm run dev:backend\"",
+    "dev:frontend": "vite",
+    "dev:backend": "tsx watch src/server/index.ts",
+    "build": "vite build"
+  },
+  "dependencies": {
+    "@base-ui/react": "^1.3.0",
+    "@fontsource-variable/geist": "^5.2.8",
+    "@hono/node-server": "^1.19.0",
+    "@mariozechner/pi-agent-core": "^0.64.0",
+    "@mariozechner/pi-ai": "^0.64.0",
+    "@tailwindcss/vite": "^4.2.0",
+    "class-variance-authority": "^0.7.1",
+    "clsx": "^2.1.1",
+    "hono": "^4.12.0",
+    "lucide-react": "^1.7.0",
+    "react": "^19.2.0",
+    "react-dom": "^19.2.0",
+    "react-router": "^7.14.0",
+    "shadcn": "^4.1.2",
+    "tailwind-merge": "^3.5.0",
+    "tailwindcss": "^4.2.0",
+    "tw-animate-css": "^1.4.0"
+  },
+  "devDependencies": {
+    "@types/node": "^22.0.0",
+    "@types/react": "^19.2.0",
+    "@types/react-dom": "^19.2.0",
+    "@vitejs/plugin-react": "^4.7.0",
+    "concurrently": "^9.2.0",
+    "tsx": "^4.21.0",
+    "typescript": "^5.7.0"
+  }
+}
