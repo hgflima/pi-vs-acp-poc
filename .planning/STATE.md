@@ -3,14 +3,14 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: executing
-stopped_at: Completed 01-01-PLAN.md
-last_updated: "2026-04-03T10:49:42.679Z"
-last_activity: 2026-04-03
+stopped_at: Phase 1 context gathered
+last_updated: "2026-04-03T10:37:19.015Z"
+last_activity: 2026-04-03 -- Phase 01 execution started
 progress:
   total_phases: 4
   completed_phases: 0
   total_plans: 3
-  completed_plans: 1
+  completed_plans: 0
   percent: 0
 ---
 
@@ -21,14 +21,14 @@ progress:
 See: .planning/PROJECT.md (updated 2026-04-03)
 
 **Core value:** Provar que pi-ai + pi-agent-core sustentam um chat web com streaming em tempo real, tool calls visiveis e troca de agentes
-**Current focus:** Phase 1: Foundation + Connection
+**Current focus:** Phase 01 — foundation-connection
 
 ## Current Position
 
-Phase: 1 of 4 (Foundation + Connection)
-Plan: 1 of 3 in current phase
-Status: Ready to execute
-Last activity: 2026-04-03
+Phase: 01 (foundation-connection) — EXECUTING
+Plan: 1 of 3
+Status: Executing Phase 01
+Last activity: 2026-04-03 -- Phase 01 execution started
 
 Progress: [░░░░░░░░░░] 0%
 
@@ -52,7 +52,6 @@ Progress: [░░░░░░░░░░] 0%
 - Trend: -
 
 *Updated after each plan completion*
-| Phase 01-foundation-connection P01 | 8min | 2 tasks | 19 files |
 
 ## Accumulated Context
 
@@ -65,9 +64,6 @@ Recent decisions affecting current work:
 - [Roadmap]: Merged Agent Switching + Model Switching + Harness into Phase 4 (all are configuration knobs on top of working chat)
 - [Roadmap]: Phase 2 (Streaming Chat) is the critical path -- validates the core hypothesis
 - [Roadmap]: Phase 4 depends on Phase 2 not Phase 3 -- tool visualization is not a prerequisite for switching/harness
-- [Phase 01-foundation-connection]: shadcn/ui base-nova style uses @base-ui/react instead of Radix -- accepted as default for v4
-- [Phase 01-foundation-connection]: Segment-based AssistantMessage model (D-13) with TextSegment and ToolSegment for Phase 2+ tool rendering
-- [Phase 01-foundation-connection]: components.json aliases use @/client/ prefix to match src/client + src/server structure
 
 ### Pending Todos
 
@@ -81,6 +77,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-04-03T10:49:42.678Z
-Stopped at: Completed 01-01-PLAN.md
-Resume file: None
+Last session: 2026-04-03T10:10:54.174Z
+Stopped at: Phase 1 context gathered
+Resume file: .planning/phases/01-foundation-connection/01-CONTEXT.md
