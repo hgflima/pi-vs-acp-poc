@@ -222,6 +222,29 @@ export function useChat() {
             case "text_delta":
               dispatch({ type: "APPEND_TEXT_DELTA", data: event.data })
               break
+            case "tool_start":
+              dispatch({
+                type: "TOOL_START",
+                tool: event.tool,
+                id: event.id,
+                params: event.params,
+              })
+              break
+            case "tool_update":
+              dispatch({
+                type: "TOOL_UPDATE",
+                id: event.id,
+                data: event.data,
+              })
+              break
+            case "tool_end":
+              dispatch({
+                type: "TOOL_END",
+                id: event.id,
+                result: event.result,
+                status: event.status,
+              })
+              break
             case "error":
               dispatch({ type: "SET_ERROR", message: event.message })
               break
