@@ -71,7 +71,7 @@ Plans:
 **Plans:** 4 plans
 
 Plans:
-- [ ] 03-01-PLAN.md -- Server-side POC tools (bash, read_file, list_files) + stream adapter extension for tool events
+- [x] 03-01-PLAN.md -- Server-side POC tools (bash, read_file, list_files) + stream adapter extension for tool events
 - [ ] 03-02-PLAN.md -- Client chat reducer + stream parser extension for tool lifecycle actions
 - [ ] 03-03-PLAN.md -- Tool card UI components (6 variants + router + status icon) + AssistantMessage segment iteration
 - [ ] 03-04-PLAN.md -- Human verification of end-to-end tool visualization pipeline

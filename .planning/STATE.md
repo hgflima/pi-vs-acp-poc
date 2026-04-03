@@ -3,14 +3,14 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: executing
-stopped_at: Completed 02-04-PLAN.md
-last_updated: "2026-04-03T19:49:05.174Z"
+stopped_at: Completed 03-01-PLAN.md
+last_updated: "2026-04-03T22:09:02.376Z"
 last_activity: 2026-04-03
 progress:
   total_phases: 4
   completed_phases: 2
-  total_plans: 9
-  completed_plans: 9
+  total_plans: 13
+  completed_plans: 10
   percent: 67
 ---
 
@@ -21,12 +21,12 @@ progress:
 See: .planning/PROJECT.md (updated 2026-04-03)
 
 **Core value:** Provar que pi-ai + pi-agent-core sustentam um chat web com streaming em tempo real, tool calls visiveis e troca de agentes
-**Current focus:** Phase 02 — streaming-chat
+**Current focus:** Phase 03 — tool-visualization
 
 ## Current Position
 
-Phase: 3
-Plan: Not started
+Phase: 03 (tool-visualization) — EXECUTING
+Plan: 2 of 4
 Status: Ready to execute
 Last activity: 2026-04-03
 
@@ -57,6 +57,7 @@ Progress: [███████░░░] 67%
 | Phase 02 P02 | 1min | 2 tasks | 2 files |
 | Phase 02 P03 | 2min | 2 tasks | 7 files |
 | Phase 02 P04 | 3min | 3 tasks | 7 files |
+| Phase 03 P01 | 2min | 2 tasks | 3 files |
 
 ## Accumulated Context
 
@@ -83,6 +84,8 @@ Recent decisions affecting current work:
 - [Phase 02]: Hardcoded 'Claude Code' agent and claude-sonnet-4-20250514 model in chat header and layout — Phase 4 will make dynamic
 - [Phase 02]: Auto-scroll uses 50px threshold and userScrolledUp ref; resets on new user message sent
 - [Phase 02]: ChatLayout is single orchestrator: calls useChat + useAuth, distributes state to all subcomponents
+- [Phase 03]: Tool execute functions return errors instead of throwing, matching pi-agent-core convention
+- [Phase 03]: 10KB truncation applied in both readFileTool content and extractTextFromResult SSE payloads
 
 ### Pending Todos
 
@@ -96,6 +99,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-04-03T16:36:50.540Z
-Stopped at: Completed 02-04-PLAN.md
+Last session: 2026-04-03T22:09:02.374Z
+Stopped at: Completed 03-01-PLAN.md
 Resume file: None
