@@ -37,7 +37,7 @@ Requirements para a validacao tecnica. Cada um mapeia para fases do roadmap.
 
 ### Tool Call Visualization
 
-- [ ] **TOOL-01**: Tool calls renderizadas com UI diferenciada por tipo durante streaming
+- [x] **TOOL-01**: Tool calls renderizadas com UI diferenciada por tipo durante streaming
 - [ ] **TOOL-02**: Card de `bash` com visual de terminal (comando + output)
 - [ ] **TOOL-03**: Card de `read`/`write` com path destacado e conteudo com syntax highlighting
 - [ ] **TOOL-04**: Card de `glob`/`grep` com resultados de busca formatados
@@ -127,7 +127,7 @@ Deferred para apos validacao do POC. Tracked mas nao no roadmap atual.
 | CHAT-08 | Phase 2 | Complete |
 | CHAT-09 | Phase 2 | Complete |
 | CHAT-10 | Phase 2 | Complete |
-| TOOL-01 | Phase 3 | Pending |
+| TOOL-01 | Phase 3 | Complete |
 | TOOL-02 | Phase 3 | Pending |
 | TOOL-03 | Phase 3 | Pending |
 | TOOL-04 | Phase 3 | Pending |
