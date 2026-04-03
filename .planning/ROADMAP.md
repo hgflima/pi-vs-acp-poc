@@ -32,7 +32,7 @@ Decimal phases appear between their surrounding integers in numeric order.
 **Plans:** 3 plans
 
 Plans:
-- [ ] 01-01-PLAN.md -- Scaffold project (Vite + React + Hono + Tailwind + shadcn), shared types, dev workflow, routing
+- [x] 01-01-PLAN.md -- Scaffold project (Vite + React + Hono + Tailwind + shadcn), shared types, dev workflow, routing
 - [ ] 01-02-PLAN.md -- pi-agent-core validation spike (Agent, events, tool execution)
 - [ ] 01-03-PLAN.md -- API Key auth flow (backend endpoint + frontend connection page)
 

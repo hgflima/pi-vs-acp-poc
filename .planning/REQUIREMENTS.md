@@ -9,9 +9,9 @@ Requirements para a validacao tecnica. Cada um mapeia para fases do roadmap.
 
 ### Foundation
 
-- [ ] **FOUND-01**: Projeto scaffolded com Vite + React 19 + Tailwind 4 + shadcn/ui + TypeScript
-- [ ] **FOUND-02**: Backend Hono com endpoints skeleton e proxy config do Vite
-- [ ] **FOUND-03**: Tipos compartilhados (Message, SSEEvent, ToolCardVariant, AppState)
+- [x] **FOUND-01**: Projeto scaffolded com Vite + React 19 + Tailwind 4 + shadcn/ui + TypeScript
+- [x] **FOUND-02**: Backend Hono com endpoints skeleton e proxy config do Vite
+- [x] **FOUND-03**: Tipos compartilhados (Message, SSEEvent, ToolCardVariant, AppState)
 - [ ] **FOUND-04**: Spike de validacao da API pi-agent-core (event types, subscribe, stream lifecycle)
 
 ### Authentication
@@ -108,9 +108,9 @@ Deferred para apos validacao do POC. Tracked mas nao no roadmap atual.
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| FOUND-01 | Phase 1 | Pending |
-| FOUND-02 | Phase 1 | Pending |
-| FOUND-03 | Phase 1 | Pending |
+| FOUND-01 | Phase 1 | Complete |
+| FOUND-02 | Phase 1 | Complete |
+| FOUND-03 | Phase 1 | Complete |
 | FOUND-04 | Phase 1 | Pending |
 | AUTH-01 | Phase 1 | Pending |
 | AUTH-02 | Phase 1 | Pending |
