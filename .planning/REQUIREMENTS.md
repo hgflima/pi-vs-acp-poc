@@ -38,13 +38,13 @@ Requirements para a validacao tecnica. Cada um mapeia para fases do roadmap.
 ### Tool Call Visualization
 
 - [x] **TOOL-01**: Tool calls renderizadas com UI diferenciada por tipo durante streaming
-- [ ] **TOOL-02**: Card de `bash` com visual de terminal (comando + output)
-- [ ] **TOOL-03**: Card de `read`/`write` com path destacado e conteudo com syntax highlighting
-- [ ] **TOOL-04**: Card de `glob`/`grep` com resultados de busca formatados
-- [ ] **TOOL-05**: Card de `subagent`/`skill` com nome e status (running/done/error)
-- [ ] **TOOL-06**: Card de `toolsearch` com lista de ferramentas encontradas
-- [ ] **TOOL-07**: Card generico para tools desconhecidos (nome + params JSON + resultado)
-- [ ] **TOOL-08**: Pelo menos 6 tipos de tool com visual proprio
+- [x] **TOOL-02**: Card de `bash` com visual de terminal (comando + output)
+- [x] **TOOL-03**: Card de `read`/`write` com path destacado e conteudo com syntax highlighting
+- [x] **TOOL-04**: Card de `glob`/`grep` com resultados de busca formatados
+- [x] **TOOL-05**: Card de `subagent`/`skill` com nome e status (running/done/error)
+- [x] **TOOL-06**: Card de `toolsearch` com lista de ferramentas encontradas
+- [x] **TOOL-07**: Card generico para tools desconhecidos (nome + params JSON + resultado)
+- [x] **TOOL-08**: Pelo menos 6 tipos de tool com visual proprio
 
 ### Agent Switching
 
@@ -128,13 +128,13 @@ Deferred para apos validacao do POC. Tracked mas nao no roadmap atual.
 | CHAT-09 | Phase 2 | Complete |
 | CHAT-10 | Phase 2 | Complete |
 | TOOL-01 | Phase 3 | Complete |
-| TOOL-02 | Phase 3 | Pending |
-| TOOL-03 | Phase 3 | Pending |
-| TOOL-04 | Phase 3 | Pending |
-| TOOL-05 | Phase 3 | Pending |
-| TOOL-06 | Phase 3 | Pending |
-| TOOL-07 | Phase 3 | Pending |
-| TOOL-08 | Phase 3 | Pending |
+| TOOL-02 | Phase 3 | Complete |
+| TOOL-03 | Phase 3 | Complete |
+| TOOL-04 | Phase 3 | Complete |
+| TOOL-05 | Phase 3 | Complete |
+| TOOL-06 | Phase 3 | Complete |
+| TOOL-07 | Phase 3 | Complete |
+| TOOL-08 | Phase 3 | Complete |
 | AGENT-01 | Phase 4 | Pending |
 | AGENT-02 | Phase 4 | Pending |
 | AGENT-03 | Phase 4 | Pending |
