@@ -68,11 +68,13 @@ Plans:
   1. Tool calls appear inline within the assistant's response (interleaved with text, not as separate messages) with a running/done/error lifecycle
   2. At least 6 tool types render with visually distinct cards: bash (terminal), read/write (file with path), glob/grep (search results), subagent/skill (name + status), toolsearch (tool list), and a generic fallback
   3. Tool cards update in real time during streaming (params appear at start, output streams during execution, final status shows at end)
-**Plans**: TBD
+**Plans:** 4 plans
 
 Plans:
-- [ ] 03-01: TBD
-- [ ] 03-02: TBD
+- [ ] 03-01-PLAN.md -- Server-side POC tools (bash, read_file, list_files) + stream adapter extension for tool events
+- [ ] 03-02-PLAN.md -- Client chat reducer + stream parser extension for tool lifecycle actions
+- [ ] 03-03-PLAN.md -- Tool card UI components (6 variants + router + status icon) + AssistantMessage segment iteration
+- [ ] 03-04-PLAN.md -- Human verification of end-to-end tool visualization pipeline
 
 **UI hint**: yes
 
@@ -103,6 +105,6 @@ Phases execute in numeric order: 1 -> 2 -> 3 -> 4
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
 | 1. Foundation + Connection | 5/5 | Complete | - |
-| 2. Streaming Chat | 0/4 | Planned | - |
-| 3. Tool Visualization | 0/2 | Not started | - |
+| 2. Streaming Chat | 4/4 | Complete | - |
+| 3. Tool Visualization | 0/4 | Planned | - |
 | 4. Configuration | 0/3 | Not started | - |
