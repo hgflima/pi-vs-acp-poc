@@ -1,5 +1,5 @@
 import { useReducer, useRef, useCallback } from "react"
-import type { Message, AssistantMessage, TextSegment } from "@/client/lib/types"
+import type { Message, AssistantMessage, TextSegment, ToolSegment, ToolCardVariant } from "@/client/lib/types"
 import { parseSSEStream } from "@/client/lib/stream-parser"
 
 interface ChatState {
@@ -12,6 +12,9 @@ type ChatAction =
   | { type: "ADD_USER_MESSAGE"; content: string }
   | { type: "START_STREAMING" }
   | { type: "APPEND_TEXT_DELTA"; data: string }
+  | { type: "TOOL_START"; tool: string; id: string; params: Record<string, unknown> }
+  | { type: "TOOL_UPDATE"; id: string; data: string }
+  | { type: "TOOL_END"; id: string; result: string; status: "done" | "error" }
   | { type: "STOP_STREAMING" }
   | { type: "SET_ERROR"; message: string }
   | { type: "CLEAR_ERROR" }
@@ -21,6 +24,35 @@ const initialState: ChatState = {
   messages: [],
   streaming: false,
   error: null,
+}
+
+function toolNameToVariant(toolName: string): ToolCardVariant {
+  const lower = toolName.toLowerCase()
+  switch (lower) {
+    case "bash":
+      return "bash"
+    case "read":
+    case "read_file":
+    case "write":
+    case "write_file":
+    case "edit":
+      return "file"
+    case "glob":
+    case "grep":
+    case "find":
+    case "ls":
+    case "list_files":
+      return "search"
+    case "subagent":
+    case "skill":
+    case "agent":
+      return "agent"
+    case "toolsearch":
+    case "tool_search":
+      return "toolsearch"
+    default:
+      return "generic"
+  }
 }
 
 function chatReducer(state: ChatState, action: ChatAction): ChatState {
@@ -60,6 +92,59 @@ function chatReducer(state: ChatState, action: ChatAction): ChatState {
         segments.push({ type: "text", content: action.data })
       }
 
+      msgs[msgs.length - 1] = { ...last, segments }
+      return { ...state, messages: msgs }
+    }
+
+    case "TOOL_START": {
+      const msgs = [...state.messages]
+      const last = msgs[msgs.length - 1] as AssistantMessage
+      const segments = [
+        ...last.segments,
+        {
+          type: "tool" as const,
+          toolId: action.id,
+          toolName: action.tool,
+          variant: toolNameToVariant(action.tool),
+          status: "running" as const,
+          args: action.params,
+        },
+      ]
+      msgs[msgs.length - 1] = { ...last, segments }
+      return { ...state, messages: msgs }
+    }
+
+    case "TOOL_UPDATE": {
+      const msgs = [...state.messages]
+      const last = msgs[msgs.length - 1] as AssistantMessage
+      const matchIndex = last.segments.findIndex(
+        (seg) => seg.type === "tool" && seg.toolId === action.id
+      )
+      if (matchIndex === -1) return state
+      const segments = [...last.segments]
+      const seg = segments[matchIndex] as ToolSegment
+      segments[matchIndex] = {
+        ...seg,
+        result: (seg.result || "") + action.data,
+      }
+      msgs[msgs.length - 1] = { ...last, segments }
+      return { ...state, messages: msgs }
+    }
+
+    case "TOOL_END": {
+      const msgs = [...state.messages]
+      const last = msgs[msgs.length - 1] as AssistantMessage
+      const matchIndex = last.segments.findIndex(
+        (seg) => seg.type === "tool" && seg.toolId === action.id
+      )
+      if (matchIndex === -1) return state
+      const segments = [...last.segments]
+      const seg = segments[matchIndex] as ToolSegment
+      if (action.status === "error") {
+        segments[matchIndex] = { ...seg, status: "error", error: action.result }
+      } else {
+        segments[matchIndex] = { ...seg, status: "done", result: action.result }
+      }
       msgs[msgs.length - 1] = { ...last, segments }
       return { ...state, messages: msgs }
     }
