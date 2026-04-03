@@ -1,5 +1,5 @@
 ---
-status: complete
+status: diagnosed
 phase: 01-foundation-connection
 source: [01-01-SUMMARY.md, 01-02-SUMMARY.md, 01-03-SUMMARY.md]
 started: 2026-04-03T14:00:00Z
@@ -58,5 +58,12 @@ blocked: 0
   reason: "User reported: error shows raw JS error 'Cannot read properties of undefined (reading api)' instead of user-friendly message"
   severity: major
   test: 6
-  artifacts: []
-  missing: []
+  root_cause: "getTestModel() returns 'claude-3-5-haiku' but pi-ai registry only has 'claude-3-5-haiku-latest' under anthropic provider. getModel() returns undefined, streamSimple crashes on undefined.api. Catch block forwards raw TypeError to frontend."
+  artifacts:
+    - path: "src/server/routes/auth.ts"
+      issue: "getTestModel returns wrong model ID 'claude-3-5-haiku'; catch block passes raw error.message to frontend"
+  missing:
+    - "Change getTestModel to return 'claude-3-5-haiku-latest' for Anthropic"
+    - "Add null-check after getModel() before calling streamSimple"
+    - "Sanitize catch block to show user-friendly error messages"
+  debug_session: ".planning/debug/invalid-apikey-raw-error.md"
