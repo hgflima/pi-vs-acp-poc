@@ -1,0 +1,186 @@
+import { useReducer, useRef, useCallback } from "react"
+import type { Message, AssistantMessage, TextSegment } from "@/client/lib/types"
+import { parseSSEStream } from "@/client/lib/stream-parser"
+
+interface ChatState {
+  messages: Message[]
+  streaming: boolean
+  error: string | null
+}
+
+type ChatAction =
+  | { type: "ADD_USER_MESSAGE"; content: string }
+  | { type: "START_STREAMING" }
+  | { type: "APPEND_TEXT_DELTA"; data: string }
+  | { type: "STOP_STREAMING" }
+  | { type: "SET_ERROR"; message: string }
+  | { type: "CLEAR_ERROR" }
+  | { type: "CLEAR_MESSAGES" }
+
+const initialState: ChatState = {
+  messages: [],
+  streaming: false,
+  error: null,
+}
+
+function chatReducer(state: ChatState, action: ChatAction): ChatState {
+  switch (action.type) {
+    case "ADD_USER_MESSAGE":
+      return {
+        ...state,
+        messages: [
+          ...state.messages,
+          { role: "user", content: action.content, timestamp: Date.now() },
+        ],
+      }
+
+    case "START_STREAMING":
+      return {
+        ...state,
+        streaming: true,
+        error: null,
+        messages: [
+          ...state.messages,
+          { role: "assistant", segments: [], streaming: true, timestamp: Date.now() },
+        ],
+      }
+
+    case "APPEND_TEXT_DELTA": {
+      const msgs = [...state.messages]
+      const last = msgs[msgs.length - 1] as AssistantMessage
+      const segments = [...last.segments]
+      const lastSeg = segments[segments.length - 1] as TextSegment | undefined
+
+      if (lastSeg?.type === "text") {
+        segments[segments.length - 1] = {
+          ...lastSeg,
+          content: lastSeg.content + action.data,
+        }
+      } else {
+        segments.push({ type: "text", content: action.data })
+      }
+
+      msgs[msgs.length - 1] = { ...last, segments }
+      return { ...state, messages: msgs }
+    }
+
+    case "STOP_STREAMING": {
+      const msgs = [...state.messages]
+      const last = msgs[msgs.length - 1]
+      if (last?.role === "assistant") {
+        msgs[msgs.length - 1] = { ...last, streaming: false }
+      }
+      return { ...state, streaming: false, messages: msgs }
+    }
+
+    case "SET_ERROR": {
+      const msgs = [...state.messages]
+      const last = msgs[msgs.length - 1]
+      if (last?.role === "assistant") {
+        msgs[msgs.length - 1] = { ...last, streaming: false }
+      }
+      return { ...state, streaming: false, error: action.message, messages: msgs }
+    }
+
+    case "CLEAR_ERROR":
+      return { ...state, error: null }
+
+    case "CLEAR_MESSAGES":
+      return { ...initialState }
+
+    default:
+      return state
+  }
+}
+
+export function useChat() {
+  const [state, dispatch] = useReducer(chatReducer, initialState)
+  const abortControllerRef = useRef<AbortController | null>(null)
+
+  const sendMessage = useCallback(
+    async (
+      content: string,
+      config: { model: string; provider: "anthropic" | "openai" }
+    ) => {
+      dispatch({ type: "ADD_USER_MESSAGE", content })
+      dispatch({ type: "START_STREAMING" })
+
+      const controller = new AbortController()
+      abortControllerRef.current = controller
+
+      try {
+        const response = await fetch("/api/chat", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            message: content,
+            model: config.model,
+            provider: config.provider,
+          }),
+          signal: controller.signal,
+        })
+
+        if (!response.ok) {
+          let errMsg = "Request failed"
+          try {
+            const err = await response.json()
+            errMsg = err.error || errMsg
+          } catch {
+            /* use default */
+          }
+          dispatch({ type: "SET_ERROR", message: errMsg })
+          return
+        }
+
+        for await (const event of parseSSEStream(response, controller.signal)) {
+          switch (event.type) {
+            case "text_delta":
+              dispatch({ type: "APPEND_TEXT_DELTA", data: event.data })
+              break
+            case "error":
+              dispatch({ type: "SET_ERROR", message: event.message })
+              break
+            case "done":
+              break
+          }
+        }
+      } catch (err) {
+        if (err instanceof DOMException && err.name === "AbortError") {
+          // User clicked stop -- not an error, text is preserved
+        } else {
+          dispatch({
+            type: "SET_ERROR",
+            message: err instanceof Error ? err.message : "Connection error",
+          })
+        }
+      } finally {
+        dispatch({ type: "STOP_STREAMING" })
+        abortControllerRef.current = null
+      }
+    },
+    []
+  )
+
+  const stopGeneration = useCallback(() => {
+    abortControllerRef.current?.abort()
+  }, [])
+
+  const clearMessages = useCallback(() => {
+    abortControllerRef.current?.abort()
+    dispatch({ type: "CLEAR_MESSAGES" })
+  }, [])
+
+  const clearError = useCallback(() => {
+    dispatch({ type: "CLEAR_ERROR" })
+  }, [])
+
+  return {
+    messages: state.messages,
+    streaming: state.streaming,
+    error: state.error,
+    sendMessage,
+    stopGeneration,
+    clearMessages,
+    clearError,
+  }
+}

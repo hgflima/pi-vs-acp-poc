@@ -3,7 +3,7 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: executing
-stopped_at: Completed 02-01-PLAN.md
+stopped_at: Completed 02-01-PLAN.md and 02-02-PLAN.md (Wave 1)
 last_updated: "2026-04-03T16:24:42.131Z"
 last_activity: 2026-04-03
 progress:
@@ -26,7 +26,7 @@ See: .planning/PROJECT.md (updated 2026-04-03)
 ## Current Position
 
 Phase: 2
-Plan: 1 of 4
+Plan: 2 of 4
 Status: Executing Phase 02
 Last activity: 2026-04-03
 
@@ -54,6 +54,7 @@ Progress: [███████░░░] 67%
 *Updated after each plan completion*
 | Phase 01 P04 | 2min | 2 tasks | 1 files |
 | Phase 02 P01 | 3min | 2 tasks | 12 files |
+| Phase 02 P02 | 1min | 2 tasks | 2 files |
 
 ## Accumulated Context
 
@@ -71,6 +72,9 @@ Recent decisions affecting current work:
 - [Phase 02]: Agent created inside streamSSE callback to scope lifecycle to stream
 - [Phase 02]: subscribe() before prompt() to avoid missed events (Pitfall 2)
 - [Phase 02]: Promise anchor pattern keeps SSE stream open until agent_end (Pitfall 1)
+- [Phase 02]: SSE parser uses async generator pattern for lazy consumption of stream events
+- [Phase 02]: Chat reducer creates new object references at every nesting level to avoid React stale-render pitfall
+- [Phase 02]: AbortError treated as non-error to preserve already-received text on user stop
 
 ### Pending Todos
 
@@ -85,5 +89,5 @@ None yet.
 ## Session Continuity
 
 Last session: 2026-04-03T16:24:42.129Z
-Stopped at: Completed 02-01-PLAN.md
+Stopped at: Completed Wave 1 (02-01-PLAN.md, 02-02-PLAN.md)
 Resume file: None
