@@ -36,7 +36,7 @@ Plans:
 - [x] 01-02-PLAN.md -- pi-agent-core validation spike (Agent, events, tool execution)
 - [x] 01-03-PLAN.md -- API Key auth flow (backend endpoint + frontend connection page)
 - [x] 01-04-PLAN.md -- Fix invalid API key error handling (gap closure from UAT)
-- [ ] 01-05-PLAN.md -- Fix invalid key detection via AssistantMessage inspection + spike human verification (gap closure from verification)
+- [x] 01-05-PLAN.md -- Fix invalid key detection via AssistantMessage inspection + spike human verification (gap closure from verification)
 
 **UI hint**: yes
 
