@@ -17,9 +17,9 @@ Requirements para a validacao tecnica. Cada um mapeia para fases do roadmap.
 ### Authentication
 
 - [ ] **AUTH-01**: Usuario pode conectar ao provider via API Key (Anthropic ou OpenAI)
-- [ ] **AUTH-02**: Backend valida a API Key com request de teste ao provider
+- [x] **AUTH-02**: Backend valida a API Key com request de teste ao provider
 - [ ] **AUTH-03**: Credenciais armazenadas in-memory no servidor (nunca expostas ao frontend)
-- [ ] **AUTH-04**: Feedback visual de conexao (conectando, conectado, erro)
+- [x] **AUTH-04**: Feedback visual de conexao (conectando, conectado, erro)
 - [ ] **AUTH-05**: Tela de conexao com selecao de provider e campo de API Key
 
 ### Streaming Chat
@@ -113,9 +113,9 @@ Deferred para apos validacao do POC. Tracked mas nao no roadmap atual.
 | FOUND-03 | Phase 1 | Complete |
 | FOUND-04 | Phase 1 | Pending |
 | AUTH-01 | Phase 1 | Pending |
-| AUTH-02 | Phase 1 | Pending |
+| AUTH-02 | Phase 1 | Complete |
 | AUTH-03 | Phase 1 | Pending |
-| AUTH-04 | Phase 1 | Pending |
+| AUTH-04 | Phase 1 | Complete |
 | AUTH-05 | Phase 1 | Pending |
 | CHAT-01 | Phase 2 | Pending |
 | CHAT-02 | Phase 2 | Pending |

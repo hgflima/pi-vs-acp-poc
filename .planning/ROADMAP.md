@@ -35,7 +35,7 @@ Plans:
 - [x] 01-01-PLAN.md -- Scaffold project (Vite + React + Hono + Tailwind + shadcn), shared types, dev workflow, routing
 - [x] 01-02-PLAN.md -- pi-agent-core validation spike (Agent, events, tool execution)
 - [x] 01-03-PLAN.md -- API Key auth flow (backend endpoint + frontend connection page)
-- [ ] 01-04-PLAN.md -- Fix invalid API key error handling (gap closure from UAT)
+- [x] 01-04-PLAN.md -- Fix invalid API key error handling (gap closure from UAT)
 
 **UI hint**: yes
 
