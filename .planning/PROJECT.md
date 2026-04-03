@@ -14,16 +14,15 @@ Provar que pi-ai + pi-agent-core sustentam um chat web com streaming em tempo re
 
 - [x] Autenticacao via API Key para conectar ao Claude e/ou Codex — Validated in Phase 1: Foundation + Connection
 - [x] Backend proxy que roteia chamadas LLM e executa agent loop server-side — Validated in Phase 1: Foundation + Connection (skeleton + auth endpoint)
+- [x] Chat interativo com streaming em tempo real (latencia < 500ms para primeiro token) — Validated in Phase 2: Streaming Chat
+- [x] SSE streaming de AgentEvent do backend para o frontend — Validated in Phase 2: Streaming Chat
 
 ### Active
 
-- [ ] Chat interativo com streaming em tempo real (latencia < 500ms para primeiro token)
-- [ ] Chat interativo com streaming em tempo real (latencia < 500ms para primeiro token)
 - [ ] Troca de agente (Claude Code / Codex) em runtime sem perda de contexto
 - [ ] Troca de modelo por provider via registry de modelos
 - [ ] Visualizacao diferenciada de tool calls (6+ tipos com UI propria)
 - [ ] Carregamento de harness (CLAUDE.md, AGENTS.md, skills, hooks) aplicado ao system prompt
-- [ ] SSE streaming de AgentEvent do backend para o frontend
 
 ### Out of Scope
 
