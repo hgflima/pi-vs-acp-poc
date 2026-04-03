@@ -58,11 +58,11 @@ Provar que pi-ai + pi-agent-core sustentam um chat web com streaming em tempo re
 
 | Decision | Rationale | Outcome |
 |----------|-----------|---------|
-| SPA + Backend Proxy | APIs LLM nao permitem chamadas do browser; streamProxy existe para isso | — Pending |
-| Hono como backend | Leve, TypeScript-first, streaming nativo, alinhado com pi-agent-core | — Pending |
+| SPA + Backend Proxy | APIs LLM nao permitem chamadas do browser; streamProxy existe para isso | Validated Phase 1 |
+| Hono como backend | Leve, TypeScript-first, streaming nativo, alinhado com pi-agent-core | Validated Phase 1 |
 | React local state (useReducer + Context) | POC simples, 1 usuario, sem persistencia, 3 telas | — Pending |
 | SSE para streaming | Unidirecional server→client, nativo do browser, alinhado com AgentEvent | — Pending |
-| API Key first, OAuth stretch | OAuth complexo demais para POC; API Key valida a stack igualmente | — Pending |
+| API Key first, OAuth stretch | OAuth complexo demais para POC; API Key valida a stack igualmente | Validated Phase 1 |
 | Recreate Agent on switch | pi-agent-core nao suporta troca mid-session; nova instancia com history | — Pending |
 
 ## Evolution
