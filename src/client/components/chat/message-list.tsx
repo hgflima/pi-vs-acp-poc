@@ -12,27 +12,36 @@ export function MessageList({ messages, streaming }: MessageListProps) {
   const scrollContainerRef = useRef<HTMLDivElement>(null)
   const bottomRef = useRef<HTMLDivElement>(null)
   const userScrolledUp = useRef(false)
-  const prevMessageCount = useRef(messages.length)
+  const isAutoScrolling = useRef(false)
+
+  const scrollToBottom = () => {
+    const el = scrollContainerRef.current
+    if (!el) return
+    isAutoScrolling.current = true
+    el.scrollTop = el.scrollHeight
+    // Reset flag after browser processes the scroll event
+    requestAnimationFrame(() => { isAutoScrolling.current = false })
+  }
 
   // Reset userScrolledUp when a new user message is added
   useEffect(() => {
-    if (messages.length > prevMessageCount.current) {
-      const lastNew = messages[messages.length - 1]
-      if (lastNew?.role === "user") {
-        userScrolledUp.current = false
-      }
-    }
-    prevMessageCount.current = messages.length
-  }, [messages.length, messages])
+    userScrolledUp.current = false
+    scrollToBottom()
+  }, [messages.length])
 
-  // Auto-scroll during streaming when user hasn't scrolled up
+  // Auto-scroll: poll during streaming to catch all DOM updates
   useEffect(() => {
-    if (streaming && !userScrolledUp.current) {
-      bottomRef.current?.scrollIntoView({ behavior: "smooth" })
-    }
-  })
+    if (!streaming) return
+    const id = setInterval(() => {
+      if (userScrolledUp.current) return
+      scrollToBottom()
+    }, 50)
+    return () => clearInterval(id)
+  }, [streaming])
 
   const handleScroll = () => {
+    // Ignore scroll events triggered by our programmatic scrolling
+    if (isAutoScrolling.current) return
     const el = scrollContainerRef.current
     if (!el) return
     const distanceFromBottom = el.scrollHeight - el.scrollTop - el.clientHeight

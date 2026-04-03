@@ -72,7 +72,7 @@ authRoutes.post("/apikey", async (c) => {
 
 function getTestModel(provider: "anthropic" | "openai") {
   // Use cheapest model for validation
-  return provider === "anthropic" ? "claude-3-5-haiku-latest" : "gpt-4o-mini"
+  return provider === "anthropic" ? "claude-haiku-4-5-20251001" : "gpt-4o-mini"
 }
 
 export { authRoutes }
