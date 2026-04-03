@@ -50,12 +50,13 @@ Plans:
   3. User can click "Stop" to abort generation mid-stream, and the input re-enables for the next message
   4. If the backend errors during streaming, the user sees an inline error with a retry button that works
   5. Chat auto-scrolls during streaming but pauses when user scrolls up; user and assistant messages are visually distinct
-**Plans**: TBD
+**Plans:** 4 plans
 
 Plans:
-- [ ] 02-01: TBD
-- [ ] 02-02: TBD
-- [ ] 02-03: TBD
+- [ ] 02-01-PLAN.md -- Install Phase 2 deps + backend streaming pipeline (Agent factory, SSE adapter, chat route)
+- [ ] 02-02-PLAN.md -- Frontend streaming infrastructure (SSE parser + useChat hook with reducer)
+- [ ] 02-03-PLAN.md -- Message rendering components (markdown + Shiki code blocks, user/assistant messages, indicators)
+- [ ] 02-04-PLAN.md -- Chat page assembly (input, header, empty state, message list, error handling, app wiring + human verify)
 
 **UI hint**: yes
 
@@ -101,7 +102,7 @@ Phases execute in numeric order: 1 -> 2 -> 3 -> 4
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
-| 1. Foundation + Connection | 4/5 | In progress | - |
-| 2. Streaming Chat | 0/3 | Not started | - |
+| 1. Foundation + Connection | 5/5 | Complete | - |
+| 2. Streaming Chat | 0/4 | Planned | - |
 | 3. Tool Visualization | 0/2 | Not started | - |
 | 4. Configuration | 0/3 | Not started | - |
