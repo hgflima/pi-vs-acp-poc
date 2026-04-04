@@ -10,8 +10,9 @@ import { Loader2, Check, Eye, EyeOff } from "lucide-react"
 
 export function ConnectionPage() {
   const navigate = useNavigate()
-  const { auth, connect } = useAuth()
   const [provider, setProvider] = useState<Provider>("anthropic")
+  const { getProviderAuth, connect } = useAuth()
+  const auth = getProviderAuth(provider)
   const [apiKey, setApiKey] = useState("")
   const [showKey, setShowKey] = useState(false)
 
