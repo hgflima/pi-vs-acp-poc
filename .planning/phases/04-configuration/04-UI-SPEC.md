@@ -54,9 +54,11 @@ Inherited from master design tokens. Phase 4 uses these specific roles:
 | Body | 14px (sm) | 400 (normal) | 1.5 (normal) | Popover model list items, settings page description, harness file info |
 | Label | 14px (sm) | 500 (medium) | 1.5 (normal) | Agent name in popover, section titles in settings, form labels |
 | Section heading | 12px (xs) | 500 (medium) | 1.5 (normal) | "AGENT" and "MODEL" section labels inside popover (uppercase, muted) |
-| Page heading | 20px (xl) | 600 (semibold) | 1.25 (tight) | Settings page title "Harness Configuration" |
+| Page heading | 20px (xl) | 500 (medium) | 1.25 (tight) | Settings page title "Harness Configuration" |
 | Header trigger | 14px (sm) | 500 (medium) | 1.5 (normal) | Clickable agent name in chat header |
 | Model badge | 12px (xs) | 500 (medium) | 1.5 (normal) | Model name badge in header |
+
+**Weight scale:** 400 (normal) + 500 (medium). Two weights only. The page heading at 20px achieves hierarchy through size alone -- no third weight needed.
 
 Font stacks:
 - Sans: `'Geist Variable', sans-serif` (from globals.css `--font-sans`)
@@ -72,8 +74,10 @@ Inherited from shadcn base-nova neutral theme + master design tokens.
 |------|-------|-------------------|
 | Dominant (60%) | `--background` (white) | Settings page background, popover background |
 | Secondary (30%) | `--secondary` / `--muted` | Popover selected item highlight, settings section card bg, model badge bg in header |
-| Accent (10%) | `--primary` (near-black in base-nova neutral) | Active agent indicator dot, "Connect" button in inline auth, "Load Harness" button |
+| Accent (10%) | `--primary` (near-black in base-nova neutral) | Active agent indicator dot, "Save API Key" button in inline auth, "Load Harness" button |
 | Destructive | `--destructive` (oklch red) | Error states only: harness loading errors, auth failure |
+
+**Dual token system note:** The project has two color sources: (1) `design-tokens.json` which defines a warm terracotta accent (`color.accent.500: #E07A5F`) intended for future branding, and (2) the shadcn base-nova theme which defines `--primary` as near-black. Phase 4 uses only the shadcn `--primary` token for interactive elements (buttons, selection states). The terracotta accent from `design-tokens.json` is not used in Phase 4 components. Semantic status colors (`color.success.*`, `color.warning.*`, `color.error.*`) are sourced from `design-tokens.json` as they have no shadcn equivalent.
 
 ### Phase 4 Specific Color Assignments
 
@@ -92,7 +96,7 @@ Inherited from shadcn base-nova neutral theme + master design tokens.
 | Model loading skeleton | `--muted` | Pulse animation while fetching models |
 | Auth needed indicator | `color.warning.500` (#F59E0B) | Warning icon when provider not authenticated |
 
-Accent reserved for: "Connect" button in inline auth form, "Load Harness" button on settings page, active selection states in popover. NOT used for agent icons, model list items at rest, or decorative elements.
+Accent reserved for: "Save API Key" button in inline auth form, "Load Harness" button on settings page, active selection states in popover. NOT used for agent icons, model list items at rest, or decorative elements.
 
 ---
 
@@ -140,19 +144,19 @@ Header trigger (rest):
 
 Popover content (open):
 ┌──────────────────────────────────┐
-│  AGENT                           │  ← section label, 12px, uppercase, muted
+│  AGENT                           │  <- section label, 12px, uppercase, muted
 │                                  │
-│  [Bot]  Claude Code        [●]   │  ← selected: green dot
-│  [Cpu]  Codex                    │  ← unselected: no dot
+│  [Bot]  Claude Code        [*]   │  <- selected: green dot
+│  [Cpu]  Codex                    │  <- unselected: no dot
 │                                  │
-│  ─────────────────────────────── │  ← separator
+│  ─────────────────────────────── │  <- separator
 │                                  │
-│  MODEL                           │  ← section label
+│  MODEL                           │  <- section label
 │                                  │
-│  claude-sonnet-4-20250514  [●]   │  ← selected model
+│  claude-sonnet-4-20250514  [*]   │  <- selected model
 │  claude-opus-4-20250514          │
 │  claude-haiku-4-20250514         │
-│  ...                             │  ← scrollable if > 6 models
+│  ...                             │  <- scrollable if > 6 models
 │                                  │
 └──────────────────────────────────┘
 ```
@@ -192,18 +196,18 @@ Shown inside the popover when the selected agent's provider is not authenticated
 ```
 ┌──────────────────────────────────┐
 │  AGENT                           │
-│  [Bot]  Claude Code        [●]   │
-│  [Cpu]  Codex                    │  ← user clicked Codex
+│  [Bot]  Claude Code        [*]   │
+│  [Cpu]  Codex                    │  <- user clicked Codex
 │                                  │
 │  ─────────────────────────────── │
 │                                  │
-│  [⚠] OpenAI API key required    │  ← warning icon + message
+│  [!] OpenAI API key required     │  <- warning icon + message
 │                                  │
 │  ┌────────────────────────────┐  │
-│  │ sk-...                     │  │  ← API key input, type=password
+│  │ sk-...                     │  │  <- API key input, type=password
 │  └────────────────────────────┘  │
 │                                  │
-│  [Connect]                       │  ← primary button, full-width
+│  [Save API Key]                  │  <- primary button, full-width
 │                                  │
 └──────────────────────────────────┘
 ```
@@ -212,12 +216,12 @@ Shown inside the popover when the selected agent's provider is not authenticated
 - Replaces the MODEL section in the popover
 - Warning row: 14px, `color.warning.700`, `AlertTriangle` icon 14px
 - Input: standard shadcn Input, type=password, placeholder "sk-..."
-- Connect button: full-width, primary variant, height 36px
+- Save API Key button: full-width, primary variant, height 36px
 - Field gap: spacing.2 (8px)
 
 **States:**
 - Default: input empty, button enabled
-- Connecting: button shows spinner + "Connecting...", input disabled
+- Saving: button shows spinner + "Saving...", input disabled
 - Error: error text below input in `color.error.500`, 12px
 - Success: popover closes, model list loads for new provider
 
@@ -268,7 +272,7 @@ Full page at `/settings` route (D-07). Not a modal.
 - Page background: `--background` (white)
 - Header: height 56px (matching chat header), border-bottom, "Back to Chat" link with ArrowLeft icon
 - Content area: max-width 520px, centered, padding-top spacing.8
-- Title: 20px, semibold, `--foreground`
+- Title: 20px, medium (weight 500), `--foreground`
 - Subtitle: 14px, normal, `--muted-foreground`, margin-top spacing.1
 - Directory picker section: `--muted` bg, border-radius `--radius-lg`, padding spacing.4, margin-top spacing.6
 - Discovered files section: margin-top spacing.6
@@ -338,8 +342,8 @@ Updated header:
 | Popover section label (model) | "MODEL" | Uppercase, 12px, muted |
 | Inline auth warning | "{Provider} API key required" | e.g. "OpenAI API key required" |
 | Inline auth input placeholder | "sk-..." | For OpenAI. "sk-ant-..." for Anthropic |
-| Inline auth button | "Connect" | Primary CTA for inline auth |
-| Inline auth connecting | "Connecting..." | Button loading state |
+| Inline auth button | "Save API Key" | Primary CTA for inline auth -- verb + noun format |
+| Inline auth saving | "Saving..." | Button loading state |
 | Inline auth error | "Invalid API key. Check your key and try again." | Error feedback |
 | Settings page title | "Harness Configuration" | Page heading |
 | Settings page subtitle | "Load project files to customize agent behavior." | Below title |
@@ -394,8 +398,8 @@ Updated header:
 
 1. User switches to agent whose provider lacks credentials
 2. Popover shows InlineAuth where model section would be
-3. User enters API key, clicks "Connect"
-4. Button shows "Connecting..." with spinner
+3. User enters API key, clicks "Save API Key"
+4. Button shows "Saving..." with spinner
 5. Backend validates key (reuse existing POST `/api/auth` endpoint)
 6. On success: InlineAuth replaced by model list, default model auto-selected
 7. On error: error text appears below input, user can retry
@@ -417,9 +421,9 @@ Updated header:
 ### Navigation Flows
 
 ```
-/chat  ──[click settings icon]──>  /settings
-/settings  ──[click "Back to Chat"]──>  /chat
-/settings  ──[load success]──>  /chat (automatic redirect)
+/chat  --[click settings icon]-->  /settings
+/settings  --[click "Back to Chat"]-->  /chat
+/settings  --[load success]-->  /chat (automatic redirect)
 ```
 
 ---
@@ -439,7 +443,7 @@ Updated header:
 ### Inline Auth
 - Input: `aria-label="API key"`, `type="password"`
 - Error: `aria-live="polite"` on error region
-- Button: `aria-busy="true"` during connecting
+- Button: `aria-busy="true"` during saving
 
 ### Settings Page
 - Page: `aria-labelledby` pointing to heading
@@ -490,6 +494,7 @@ No third-party registries declared. All components from shadcn official registry
 | SCR-03: Modal overlay on `/chat` | Settings page at `/settings` | D-07: user decided harness config is a full page, not a modal. File picker + drag & drop + file status list need more space than a modal provides. |
 | SCR-02 header: Select dropdowns for agent/model | Single Popover with both agent + model sections | D-01: Cursor-style popover is more compact. One click target instead of two separate dropdowns. |
 | SCR-03: 4 separate file path inputs | Single directory input, auto-discovery | D-08: user points to one directory, backend finds all files automatically. Simpler UX. |
+| Master design tokens: warm terracotta accent | shadcn base-nova near-black `--primary` | Phase 4 uses shadcn theme tokens for interactive elements. The `design-tokens.json` terracotta accent (`color.accent.500: #E07A5F`) is reserved for future branding phases. Semantic status colors (`success`, `warning`, `error`) are sourced from `design-tokens.json`. |
 
 These deviations are authorized by CONTEXT.md locked decisions.
 
