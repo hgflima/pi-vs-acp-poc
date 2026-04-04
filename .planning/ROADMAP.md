@@ -23,7 +23,7 @@ Full details: `.planning/milestones/v1.0-ROADMAP.md`
 
 **Milestone Goal:** Add OAuth authentication as an alternative to API Key for OpenAI Codex, with full coexistence of both auth methods and updated connection UI.
 
-- [ ] **Phase 5: Credential Infrastructure** - Refactor credential store for compound credentials (OAuth + API Key coexistence) and async token resolution
+- [x] **Phase 5: Credential Infrastructure** - Refactor credential store for compound credentials (OAuth + API Key coexistence) and async token resolution (completed 2026-04-04)
 - [ ] **Phase 6: Anthropic OAuth Flow** - Backend OAuth routes for Anthropic with PKCE via pi-ai loginAnthropic, token storage, and credential resolution
 - [ ] **Phase 7: OpenAI OAuth Flow** - Backend OAuth routes for OpenAI Codex with PKCE, token storage, and automatic refresh
 - [ ] **Phase 8: OAuth Connection UI** - Auth method selector, OAuth login button with popup flow, and token status indicators
@@ -89,7 +89,7 @@ Full details: `.planning/milestones/v1.0-ROADMAP.md`
 | 2. Streaming Chat | v1.0 | 4/4 | Complete | 2026-04-03 |
 | 3. Tool Visualization | v1.0 | 4/4 | Complete | 2026-04-03 |
 | 4. Configuration | v1.0 | 5/5 | Complete | 2026-04-04 |
-| 5. Credential Infrastructure | v1.1 | 0/3 | Not started | - |
+| 5. Credential Infrastructure | v1.1 | 3/3 | Complete   | 2026-04-04 |
 | 6. Anthropic OAuth Flow | v1.1 | 0/0 | Not started | - |
 | 7. OpenAI OAuth Flow | v1.1 | 0/0 | Not started | - |
 | 8. OAuth Connection UI | v1.1 | 0/0 | Not started | - |
