@@ -88,12 +88,13 @@ Plans:
   3. If the user selects an agent whose provider is not authenticated, the app prompts for authentication before proceeding
   4. User can select harness files (CLAUDE.md, AGENTS.md, skills, hooks), see confirmation that harness is active, and the agent's behavior reflects the loaded harness in subsequent messages
   5. Errors in harness loading (file not found, too large, invalid format) surface as clear feedback rather than silent failures
-**Plans**: TBD
+**Plans:** 4 plans
 
 Plans:
-- [ ] 04-01: TBD
-- [ ] 04-02: TBD
-- [ ] 04-03: TBD
+- [ ] 04-01-PLAN.md -- Types expansion + backend endpoints (models, harness discovery, harness route, dynamic systemPrompt)
+- [ ] 04-02-PLAN.md -- Frontend infrastructure (shadcn install, useAgent hook, useHarness hook, API helpers)
+- [ ] 04-03-PLAN.md -- Agent/model switching UI (popover, inline auth, ChatHeader rewrite, ChatLayout wiring)
+- [ ] 04-04-PLAN.md -- Settings page (harness picker, file status display, /settings route)
 
 **UI hint**: yes
 
@@ -107,4 +108,4 @@ Phases execute in numeric order: 1 -> 2 -> 3 -> 4
 | 1. Foundation + Connection | 5/5 | Complete | - |
 | 2. Streaming Chat | 4/4 | Complete | - |
 | 3. Tool Visualization | 0/4 | Planned | - |
-| 4. Configuration | 0/3 | Not started | - |
+| 4. Configuration | 0/4 | Not started | - |
