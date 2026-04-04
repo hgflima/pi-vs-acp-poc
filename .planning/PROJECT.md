@@ -16,12 +16,12 @@ Provar que pi-ai + pi-agent-core sustentam um chat web com streaming em tempo re
 - [x] Backend proxy que roteia chamadas LLM e executa agent loop server-side — Validated in Phase 1: Foundation + Connection (skeleton + auth endpoint)
 - [x] Chat interativo com streaming em tempo real (latencia < 500ms para primeiro token) — Validated in Phase 2: Streaming Chat
 - [x] SSE streaming de AgentEvent do backend para o frontend — Validated in Phase 2: Streaming Chat
+- [x] Visualizacao diferenciada de tool calls (6+ tipos com UI propria) — Validated in Phase 3: Tool Visualization
 
 ### Active
 
 - [ ] Troca de agente (Claude Code / Codex) em runtime sem perda de contexto
 - [ ] Troca de modelo por provider via registry de modelos
-- [ ] Visualizacao diferenciada de tool calls (6+ tipos com UI propria)
 - [ ] Carregamento de harness (CLAUDE.md, AGENTS.md, skills, hooks) aplicado ao system prompt
 
 ### Out of Scope
@@ -60,7 +60,7 @@ Provar que pi-ai + pi-agent-core sustentam um chat web com streaming em tempo re
 | SPA + Backend Proxy | APIs LLM nao permitem chamadas do browser; streamProxy existe para isso | Validated Phase 1 |
 | Hono como backend | Leve, TypeScript-first, streaming nativo, alinhado com pi-agent-core | Validated Phase 1 |
 | React local state (useReducer + Context) | POC simples, 1 usuario, sem persistencia, 3 telas | — Pending |
-| SSE para streaming | Unidirecional server→client, nativo do browser, alinhado com AgentEvent | — Pending |
+| SSE para streaming | Unidirecional server→client, nativo do browser, alinhado com AgentEvent | Validated Phase 2-3 |
 | API Key first, OAuth stretch | OAuth complexo demais para POC; API Key valida a stack igualmente | Validated Phase 1 |
 | Recreate Agent on switch | pi-agent-core nao suporta troca mid-session; nova instancia com history | — Pending |
 
@@ -82,4 +82,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-04-03 after Phase 1 completion*
+*Last updated: 2026-04-04 after Phase 3 completion*
