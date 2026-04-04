@@ -1,6 +1,6 @@
 import { Hono } from "hono"
 import { getModels } from "@mariozechner/pi-ai"
-import { hasCredentials } from "../lib/credentials"
+import { hasAnyCredential } from "../lib/credentials"
 
 const modelRoutes = new Hono()
 
@@ -13,7 +13,7 @@ modelRoutes.get("/", (c) => {
 
   const typedProvider = provider as "anthropic" | "openai"
 
-  if (!hasCredentials(typedProvider)) {
+  if (!hasAnyCredential(typedProvider)) {
     return c.json({ error: "Not authenticated", needsAuth: true }, 401)
   }
 

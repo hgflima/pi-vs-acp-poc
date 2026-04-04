@@ -2,7 +2,7 @@ import { Hono } from "hono"
 import { streamSSE } from "hono/streaming"
 import { createAgent } from "../agent/setup"
 import { adaptAgentEvents } from "../lib/stream-adapter"
-import { getCredentials } from "../lib/credentials"
+import { hasAnyCredential } from "../lib/credentials"
 
 const chatRoutes = new Hono()
 
@@ -14,13 +14,13 @@ chatRoutes.post("/", async (c) => {
     history?: Array<{ role: string; content: string }>
   }>()
 
-  const apiKey = getCredentials(provider)
-  if (!apiKey) {
+  if (!hasAnyCredential(provider)) {
     return c.json({ error: "Not authenticated" }, 401)
   }
 
   return streamSSE(c, async (stream) => {
-    const agent = createAgent({ provider, modelId: model, apiKey })
+    // @ts-expect-error Plan 02 updates createAgent signature
+    const agent = createAgent({ provider, modelId: model })
 
     const done = new Promise<void>((resolve) => {
       const unsubscribe = adaptAgentEvents({ agent, stream, onDone: resolve })
