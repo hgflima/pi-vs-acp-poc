@@ -41,7 +41,8 @@ Inherited from master design tokens. All values are multiples of 4.
 | spacing.8 | 32px | Settings page top/bottom margin |
 | spacing.12 | 48px | Settings page max-width centering |
 
-Exceptions: none.
+**Exceptions:**
+- `spacing.3 = 12px` -- inherited from master design-tokens.json. Grid-aligned (3x4px). Used for component-level micro-gaps where 8px is too tight and 16px is too loose: separator margin in popover, agent/model item padding-x, harness badge gap, settings subtitle margin.
 
 ---
 
@@ -138,27 +139,27 @@ Accent reserved for: "Save API Key" button in inline auth form, "Load Harness" b
 
 ```
 Header trigger (rest):
-┌──────────────────────────────┐
-│ [Bot] Claude Code  [ChevronDown] │  [claude-sonnet-4 badge]  [Settings icon]
-└──────────────────────────────┘
++------------------------------+
+| [Bot] Claude Code  [ChevronDown] |  [claude-sonnet-4 badge]  [Settings icon]
++------------------------------+
 
 Popover content (open):
-┌──────────────────────────────────┐
-│  AGENT                           │  <- section label, 12px, uppercase, muted
-│                                  │
-│  [Bot]  Claude Code        [*]   │  <- selected: green dot
-│  [Cpu]  Codex                    │  <- unselected: no dot
-│                                  │
-│  ─────────────────────────────── │  <- separator
-│                                  │
-│  MODEL                           │  <- section label
-│                                  │
-│  claude-sonnet-4-20250514  [*]   │  <- selected model
-│  claude-opus-4-20250514          │
-│  claude-haiku-4-20250514         │
-│  ...                             │  <- scrollable if > 6 models
-│                                  │
-└──────────────────────────────────┘
++----------------------------------+
+|  AGENT                           |  <- section label, 12px, uppercase, muted
+|                                  |
+|  [Bot]  Claude Code        [*]   |  <- selected: green dot
+|  [Cpu]  Codex                    |  <- unselected: no dot
+|                                  |
+|  --------------------------------|  <- separator
+|                                  |
+|  MODEL                           |  <- section label
+|                                  |
+|  claude-sonnet-4-20250514  [*]   |  <- selected model
+|  claude-opus-4-20250514          |
+|  claude-haiku-4-20250514         |
+|  ...                             |  <- scrollable if > 6 models
+|                                  |
++----------------------------------+
 ```
 
 **Layout:**
@@ -194,22 +195,22 @@ Popover content (open):
 Shown inside the popover when the selected agent's provider is not authenticated (D-10).
 
 ```
-┌──────────────────────────────────┐
-│  AGENT                           │
-│  [Bot]  Claude Code        [*]   │
-│  [Cpu]  Codex                    │  <- user clicked Codex
-│                                  │
-│  ─────────────────────────────── │
-│                                  │
-│  [!] OpenAI API key required     │  <- warning icon + message
-│                                  │
-│  ┌────────────────────────────┐  │
-│  │ sk-...                     │  │  <- API key input, type=password
-│  └────────────────────────────┘  │
-│                                  │
-│  [Save API Key]                  │  <- primary button, full-width
-│                                  │
-└──────────────────────────────────┘
++----------------------------------+
+|  AGENT                           |
+|  [Bot]  Claude Code        [*]   |
+|  [Cpu]  Codex                    |  <- user clicked Codex
+|                                  |
+|  --------------------------------|
+|                                  |
+|  [!] OpenAI API key required     |  <- warning icon + message
+|                                  |
+|  +----------------------------+  |
+|  | sk-...                     |  |  <- API key input, type=password
+|  +----------------------------+  |
+|                                  |
+|  [Save API Key]                  |  <- primary button, full-width
+|                                  |
++----------------------------------+
 ```
 
 **Layout:**
@@ -230,42 +231,42 @@ Shown inside the popover when the selected agent's provider is not authenticated
 Full page at `/settings` route (D-07). Not a modal.
 
 ```
-┌─────────────────────────────────────────────────────────────────┐
-│ ┌─────────────────────────────────────────────────────────────┐ │
-│ │ [ArrowLeft] Back to Chat                                    │ │
-│ └─────────────────────────────────────────────────────────────┘ │
-│                                                                 │
-│         ┌──────────────────────────────────────────┐            │
-│         │                                          │            │
-│         │  Harness Configuration                   │            │
-│         │  Load project files to customize agent   │            │
-│         │  behavior.                               │            │
-│         │                                          │            │
-│         │  ┌──────────────────────────────────────┐│            │
-│         │  │                                      ││            │
-│         │  │  Project Directory                   ││            │
-│         │  │                                      ││            │
-│         │  │  ┌───────────────────────┐ [Browse]  ││            │
-│         │  │  │ /path/to/project      │           ││            │
-│         │  │  └───────────────────────┘           ││            │
-│         │  │                                      ││            │
-│         │  │  Or drag & drop a folder here        ││            │
-│         │  │                                      ││            │
-│         │  └──────────────────────────────────────┘│            │
-│         │                                          │            │
-│         │  Discovered Files                        │            │
-│         │  ┌──────────────────────────────────────┐│            │
-│         │  │ [CheckCircle] CLAUDE.md    2.4 KB    ││            │
-│         │  │ [CheckCircle] AGENTS.md    1.1 KB    ││            │
-│         │  │ [FolderOpen]  skills/      3 skills  ││            │
-│         │  │ [XCircle]     hooks/       Not found ││            │
-│         │  └──────────────────────────────────────┘│            │
-│         │                                          │            │
-│         │                     [Load Harness]        │            │
-│         │                                          │            │
-│         └──────────────────────────────────────────┘            │
-│                                                                 │
-└─────────────────────────────────────────────────────────────────┘
++-----------------------------------------------------------------+
+| +-------------------------------------------------------------+ |
+| | [ArrowLeft] Back to Chat                                     | |
+| +-------------------------------------------------------------+ |
+|                                                                 |
+|         +----------------------------------------------+        |
+|         |                                              |        |
+|         |  Harness Configuration                       |        |
+|         |  Load project files to customize agent       |        |
+|         |  behavior.                                   |        |
+|         |                                              |        |
+|         |  +------------------------------------------+|        |
+|         |  |                                          ||        |
+|         |  |  Project Directory                       ||        |
+|         |  |                                          ||        |
+|         |  |  +---------------------+ [Browse Files]  ||        |
+|         |  |  | /path/to/project    |                 ||        |
+|         |  |  +---------------------+                 ||        |
+|         |  |                                          ||        |
+|         |  |  Or drag & drop a folder here            ||        |
+|         |  |                                          ||        |
+|         |  +------------------------------------------+|        |
+|         |                                              |        |
+|         |  Discovered Files                            |        |
+|         |  +------------------------------------------+|        |
+|         |  | [CheckCircle] CLAUDE.md    2.4 KB        ||        |
+|         |  | [CheckCircle] AGENTS.md    1.1 KB        ||        |
+|         |  | [FolderOpen]  skills/      3 skills      ||        |
+|         |  | [XCircle]     hooks/       Not found     ||        |
+|         |  +------------------------------------------+|        |
+|         |                                              |        |
+|         |                     [Load Harness]           |        |
+|         |                                              |        |
+|         +----------------------------------------------+        |
+|                                                                 |
++-----------------------------------------------------------------+
 ```
 
 **Layout:**
@@ -293,14 +294,14 @@ Full page at `/settings` route (D-07). Not a modal.
 **Layout:**
 - Container: dashed 2px border `--border`, border-radius `--radius-lg`, padding spacing.6, text-align center
 - Drag active: border color `--primary`, bg `--accent`
-- Inside: `FolderOpen` icon 32px muted, "Drop a project folder here" text 14px muted, "or" text 12px subtle, "Browse" button ghost variant
-- Input + Browse button: standard Input + ghost Button side by side, below the drop zone area
-- When directory is set: dashed zone collapses, shows the path as a row with a "Change" button
+- Inside: `FolderOpen` icon 32px muted, "Drop a project folder here" text 14px muted, "or" text 12px subtle, "Browse Files" button ghost variant
+- Input + Browse Files button: standard Input + ghost Button side by side, below the drop zone area
+- When directory is set: dashed zone collapses, shows the path as a row with a "Change Folder" button
 
 **States:**
 - Empty: full drop zone visible
 - Drag over: border highlight, bg tint
-- Directory set: path shown as text with Change button, drop zone hidden
+- Directory set: path shown as text with "Change Folder" button, drop zone hidden
 
 ### HarnessFileStatus
 
@@ -351,8 +352,8 @@ Updated header:
 | Directory picker placeholder | "/path/to/project" | Input placeholder |
 | Drop zone text | "Drop a project folder here" | Drag & drop zone |
 | Drop zone secondary | "or" | Between drop text and browse button |
-| Browse button | "Browse" | Ghost button to open file picker |
-| Change directory button | "Change" | Ghost button when directory already set |
+| Browse button | "Browse Files" | Ghost button to open file picker -- verb + noun format |
+| Change directory button | "Change Folder" | Ghost button when directory already set -- verb + noun format |
 | Discovered files heading | "Discovered Files" | Section heading above file list |
 | File found status | "Loaded -- {size}" | e.g. "Loaded -- 2.4 KB" |
 | Directory found status | "{count} items found" | e.g. "3 skills found" |
