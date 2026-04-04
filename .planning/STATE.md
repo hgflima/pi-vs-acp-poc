@@ -3,14 +3,14 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: executing
-stopped_at: Completed 04-01-PLAN.md
-last_updated: "2026-04-04T11:02:31.521Z"
+stopped_at: Completed 04-02-PLAN.md
+last_updated: "2026-04-04T11:08:15.672Z"
 last_activity: 2026-04-04
 progress:
   total_phases: 4
   completed_phases: 3
   total_plans: 17
-  completed_plans: 14
+  completed_plans: 15
   percent: 67
 ---
 
@@ -26,7 +26,7 @@ See: .planning/PROJECT.md (updated 2026-04-03)
 ## Current Position
 
 Phase: 04 (configuration) — EXECUTING
-Plan: 2 of 4
+Plan: 3 of 4
 Status: Ready to execute
 Last activity: 2026-04-04
 
@@ -61,6 +61,7 @@ Progress: [███████░░░] 67%
 | Phase 03 P02 | 2min | 2 tasks | 1 files |
 | Phase 03 P03 | 2min | 2 tasks | 9 files |
 | Phase 04 P01 | 3min | 3 tasks | 6 files |
+| Phase 04 P02 | 3min | 2 tasks | 6 files |
 
 ## Accumulated Context
 
@@ -96,6 +97,9 @@ Recent decisions affecting current work:
 - [Phase 04]: Model list served dynamically from pi-ai getModels, not hardcoded (D-04)
 - [Phase 04]: Harness stored in-memory with no file watching (D-13)
 - [Phase 04]: createAgent auto-applies active harness to system prompt when no explicit override
+- [Phase 04]: fetchModels returns needsAuth on 401 for inline auth UI (Pitfall 6)
+- [Phase 04]: Model set to null during agent transition, then to defaultModel once list arrives (Pitfall 2)
+- [Phase 04]: switchAgent/switchModel only update local state; ChatLayout calls clearMessages (D-05/D-06)
 
 ### Pending Todos
 
@@ -109,6 +113,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-04-04T11:02:31.519Z
-Stopped at: Completed 04-01-PLAN.md
+Last session: 2026-04-04T11:08:15.670Z
+Stopped at: Completed 04-02-PLAN.md
 Resume file: None
