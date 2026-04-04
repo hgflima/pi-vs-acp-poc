@@ -32,7 +32,10 @@ Provar que pi-ai + pi-agent-core sustentam um chat web com streaming em tempo re
 
 ### Active
 
-(No active requirements — all validated or out of scope)
+- [ ] OAuth flow para Anthropic (Claude Code)
+- [ ] OAuth flow para OpenAI (Codex)
+- [ ] Coexistencia: usuario escolhe entre OAuth ou API Key por provider
+- [ ] UI de conexao atualizada para suportar ambos os metodos
 
 ### Out of Scope
 
@@ -43,10 +46,20 @@ Provar que pi-ai + pi-agent-core sustentam um chat web com streaming em tempo re
 - Suporte mobile / responsividade refinada — desktop browser only
 - Edicao de arquivos inline ou terminal integrado — fora do escopo do POC
 - Gerenciamento de multiplas conversas simultaneas — uma conversa por vez
-- OAuth flow completo — API Key first, OAuth como stretch goal (ADR-005)
+- OAuth flow completo como unico metodo — API Key deve coexistir (ADR-005 atualizado v1.1)
 - Extended thinking display — v2 requirement
 - Tool card expand/collapse — v2 requirement
 - Tool execution timing — v2 requirement
+
+## Current Milestone: v1.1 OAuth Authentication
+
+**Goal:** Adicionar autenticacao OAuth como alternativa ao API Key para ambos os providers (Anthropic/Claude Code e OpenAI/Codex), mantendo coexistencia total com o fluxo existente.
+
+**Target features:**
+- OAuth flow para Anthropic (Claude Code)
+- OAuth flow para OpenAI (Codex)
+- Coexistencia: usuario escolhe entre OAuth ou API Key por provider
+- UI de conexao atualizada para suportar ambos os metodos
 
 ## Context
 
@@ -102,4 +115,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-04-04 after v1.0 milestone*
+*Last updated: 2026-04-04 after v1.1 milestone start*
