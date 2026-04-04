@@ -1,6 +1,6 @@
 import { Hono } from "hono"
 import { getModel, streamSimple } from "@mariozechner/pi-ai"
-import { storeCredentials } from "../lib/credentials"
+import { storeApiKey, getAuthStatus } from "../lib/credentials"
 
 const authRoutes = new Hono()
 
@@ -61,7 +61,7 @@ authRoutes.post("/apikey", async (c) => {
     }
 
     // Only store credentials if validation actually passed
-    storeCredentials(provider, key)
+    storeApiKey(provider, key)
 
     return c.json({ status: "ok", provider })
   } catch (error: unknown) {
@@ -74,5 +74,13 @@ function getTestModel(provider: "anthropic" | "openai") {
   // Use cheapest model for validation
   return provider === "anthropic" ? "claude-haiku-4-5-20251001" : "gpt-4o-mini"
 }
+
+authRoutes.get("/status", (c) => {
+  const provider = c.req.query("provider") as "anthropic" | "openai" | undefined
+  if (!provider || !["anthropic", "openai"].includes(provider)) {
+    return c.json({ error: "Invalid provider. Use 'anthropic' or 'openai'." }, 400)
+  }
+  return c.json(getAuthStatus(provider))
+})
 
 export { authRoutes }
