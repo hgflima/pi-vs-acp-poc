@@ -3,14 +3,14 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: executing
-stopped_at: Phase 4 context gathered
-last_updated: "2026-04-04T09:49:43.170Z"
+stopped_at: Completed 04-01-PLAN.md
+last_updated: "2026-04-04T11:02:31.521Z"
 last_activity: 2026-04-04
 progress:
   total_phases: 4
   completed_phases: 3
-  total_plans: 13
-  completed_plans: 13
+  total_plans: 17
+  completed_plans: 14
   percent: 67
 ---
 
@@ -21,12 +21,12 @@ progress:
 See: .planning/PROJECT.md (updated 2026-04-03)
 
 **Core value:** Provar que pi-ai + pi-agent-core sustentam um chat web com streaming em tempo real, tool calls visiveis e troca de agentes
-**Current focus:** Phase 03 — tool-visualization
+**Current focus:** Phase 04 — configuration
 
 ## Current Position
 
-Phase: 4
-Plan: Not started
+Phase: 04 (configuration) — EXECUTING
+Plan: 2 of 4
 Status: Ready to execute
 Last activity: 2026-04-04
 
@@ -60,6 +60,7 @@ Progress: [███████░░░] 67%
 | Phase 03 P01 | 2min | 2 tasks | 3 files |
 | Phase 03 P02 | 2min | 2 tasks | 1 files |
 | Phase 03 P03 | 2min | 2 tasks | 9 files |
+| Phase 04 P01 | 3min | 3 tasks | 6 files |
 
 ## Accumulated Context
 
@@ -92,6 +93,9 @@ Recent decisions affecting current work:
 - [Phase 03]: TOOL_UPDATE/TOOL_END silently return state if no matching toolId (Pitfall 2 defense)
 - [Phase 03]: ToolCard router uses switch/case with GenericCard as default fallback for unknown variants
 - [Phase 03]: AssistantMessage iterates segments[] instead of concatenating text for inline tool/text interleaving
+- [Phase 04]: Model list served dynamically from pi-ai getModels, not hardcoded (D-04)
+- [Phase 04]: Harness stored in-memory with no file watching (D-13)
+- [Phase 04]: createAgent auto-applies active harness to system prompt when no explicit override
 
 ### Pending Todos
 
@@ -105,6 +109,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-04-04T09:49:43.168Z
-Stopped at: Phase 4 context gathered
-Resume file: .planning/phases/04-configuration/04-CONTEXT.md
+Last session: 2026-04-04T11:02:31.519Z
+Stopped at: Completed 04-01-PLAN.md
+Resume file: None

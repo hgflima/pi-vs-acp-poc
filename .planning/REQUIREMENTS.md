@@ -49,23 +49,23 @@ Requirements para a validacao tecnica. Cada um mapeia para fases do roadmap.
 ### Agent Switching
 
 - [ ] **AGENT-01**: Switcher na interface para trocar entre Claude Code e Codex
-- [ ] **AGENT-02**: Troca de agente cria nova instancia de Agent (ADR-006) com history como contexto
+- [x] **AGENT-02**: Troca de agente cria nova instancia de Agent (ADR-006) com history como contexto
 - [ ] **AGENT-03**: Indicador visual do agente ativo
 - [ ] **AGENT-04**: Se o provider do agente selecionado nao estiver autenticado, solicitar auth
 
 ### Model Switching
 
-- [ ] **MODEL-01**: Dropdown com modelos disponiveis para o provider ativo (via getModels)
+- [x] **MODEL-01**: Dropdown com modelos disponiveis para o provider ativo (via getModels)
 - [ ] **MODEL-02**: Troca de modelo atualiza proximas interacoes
-- [ ] **MODEL-03**: Lista de modelos atualiza ao trocar de agente/provider
+- [x] **MODEL-03**: Lista de modelos atualiza ao trocar de agente/provider
 - [ ] **MODEL-04**: Indicador visual do modelo ativo
 
 ### Harness Loading
 
 - [ ] **HARN-01**: Interface para selecionar/apontar arquivos de harness (CLAUDE.md, AGENTS.md, skills, hooks)
-- [ ] **HARN-02**: Backend carrega e aplica harness ao system prompt do agente
+- [x] **HARN-02**: Backend carrega e aplica harness ao system prompt do agente
 - [ ] **HARN-03**: Indicador visual de que o harness esta ativo
-- [ ] **HARN-04**: Error handling para arquivo nao encontrado, formato invalido, harness muito grande
+- [x] **HARN-04**: Error handling para arquivo nao encontrado, formato invalido, harness muito grande
 
 ## v2 Requirements
 
@@ -136,17 +136,17 @@ Deferred para apos validacao do POC. Tracked mas nao no roadmap atual.
 | TOOL-07 | Phase 3 | Complete |
 | TOOL-08 | Phase 3 | Complete |
 | AGENT-01 | Phase 4 | Pending |
-| AGENT-02 | Phase 4 | Pending |
+| AGENT-02 | Phase 4 | Complete |
 | AGENT-03 | Phase 4 | Pending |
 | AGENT-04 | Phase 4 | Pending |
-| MODEL-01 | Phase 4 | Pending |
+| MODEL-01 | Phase 4 | Complete |
 | MODEL-02 | Phase 4 | Pending |
-| MODEL-03 | Phase 4 | Pending |
+| MODEL-03 | Phase 4 | Complete |
 | MODEL-04 | Phase 4 | Pending |
 | HARN-01 | Phase 4 | Pending |
-| HARN-02 | Phase 4 | Pending |
+| HARN-02 | Phase 4 | Complete |
 | HARN-03 | Phase 4 | Pending |
-| HARN-04 | Phase 4 | Pending |
+| HARN-04 | Phase 4 | Complete |
 
 **Coverage:**
 - v1 requirements: 39 total

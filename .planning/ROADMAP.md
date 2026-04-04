@@ -91,7 +91,7 @@ Plans:
 **Plans:** 4 plans
 
 Plans:
-- [ ] 04-01-PLAN.md -- Types expansion + backend endpoints (models, harness discovery, harness route, dynamic systemPrompt)
+- [x] 04-01-PLAN.md -- Types expansion + backend endpoints (models, harness discovery, harness route, dynamic systemPrompt)
 - [ ] 04-02-PLAN.md -- Frontend infrastructure (shadcn install, useAgent hook, useHarness hook, API helpers)
 - [ ] 04-03-PLAN.md -- Agent/model switching UI (popover, inline auth, ChatHeader rewrite, ChatLayout wiring)
 - [ ] 04-04-PLAN.md -- Settings page (harness picker, file status display, /settings route)
