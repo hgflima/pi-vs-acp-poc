@@ -41,8 +41,8 @@ Full details: `.planning/milestones/v1.0-ROADMAP.md`
   4. Credential store supports both Anthropic and OpenAI providers with either auth method
 **Plans**: 3 plans
   - [x] 05-01-PLAN.md — Refactor credential store to compound API Key + OAuth per provider; add GET /auth/status route
-  - [ ] 05-02-PLAN.md — Async getApiKey resolver in agent factory with per-provider refresh mutex
-  - [ ] 05-03-PLAN.md — Per-provider frontend auth state (ProviderAuthState, refactored useAuth, connection page)
+  - [x] 05-02-PLAN.md — Async getApiKey resolver in agent factory with per-provider refresh mutex
+  - [x] 05-03-PLAN.md — Per-provider frontend auth state (ProviderAuthState, refactored useAuth, connection page)
 
 ### Phase 6: Anthropic OAuth Flow
 **Goal**: User can authenticate with Anthropic via OAuth PKCE and use the resulting token for chat

@@ -2,15 +2,15 @@
 gsd_state_version: 1.0
 milestone: v1.1
 milestone_name: OAuth Authentication
-status: executing
-stopped_at: Completed 05-01-PLAN.md
-last_updated: "2026-04-04T21:28:39.569Z"
+status: verifying
+stopped_at: Completed 05-03-PLAN.md
+last_updated: "2026-04-04T21:47:16.974Z"
 last_activity: 2026-04-04
 progress:
   total_phases: 4
-  completed_phases: 0
+  completed_phases: 1
   total_plans: 3
-  completed_plans: 1
+  completed_plans: 3
   percent: 0
 ---
 
@@ -26,8 +26,8 @@ See: .planning/PROJECT.md (updated 2026-04-04)
 ## Current Position
 
 Phase: 05 (credential-infrastructure) — EXECUTING
-Plan: 2 of 3
-Status: Ready to execute
+Plan: 3 of 3
+Status: Phase complete — ready for verification
 Last activity: 2026-04-04
 
 Progress: [░░░░░░░░░░] 0%
@@ -51,6 +51,8 @@ Progress: [░░░░░░░░░░] 0%
 
 *Updated after each plan completion*
 | Phase 05 P01 | 4min | 3 tasks | 4 files |
+| Phase 05-credential-infrastructure P02 | 8min | 3 tasks | 2 files |
+| Phase 05 P03 | 10 min | 5 tasks | 5 files |
 
 ## Accumulated Context
 
@@ -65,6 +67,13 @@ Recent decisions affecting current work:
 - [Phase 05]: Plan 05-01: OAuth takes priority over API Key when both credentials exist for a provider (D-01)
 - [Phase 05]: Plan 05-01: Credential store exposes per-type clearing (clearByType) with auto-cleanup when both become null
 - [Phase 05]: Plan 05-01: createAgent signature change deferred to Plan 02 via transitional @ts-expect-error in chat.ts
+- [Phase 05]: Plan 05-03: Per-provider frontend auth state via Map<Provider, ProviderAuthState> (D-06) — Anthropic and OpenAI independent
+- [Phase 05]: Plan 05-03: authMethod field on ProviderAuthState (D-05) prepares Phase 8 UI-03 token health badges
+- [Phase 05]: Plan 05-03: refreshStatus swallows network errors to preserve known-connected state across transient blips
+- [Phase 05-credential-infrastructure]: Plan 05-02: D-03 realized — createAgent owns credential resolution (callers pass only provider/modelId)
+- [Phase 05-credential-infrastructure]: Plan 05-02: D-04 realized — OAuth refresh happens inline in async getApiKey callback (pi-agent-core awaits it)
+- [Phase 05-credential-infrastructure]: Plan 05-02: Per-provider refresh mutex via Map<Provider, Promise> prevents single-use refresh token reuse
+- [Phase 05-credential-infrastructure]: Plan 05-02: 60s refresh-ahead buffer (REFRESH_BUFFER_MS) triggers refresh before expiry, avoiding mid-stream failures
 
 ### Pending Todos
 
@@ -77,6 +86,6 @@ None.
 
 ## Session Continuity
 
-Last session: 2026-04-04T21:28:39.568Z
-Stopped at: Completed 05-01-PLAN.md
+Last session: 2026-04-04T21:47:13.739Z
+Stopped at: Completed 05-03-PLAN.md
 Resume file: None

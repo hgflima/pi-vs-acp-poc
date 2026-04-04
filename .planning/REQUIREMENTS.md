@@ -10,7 +10,7 @@ Requirements for milestone v1.1 OAuth Authentication. Each maps to roadmap phase
 ### Credential Infrastructure
 
 - [x] **CRED-01**: Credential store suporta compound credentials (OAuth tokens + API Key) coexistindo por provider
-- [ ] **CRED-02**: Agent factory usa async getApiKey resolver com token refresh transparente
+- [x] **CRED-02**: Agent factory usa async getApiKey resolver com token refresh transparente
 
 ### OAuth Authentication
 
@@ -46,7 +46,7 @@ Requirements for milestone v1.1 OAuth Authentication. Each maps to roadmap phase
 | Requirement | Phase | Status |
 |-------------|-------|--------|
 | CRED-01 | Phase 5 | Complete |
-| CRED-02 | Phase 5 | Pending |
+| CRED-02 | Phase 5 | Complete |
 | OAUTH-01 | Phase 6 | Pending |
 | OAUTH-02 | Phase 7 | Pending |
 | OAUTH-03 | Phase 7 | Pending |

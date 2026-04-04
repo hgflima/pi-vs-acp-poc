@@ -16,6 +16,18 @@ src/server/routes/auth.ts(32,38): error TS2345: Argument of type '"claude-haiku-
 **Scope:** Not caused by credential store refactor. Out of scope for Plan 05-01.
 **Recommendation:** Address in a dedicated typing cleanup (either cast `as never` locally or upgrade getTestModel return type to the pi-ai ModelId union).
 
+### setup.ts line 62 — getModel type narrowing (carried from baseline)
+
+```
+src/server/agent/setup.ts(62,34): error TS2345: Argument of type 'any' is not assignable to parameter of type 'never'.
+```
+
+**Status:** Pre-existing before Plan 05-02 started. The `getModel(provider, modelId as any)` cast was carried over from the original setup.ts (pre-Plan 05). Confirmed via `git stash` — error appears on the unmodified file at HEAD.
+**Root cause:** Same as auth.ts:32 — `getModel(provider, modelId)` from `@mariozechner/pi-ai` expects a ModelId literal that depends on the provider; TypeScript cannot narrow the union with the current cast pattern.
+**Impact:** Type-check warning only; runtime works.
+**Scope:** Not caused by async resolver refactor. Plan 05-02's Task 1 action block explicitly preserved the existing `modelId as any` cast verbatim.
+**Recommendation:** Address together with auth.ts:32 in a dedicated typing cleanup pass — either use `as never` or pipe through a provider-indexed lookup.
+
 ### models.ts line 20 — getModels KnownProvider type mismatch
 
 ```
