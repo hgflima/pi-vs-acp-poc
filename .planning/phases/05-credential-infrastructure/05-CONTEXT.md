@@ -19,7 +19,7 @@ Refactor the credential store for compound credentials (OAuth tokens + API Key c
 
 ### Agent factory contract
 - **D-03:** Factory resolves credentials internally — `createAgent(provider, modelId)` consults the credential store. Callers don't need to know about credential types
-- **D-04:** Proactive refresh strategy — a timer/check before requests ensures the token is fresh. `getApiKey` remains synchronous, returning the current token from the store. No async wrapper needed since pi-agent-core expects `() => string`
+- **D-04:** Async on-demand refresh — `getApiKey(provider): Promise<string | undefined>` refreshes the OAuth token inline if it's within expiry buffer (e.g., 60s). pi-agent-core's `getApiKey` option natively supports `Promise<string | undefined> | string | undefined` (verified in agent-loop.js), so no wrapper or timer is needed. A per-provider refresh mutex prevents concurrent refresh races (refresh tokens are single-use). **Correction:** Original discussion assumed sync `() => string`; research proved pi-agent-core awaits the result.
 
 ### Frontend auth awareness
 - **D-05:** AuthState exposes active auth method — includes `authMethod: 'apiKey' | 'oauth' | null` so the UI can show badges and token status indicators (prepares for UI-03)
