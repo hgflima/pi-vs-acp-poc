@@ -1,308 +1,239 @@
-# Technology Stack
+# Stack Research: v1.1 OAuth Authentication
 
-**Project:** Pi AI Chat Web (POC)
-**Researched:** 2026-04-03
-**Overall Confidence:** MEDIUM-HIGH
-
----
+**Domain:** OAuth authentication for LLM providers (Anthropic + OpenAI Codex)
+**Researched:** 2026-04-04
+**Confidence:** HIGH
 
 ## Executive Summary
 
-The stack is anchored by two non-negotiable packages -- `@mariozechner/pi-ai` and `@mariozechner/pi-agent-core` -- which are the validation targets. Everything else was chosen to support them effectively. The architecture calls for a React SPA frontend with a Hono backend proxy, communicating via SSE for real-time streaming of agent events.
+The single most important finding is that **pi-ai already ships built-in OAuth providers** for both Anthropic and OpenAI Codex (`@mariozechner/pi-ai/oauth`). The library includes complete PKCE flows, local callback servers, token exchange, token refresh, and credential management. This eliminates the need for any external OAuth library.
 
-A key discovery during research: `@mariozechner/pi-web-ui` already provides a complete chat UI with streaming, tool visualization, artifacts, and IndexedDB persistence -- but it uses Lit-based web components, not React. The project explicitly chose React + shadcn/ui (per ADRs), so pi-web-ui serves as a **reference implementation** rather than a direct dependency. Its patterns (event mapping, stream consumption, tool rendering) should inform the React implementation.
+The second critical finding concerns **Anthropic's policy shift**: as of April 4, 2026, Anthropic requires Extra Usage (pay-as-you-go) billing for third-party OAuth traffic. The OAuth flow itself works, but subscription credits no longer cover third-party usage. OpenAI has no such restriction -- Codex OAuth works freely in third-party tools.
 
-The recommended stack uses **Vite 6** (not Vite 8) because Vite 8's Rolldown migration introduces CommonJS interop changes and plugin compatibility risks that add unnecessary friction to a 2-hour POC. Vite 6 is stable, well-tested with the React plugin, and adequate for this project's needs. Upgrade to Vite 8 later if the POC evolves to MVP.
+**Zero new npm dependencies are needed.** The implementation is entirely about wiring pi-ai's existing OAuth utilities into the Hono backend.
 
----
+## Recommended Stack Additions
 
-## Recommended Stack
+### New Dependencies: NONE
 
-### Core (Non-Negotiable)
+No new packages need to be installed. Everything required exists in `@mariozechner/pi-ai ^0.64.0`.
 
-| Technology | Version | Purpose | Why | Confidence |
-|------------|---------|---------|-----|------------|
-| `@mariozechner/pi-ai` | ^0.64.0 | Unified LLM API (stream, auth, model registry) | **Validation target** -- the whole POC exists to test this | HIGH |
-| `@mariozechner/pi-agent-core` | ^0.64.0 | Agent runtime (Agent, tools, events, streamProxy) | **Validation target** -- agent loop and tool execution | HIGH |
+### pi-ai OAuth Modules (Already Installed)
 
-These packages are the reason the project exists. They power streaming (`stream(model, context)`), authentication (`getEnvApiKey`, OAuth), model discovery (`getModels`, `getProviders`), agent lifecycle (`Agent` class, `AgentEvent`), tool execution (`AgentTool`), and browser proxy routing (`streamProxy`).
+| Module | Import Path | Purpose | Why |
+|--------|-------------|---------|-----|
+| `openaiCodexOAuthProvider` | `@mariozechner/pi-ai/oauth` | Complete OpenAI Codex OAuth PKCE flow | Built-in provider with local callback server on port 1455, PKCE S256, token refresh |
+| `anthropicOAuthProvider` | `@mariozechner/pi-ai/oauth` | Complete Anthropic OAuth PKCE flow | Built-in provider with local callback server on port 53692, PKCE S256, token refresh |
+| `getOAuthProvider` | `@mariozechner/pi-ai/oauth` | Provider registry lookup | Fetch provider by ID for login/refresh |
+| `getOAuthApiKey` | `@mariozechner/pi-ai/oauth` | API key extraction with auto-refresh | Handles expired token refresh transparently, returns fresh API key |
+| `OAuthCredentials` | `@mariozechner/pi-ai/oauth` | Type: `{ refresh, access, expires, [key]: unknown }` | Credential storage type shared by all providers |
+| `OAuthLoginCallbacks` | `@mariozechner/pi-ai/oauth` | Type: callbacks for OAuth flow | `onAuth` (URL), `onPrompt` (fallback), `onProgress`, `onManualCodeInput` |
+| `OAuthProviderInterface` | `@mariozechner/pi-ai/oauth` | Type: provider contract | `login()`, `refreshToken()`, `getApiKey()`, `modifyModels()` |
 
-**Important:** Pin to the same version for both packages. They are released in lockstep from the pi-mono monorepo (currently at 0.64.0 as of March 29, 2026).
+## How pi-ai OAuth Works (Architecture)
 
-### Frontend Framework
+### OpenAI Codex Flow
 
-| Technology | Version | Purpose | Why | Confidence |
-|------------|---------|---------|-----|------------|
-| React | ^19.2.0 | UI framework | Mature ecosystem, required by shadcn/ui, ADR decision | HIGH |
-| React DOM | ^19.2.0 | DOM rendering | Paired with React | HIGH |
-| TypeScript | ^5.7.0 | Type safety | Required for pi-ai/pi-agent-core typed APIs | HIGH |
+1. **Client ID:** `app_EMoamEEZ73f0CkXaXp7hrann` (hardcoded in pi-ai)
+2. **Authorization URL:** `https://auth.openai.com/oauth/authorize`
+3. **Token URL:** `https://auth.openai.com/oauth/token`
+4. **Redirect URI:** `http://localhost:1455/auth/callback`
+5. **Scopes:** `openid profile email offline_access`
+6. **PKCE:** S256 code challenge
+7. **Local callback server:** `node:http.createServer` on port 1455
+8. **Token refresh:** POST to token URL with `grant_type=refresh_token`
+9. **Extra field:** `accountId` extracted from JWT claim `https://api.openai.com/auth`
 
-React 19.2 is the latest stable release (October 2025, with 19.2.1 patch in December 2025). It brings improved async orchestration and performance. Use 19.2.x, not 19.0.x -- shadcn/ui is fully compatible.
+### Anthropic Flow
 
-### Build Tool
+1. **Client ID:** Base64-encoded in pi-ai source (obfuscated)
+2. **Authorization URL:** `https://claude.ai/oauth/authorize`
+3. **Token URL:** `https://platform.claude.com/v1/oauth/token`
+4. **Redirect URI:** `http://localhost:53692/callback`
+5. **Scopes:** `org:create_api_key user:profile user:inference user:sessions:claude_code user:mcp_servers user:file_upload`
+6. **PKCE:** S256 code challenge
+7. **Local callback server:** `node:http.createServer` on port 53692
+8. **Token refresh:** POST to token URL with `grant_type=refresh_token`
 
-| Technology | Version | Purpose | Why | Confidence |
-|------------|---------|---------|-----|------------|
-| Vite | ^6.2.0 | Dev server + bundler | Fast HMR, TypeScript native, dev proxy for backend | HIGH |
-| `@vitejs/plugin-react` | ^4.4.0 | React Fast Refresh | Official React plugin for Vite 6 | HIGH |
+### Integration Point with Existing Code
 
-**Why Vite 6 and not Vite 8:** Vite 8.0 (March 2026) replaces esbuild+Rollup with Rolldown, delivering 10-30x faster builds. However, for a POC:
-- Vite 8 introduces CommonJS interop breaking changes that may affect pi-ai/pi-agent-core imports
-- `@vitejs/plugin-react` v6 (for Vite 8) drops Babel and uses Oxc -- new territory with potential edge cases
-- Vite 6 builds are already fast enough for a local-only single-developer POC
-- Migration from 6 to 8 is straightforward later if needed
+The existing `createAgent()` in `src/server/agent/setup.ts` already uses `getApiKey: () => apiKey`. For OAuth, the change is:
 
-**Decision: Use Vite 6 for stability. Revisit Vite 8 at MVP stage.**
+```typescript
+// Current (API Key)
+getApiKey: () => apiKey
 
-### Styling
+// OAuth (with auto-refresh)
+getApiKey: async () => {
+  const result = await getOAuthApiKey(providerId, oauthCredentials)
+  if (!result) throw new Error("OAuth credentials expired")
+  // Update stored credentials with refreshed tokens
+  updateOAuthCredentials(providerId, result.newCredentials)
+  return result.apiKey
+}
+```
 
-| Technology | Version | Purpose | Why | Confidence |
-|------------|---------|---------|-----|------------|
-| Tailwind CSS | ^4.2.0 | Utility-first CSS | ADR decision, shadcn/ui requirement, pi-web-ui also uses TW4 | HIGH |
-| `tailwind-merge` | ^3.5.0 | Class deduplication | Resolves conflicting Tailwind classes in `cn()` utility | HIGH |
-| `clsx` | ^2.1.1 | Conditional classes | Used by shadcn/ui's `cn()` helper, tiny (239B) | HIGH |
-| `class-variance-authority` | ^0.7.1 | Component variants | Type-safe variant props for component styling | MEDIUM |
+## Backend Integration Points
 
-Tailwind CSS 4.2 (February 2026) is a ground-up rewrite: CSS-first configuration (no `tailwind.config.ts` needed for basics), 5x faster full builds, 100x faster incremental builds. Note: Tailwind 4 uses `@import "tailwindcss"` in CSS instead of `@tailwind` directives.
+### Credentials Store Extension
 
-**CVA note:** class-variance-authority 0.7.1 hasn't been updated in over a year. It works fine but consider it maintenance-mode. For this POC, it's adequate. If building an MVP, evaluate `tailwind-variants` as an alternative.
+The existing `src/server/lib/credentials.ts` stores API keys as `Map<Provider, string>`. For OAuth, extend to:
 
-### Component Library
+```typescript
+type AuthMethod = "apikey" | "oauth"
+type Credentials = {
+  method: AuthMethod
+  apiKey?: string
+  oauth?: OAuthCredentials
+}
+```
 
-| Technology | Version | Purpose | Why | Confidence |
-|------------|---------|---------|-----|------------|
-| shadcn/ui (CLI v4) | Latest (CLI) | Headless component primitives | Copy-paste components, full control, Tailwind-native | HIGH |
-| Radix UI primitives | Various | Accessible headless components | shadcn/ui is built on Radix, installed automatically | HIGH |
+### New OAuth Routes (in existing Hono backend)
 
-shadcn/ui is not a package you install -- it's a CLI that copies component source code into your project. The CLI v4 (March 2026) supports Tailwind v4 and React 19 natively. Components get a `data-slot` attribute for styling. No `forwardRef` needed in React 19.
+| Route | Method | Purpose |
+|-------|--------|---------|
+| `POST /api/auth/oauth/start` | POST | Start OAuth flow, return auth URL to frontend |
+| `GET /api/auth/oauth/status/:provider` | GET | Poll OAuth completion status |
+| `POST /api/auth/oauth/refresh` | POST | Force token refresh |
 
-Components needed for this POC (from architecture doc): Button, Input, Select, Card, Dialog, Badge, Alert, Separator, Tooltip, ScrollArea, Textarea -- all available in shadcn/ui.
+The OAuth callback is handled by pi-ai's built-in `node:http` server (ports 1455/53692), NOT by Hono. The Hono backend orchestrates the flow but the callback happens on a separate port.
 
-### Routing
+### Flow Sequence
 
-| Technology | Version | Purpose | Why | Confidence |
-|------------|---------|---------|-----|------------|
-| `react-router` | ^7.13.0 | Client-side SPA routing | Two routes only (`/` and `/chat`), SPA mode | HIGH |
+```
+Frontend                    Hono Backend              pi-ai OAuth            Browser
+   |                            |                         |                     |
+   |-- POST /oauth/start ------>|                         |                     |
+   |                            |-- loginOpenAICodex() -->|                     |
+   |                            |   (starts http server)  |                     |
+   |<-- { authUrl } -----------|<-- onAuth({ url }) ------|                     |
+   |                            |                         |                     |
+   |-- window.open(authUrl) ------------------------------------------>|        |
+   |                            |                         |            |        |
+   |                            |                         |<-- callback on :1455|
+   |                            |<-- resolves credentials |                     |
+   |                            |                         |                     |
+   |-- GET /oauth/status ------>|                         |                     |
+   |<-- { status: "ok" } ------|                         |                     |
+```
 
-React Router 7 in SPA mode (`ssr: false` in config) generates a static `index.html` at build time. For a 2-route POC, this is the simplest approach. No need for framework mode, loaders, or actions.
+## Provider Policy Status
 
-**Note:** In React Router 7, `react-router-dom` is deprecated. Import everything from `react-router` directly.
+### OpenAI Codex -- SAFE for Third-Party OAuth
 
-### Backend Framework
+| Aspect | Status |
+|--------|--------|
+| OAuth in third-party tools | **Allowed** -- OpenAI officially partners with OpenCode, RooCode, etc. |
+| Subscription billing | Subscription credits cover third-party usage |
+| Terms of service risk | **LOW** -- OpenAI actively encourages third-party integration |
+| Token lifetime | Short-lived JWTs (~1 hour), auto-refresh via refresh token |
 
-| Technology | Version | Purpose | Why | Confidence |
-|------------|---------|---------|-----|------------|
-| Hono | ^4.12.0 | HTTP server + SSE streaming | TypeScript-first, streaming helpers, lightweight | HIGH |
-| `@hono/node-server` | ^1.19.0 | Node.js adapter for Hono | Runs Hono on Node.js (required for pi-agent-core tools) | HIGH |
+**Confidence:** HIGH -- Multiple official sources confirm OpenAI's permissive stance.
 
-Hono provides built-in `streamSSE` helper that handles all SSE protocol details (headers, chunked encoding, reconnection). This maps directly to the AgentEvent -> SSE adapter pattern in the architecture.
+### Anthropic -- WORKS WITH CAVEATS
 
-**Why Hono over Express:** Hono is TypeScript-first (no `@types/` needed), has zero dependencies, includes streaming helpers natively, and is growing at 340% YoY (2.8M weekly downloads). Express would require additional middleware for SSE.
+| Aspect | Status |
+|--------|--------|
+| OAuth in third-party tools | **Works** but requires Extra Usage billing (pay-as-you-go) |
+| Subscription billing | Subscription credits NO LONGER cover third-party usage (changed April 4, 2026) |
+| Terms of service risk | **MEDIUM** -- OAuth technically works but Anthropic discourages third-party use |
+| Recommended alternative | API Key authentication (clearer billing path) |
+| Token lifetime | Short-lived (~1 hour), auto-refresh via refresh token |
 
-### Streaming (SSE)
+**Confidence:** HIGH -- Verified via OpenClaw docs, VentureBeat, The Register, multiple sources.
 
-| Technology | Version | Purpose | Why | Confidence |
-|------------|---------|---------|-----|------------|
-| Hono `streamSSE` | Built-in | Server-side SSE emission | Part of Hono's streaming helpers, zero config | HIGH |
-| Native `EventSource` API | Browser built-in | Client-side SSE consumption | Standard browser API, auto-reconnection | MEDIUM |
-| `fetch` + `ReadableStream` | Browser built-in | Alternative SSE client for POST requests | EventSource only supports GET; chat needs POST | HIGH |
+**Recommendation for Anthropic:** Implement OAuth but prominently warn users that Extra Usage billing applies. API Key remains the recommended auth method for Anthropic. The UI should default to API Key for Anthropic and OAuth for OpenAI.
 
-**Critical detail:** The native `EventSource` API only supports GET requests. The `/api/chat` endpoint requires POST (to send message, model, context). Two options:
+## Frontend Changes (No New Libraries)
 
-1. **Recommended: Use `fetch` with `ReadableStream`** -- POST the message, read the response as a stream, parse SSE events manually with a lightweight parser. This is what ChatGPT, Claude.ai, and most LLM chat UIs do.
-2. Alternative: Split into POST (initiate) + GET (stream) with a session ID. More complex, unnecessary for POC.
+The frontend needs no new npm dependencies. Changes are React state + fetch calls:
 
-For parsing the SSE stream from `fetch`, use a manual line parser in `stream-parser.ts` (architecture already has this file). The format is simple (`data: {...}\n\n`), and a custom parser avoids adding a dependency. If you want a dependency, `eventsource-parser` (3.0.6) is the standard choice.
-
-### Markdown Rendering
-
-| Technology | Version | Purpose | Why | Confidence |
-|------------|---------|---------|-----|------------|
-| `react-markdown` | ^10.1.0 | Render assistant markdown responses | Standard React markdown renderer | HIGH |
-| `remark-gfm` | ^4.0.1 | GitHub Flavored Markdown | Tables, strikethrough, tasklists in responses | HIGH |
-
-### Syntax Highlighting
-
-| Technology | Version | Purpose | Why | Confidence |
-|------------|---------|---------|-----|------------|
-| `react-shiki` | ^0.9.0 | Code block highlighting in messages | React wrapper for Shiki, VS Code-quality highlighting | MEDIUM |
-
-**Why react-shiki over raw shiki:** react-shiki provides a `ShikiHighlighter` component and `isInlineCode` helper that integrates directly with react-markdown's `components` prop. It handles the React rendering lifecycle correctly (async grammar loading, etc.).
-
-**Bundle size consideration:** The full Shiki bundle is ~1.2MB gzipped. Use the "web" bundle (~695KB) or "core" bundle with only the languages you need (TypeScript, JavaScript, Bash, JSON, Markdown). For a POC, the web bundle is fine; optimize at MVP stage.
-
-**Alternative: Use `rehype-pretty-code`** if you prefer a rehype plugin approach over a component. Both work, but react-shiki gives more control over rendering.
-
-### Icons
-
-| Technology | Version | Purpose | Why | Confidence |
-|------------|---------|---------|-----|------------|
-| `lucide-react` | ^1.7.0 | UI icons | Default icon set for shadcn/ui, tree-shakable | HIGH |
-
----
-
-## Key Discovery: @mariozechner/pi-web-ui
-
-During research, I discovered that the pi-mono ecosystem includes `@mariozechner/pi-web-ui` -- a **complete chat UI** with:
-- Message history + streaming
-- Tool execution visualization
-- Artifact rendering (HTML, SVG, Markdown) in sandboxed iframes
-- File attachments with text extraction
-- IndexedDB persistence
-- Model selector and settings dialogs
-
-**However, it uses Lit web components, not React.** The project's ADRs chose React + shadcn/ui.
-
-### Recommendation: Use as Reference, Not Dependency
-
-| Approach | Pros | Cons | Verdict |
-|----------|------|------|---------|
-| Use pi-web-ui directly | Immediate functionality, maintained by pi-mono team | Lit + web components, not React; no shadcn/ui integration; styling mismatch | **NO** -- architecture chose React |
-| Wrap pi-web-ui in React | Reuse logic, adapt rendering | Web component/React interop is fragile; state sync issues; defeats the POC's purpose | **NO** -- too much friction |
-| Use as reference implementation | Study event mapping, stream consumption, tool rendering patterns | Requires reimplementation in React | **YES** -- learn from it, build React equivalents |
-
-Study these pi-web-ui patterns specifically:
-1. How `AgentInterface` maps `AgentEvent` types to UI updates
-2. How `ChatPanel` orchestrates streaming state
-3. How tool execution cards handle running/done/error states
-4. The `convertToLlm` function for message format conversion
-
----
+| Change | What | Why |
+|--------|------|-----|
+| Auth method toggle | `"apikey" | "oauth"` in connection UI | User chooses auth method per provider |
+| OAuth start button | Calls `POST /api/auth/oauth/start` | Initiates flow |
+| OAuth status polling | Polls `GET /api/auth/oauth/status/:provider` | Detects when OAuth completes |
+| `window.open()` | Opens provider auth URL | Standard browser popup for OAuth |
+| Billing warning | Anthropic-specific notice | Warns about Extra Usage requirement |
 
 ## Alternatives Considered
 
 | Category | Recommended | Alternative | Why Not |
 |----------|-------------|-------------|---------|
-| Build tool | Vite 6 | Vite 8 | CommonJS interop risks with pi-ai packages; unnecessary for POC |
-| Build tool | Vite 6 | Next.js | Over-engineered for SPA POC; SSR unnecessary; ADR chose Vite |
-| Backend | Hono | Express | No built-in TypeScript, no streaming helpers, more boilerplate |
-| Backend | Hono | Fastify | Heavier, more config; Hono's SSE helper is purpose-built |
-| State management | useReducer + Context | Zustand | Overkill for 1-user POC with 3 screens; ADR chose local state |
-| State management | useReducer + Context | Jotai/Valtio | Same reason -- POC simplicity wins |
-| Styling | Tailwind CSS 4 | CSS Modules | shadcn/ui requires Tailwind; ADR chose Tailwind |
-| Component library | shadcn/ui | Chakra UI / MUI | Heavier, opinionated styling; shadcn/ui gives full control |
-| Chat UI | Custom React | pi-web-ui | Lit web components, not React; architecture chose React |
-| Chat UI | Custom React | Vercel AI SDK UI | Different streaming protocol; doesn't integrate with pi-ai/pi-agent-core events |
-| SSE client | fetch + ReadableStream | EventSource API | EventSource only supports GET; chat requires POST |
-| Routing | React Router 7 | TanStack Router | Two routes only; React Router is simpler for minimal SPA |
-| Markdown | react-markdown | MDX | MDX is for authoring, not rendering LLM responses |
-| Syntax highlighting | react-shiki | highlight.js / Prism | Shiki provides VS Code-quality highlighting; industry moving to Shiki |
+| OAuth library | pi-ai built-in OAuth | `oauth4webapi` (v3.8.5) | pi-ai already implements the complete flow; adding a generic library duplicates effort and loses provider-specific handling (accountId extraction, scope config, obfuscated client IDs) |
+| OAuth library | pi-ai built-in OAuth | `arctic` (v3) | Arctic supports 50+ providers but NOT OpenAI Codex or Anthropic specifically; pi-ai's implementations are purpose-built |
+| OAuth library | pi-ai built-in OAuth | `@hono/oauth-providers` | Only supports predefined social providers (Google, GitHub, etc.); no OpenAI or Anthropic support |
+| OAuth framework | None (no auth framework) | `better-auth` | Full auth framework is massive overkill for single-user POC that needs 2 specific OAuth flows |
+| OAuth framework | None (no auth framework) | `lucia-auth` / `auth.js` | Same reasoning -- these solve user authentication, not provider OAuth |
+| Token storage | In-memory `Map` (extended) | `~/.pi/agent/auth.json` | POC is local-only, in-memory is sufficient, consistent with existing API key storage pattern |
+| Token storage | In-memory `Map` (extended) | IndexedDB / localStorage | Credentials must stay server-side (security constraint); browser storage would expose tokens |
+| Callback handling | pi-ai's built-in `node:http` server | Hono route on same port | pi-ai hardcodes callback ports (1455 for OpenAI, 53692 for Anthropic) and handles the full HTTP exchange; reimplementing in Hono would duplicate and likely break the flow |
 
----
+## What NOT to Add
+
+| Avoid | Why | Impact if Added |
+|-------|-----|-----------------|
+| `passport` / `passport-oauth2` | Express middleware, not Hono-compatible; designed for user auth, not provider auth | Adds Express dependency, fundamentally wrong abstraction |
+| `oauth4webapi` | Duplicates what pi-ai already provides with provider-specific knowledge baked in | Unnecessary dependency, must re-implement provider specifics |
+| `openid-client` | OpenID Connect client, overkill -- we need raw OAuth 2.0 PKCE, which pi-ai handles | Heavy library, complex API, unnecessary discovery/metadata |
+| `better-auth` / `lucia-auth` | Full auth frameworks for user sessions; this POC has no user authentication | Massive scope creep, irrelevant to the problem |
+| `jsonwebtoken` / `jose` | JWT verification -- pi-ai's `getApiKey()` handles token extraction; we don't need to verify JWTs ourselves | Unnecessary; tokens are verified by the provider on API calls |
+| Any database ORM | Token storage is in-memory; no persistence needed for single-user local-only POC | Violates constraint: "no database" |
+| `cookie-parser` / session middleware | No user sessions; OAuth state is managed server-side in memory during the flow | Wrong abstraction for provider OAuth |
 
 ## Installation
 
 ```bash
-# Core (non-negotiable)
-npm install @mariozechner/pi-ai@^0.64.0 @mariozechner/pi-agent-core@^0.64.0
-
-# Frontend
-npm install react@^19.2.0 react-dom@^19.2.0 react-router@^7.13.0
-
-# Backend
-npm install hono@^4.12.0 @hono/node-server@^1.19.0
-
-# Markdown + syntax highlighting
-npm install react-markdown@^10.1.0 remark-gfm@^4.0.1 react-shiki@^0.9.0
-
-# Icons
-npm install lucide-react@^1.7.0
-
-# Dev dependencies
-npm install -D typescript@^5.7.0 vite@^6.2.0 @vitejs/plugin-react@^4.4.0
-npm install -D tailwindcss@^4.2.0 @tailwindcss/vite@^4.2.0
-npm install -D @types/react@^19.0.0 @types/react-dom@^19.0.0
-
-# shadcn/ui setup (run after project init)
-npx shadcn@latest init
-# Then add components as needed:
-npx shadcn@latest add button input select card dialog badge alert separator tooltip scroll-area textarea
+# Nothing to install. All OAuth functionality comes from existing dependencies:
+# @mariozechner/pi-ai ^0.64.0 (already installed)
+# @mariozechner/pi-agent-core ^0.64.0 (already installed)
 ```
 
-**Note on shadcn/ui:** The `npx shadcn@latest init` command will automatically install `tailwind-merge`, `clsx`, `class-variance-authority`, and required Radix UI primitives. Do not install these manually beforehand.
+## Version Compatibility
 
----
+| Package | Required Version | Verified | Notes |
+|---------|-----------------|----------|-------|
+| `@mariozechner/pi-ai` | `^0.64.0` | YES (installed) | OAuth module available since this version |
+| `@mariozechner/pi-agent-core` | `^0.64.0` | YES (installed) | `getApiKey` supports async (Promise return) |
+| Node.js | 20+ | YES | Required for `node:http` and `node:crypto` used by OAuth |
+| Hono | `^4.12.0` | YES (installed) | No changes needed; new routes use same patterns |
 
-## Version Pinning Strategy
+## Port Allocation
 
-| Package | Pin Strategy | Rationale |
-|---------|-------------|-----------|
-| pi-ai, pi-agent-core | `^0.64.0` (caret) | Track minor updates from pi-mono; they are pre-1.0 so minor = features |
-| React, React DOM | `^19.2.0` (caret) | Stable major; patches are safe |
-| Vite | `^6.2.0` (caret) | Stay on 6.x; do NOT auto-upgrade to 7 or 8 |
-| Hono | `^4.12.0` (caret) | Actively maintained; patches are safe |
-| Tailwind CSS | `^4.2.0` (caret) | v4 is stable; no breaking changes expected in 4.x |
-| Everything else | Caret (^) | Standard approach for non-critical deps |
+| Port | Owner | Purpose |
+|------|-------|---------|
+| 5173 | Vite dev server | Frontend |
+| 3001 | Hono backend | API routes |
+| 1455 | pi-ai OAuth (OpenAI) | OAuth callback server (temporary, during login only) |
+| 53692 | pi-ai OAuth (Anthropic) | OAuth callback server (temporary, during login only) |
 
----
-
-## Node.js Version
-
-**Required: Node.js >= 20.19 or >= 22.12**
-
-Vite 6 requires Node.js 18+, but Hono's node-server adapter and modern Tailwind CSS perform best on Node 20+. Use **Node.js 22 LTS** if available on your machine, otherwise **Node.js 20 LTS**.
-
----
-
-## Vite Configuration Notes
-
-```typescript
-// vite.config.ts - Key configuration for this project
-import { defineConfig } from 'vite'
-import react from '@vitejs/plugin-react'
-import tailwindcss from '@tailwindcss/vite'
-
-export default defineConfig({
-  plugins: [react(), tailwindcss()],
-  server: {
-    proxy: {
-      '/api': {
-        target: 'http://localhost:3001',
-        changeOrigin: true,
-      },
-    },
-  },
-})
-```
-
-The Vite dev server proxy routes `/api/*` requests to the Hono backend at port 3001. This avoids CORS issues during development without any extra configuration.
-
-**Tailwind CSS 4 note:** With TW4 + `@tailwindcss/vite`, there is no `tailwind.config.ts` file. Configuration is done via CSS `@theme` blocks in `globals.css`. The `@tailwindcss/vite` plugin replaces the PostCSS approach from TW3.
-
----
-
-## Package Manager
-
-Use **npm** (not pnpm/yarn/bun) unless you have a strong preference. Rationale:
-- shadcn/ui CLI works best with npm (auto-handles React 19 dependency flags)
-- pi-mono packages publish to npm
-- Simplest for POC; no workspace config needed
-
----
+The callback servers are ephemeral -- they start when `loginOpenAICodex()` or `loginAnthropic()` is called and shut down after the callback is received or the flow times out.
 
 ## Sources
 
-### Official / Authoritative
-- [React 19.2 release blog](https://react.dev/blog/2025/10/01/react-19-2) -- HIGH confidence
-- [Vite 6 docs](https://vite.dev/releases) -- HIGH confidence
-- [Vite 8 announcement](https://vite.dev/blog/announcing-vite8) -- HIGH confidence
-- [Tailwind CSS 4.0 release](https://tailwindcss.com/blog/tailwindcss-v4) -- HIGH confidence
-- [Hono streaming helpers](https://hono.dev/docs/helpers/streaming) -- HIGH confidence
-- [shadcn/ui Tailwind v4 docs](https://ui.shadcn.com/docs/tailwind-v4) -- HIGH confidence
-- [React Router 7 SPA mode](https://reactrouter.com/how-to/spa) -- HIGH confidence
-- [pi-mono GitHub repo](https://github.com/badlogic/pi-mono) -- HIGH confidence
+### Verified with Source Code (HIGH confidence)
+- `@mariozechner/pi-ai/dist/utils/oauth/openai-codex.js` -- Full OpenAI Codex PKCE implementation
+- `@mariozechner/pi-ai/dist/utils/oauth/anthropic.js` -- Full Anthropic PKCE implementation
+- `@mariozechner/pi-ai/dist/utils/oauth/index.js` -- Provider registry, `getOAuthApiKey()` with auto-refresh
+- `@mariozechner/pi-ai/dist/utils/oauth/types.d.ts` -- `OAuthCredentials`, `OAuthLoginCallbacks`, `OAuthProviderInterface`
+- `@mariozechner/pi-agent-core/dist/agent.d.ts` -- `getApiKey` option supports async `Promise<string | undefined>`
 
-### Package Registries (npm)
-- [@mariozechner/pi-ai](https://www.npmjs.com/package/@mariozechner/pi-ai) -- v0.64.0, March 2026
-- [@mariozechner/pi-agent-core](https://www.npmjs.com/package/@mariozechner/pi-agent-core) -- v0.64.0, March 2026
-- [@mariozechner/pi-web-ui](https://www.npmjs.com/package/@mariozechner/pi-web-ui) -- reference implementation
-- [Hono](https://www.npmjs.com/package/hono) -- v4.12.10
-- [@hono/node-server](https://www.npmjs.com/package/@hono/node-server) -- v1.19.12
-- [react-shiki](https://www.npmjs.com/react-shiki) -- v0.9.2
-- [lucide-react](https://www.npmjs.com/package/lucide-react) -- v1.7.0
+### Official Documentation (HIGH confidence)
+- [OpenAI Codex Authentication](https://developers.openai.com/codex/auth) -- OAuth and API key methods
+- [Claude Code Authentication](https://code.claude.com/docs/en/authentication) -- OAuth credential management
+- [pi-mono providers docs](https://github.com/badlogic/pi-mono/blob/main/packages/coding-agent/docs/providers.md) -- OAuth provider configuration
+- [pi-mono custom providers](https://github.com/badlogic/pi-mono/blob/main/packages/coding-agent/docs/custom-provider.md) -- OAuthLoginCallbacks interface
 
-### Community / Blog (verified with official sources)
-- [SSE for LLM streaming best practices](https://dev.to/pockit_tools/the-complete-guide-to-streaming-llm-responses-in-web-applications-from-sse-to-real-time-ui-3534) -- MEDIUM confidence
-- [Hono SSE tutorial](https://dev.to/yanael/hono-with-server-sent-events-6gf) -- MEDIUM confidence
-- [Building custom agent with PI stack](https://gist.github.com/dabit3/e97dbfe71298b1df4d36542aceb5f158) -- MEDIUM confidence
-- [pi-web-ui DeepWiki analysis](https://deepwiki.com/badlogic/pi-mono/6-@mariozechnerpi-web-ui) -- MEDIUM confidence
+### Policy / Terms (HIGH confidence)
+- [Anthropic bans third-party OAuth](https://www.theregister.com/2026/02/20/anthropic_clarifies_ban_third_party_claude_access) -- February 2026
+- [Anthropic Extra Usage billing change](https://docs.openclaw.ai/providers/anthropic) -- April 4, 2026
+- [OpenAI supports third-party OAuth](https://www.zbuild.io/resources/news/opencode-blocked-anthropic-2026) -- OpenAI partners with third-party tools
+
+### Community / Ecosystem (MEDIUM confidence)
+- [OpenAI Codex OAuth client_id discussion](https://community.openai.com/t/best-practice-for-clientid-when-using-codex-oauth/1371778)
+- [OpenCode Codex OAuth implementation](https://github.com/anomalyco/opencode/issues/3281) -- Third-party OAuth flow details
+- [openai-oauth package](https://github.com/EvanZhouDev/openai-oauth) -- Confirms Codex OAuth endpoints
+
+---
+*Stack research for: v1.1 OAuth Authentication*
+*Researched: 2026-04-04*
