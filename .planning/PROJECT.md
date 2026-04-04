@@ -2,24 +2,33 @@
 
 ## What This Is
 
-Um chat web (SPA + Backend Proxy) que valida se a stack `@mariozechner/pi-ai` + `@mariozechner/pi-agent-core` consegue sustentar uma experiencia de chat similar ao Claude.ai/ChatGPT — com streaming em tempo real, troca de agentes (Claude Code / Codex), troca de modelos, carregamento de harness e visualizacao diferenciada de tool calls. Uso pessoal do autor para decidir se a stack e viavel para um produto futuro.
+Um chat web (SPA + Backend Proxy) que validou com sucesso que a stack `@mariozechner/pi-ai` + `@mariozechner/pi-agent-core` sustenta uma experiencia de chat similar ao Claude.ai/ChatGPT — com streaming em tempo real, troca de agentes (Claude Code / Codex), troca de modelos, carregamento de harness e visualizacao diferenciada de tool calls. POC completo, validacao tecnica positiva.
 
 ## Core Value
 
 Provar que pi-ai + pi-agent-core sustentam um chat web com streaming em tempo real, tool calls visiveis e troca de agentes — a validacao tecnica que decide se a stack segue para MVP.
 
+**Status: VALIDADO** — a stack sustenta o caso de uso. Decisao de prosseguir para MVP e viavel.
+
 ## Requirements
 
 ### Validated
 
-- [x] Autenticacao via API Key para conectar ao Claude e/ou Codex — Validated in Phase 1: Foundation + Connection
-- [x] Backend proxy que roteia chamadas LLM e executa agent loop server-side — Validated in Phase 1: Foundation + Connection (skeleton + auth endpoint)
-- [x] Chat interativo com streaming em tempo real (latencia < 500ms para primeiro token) — Validated in Phase 2: Streaming Chat
-- [x] SSE streaming de AgentEvent do backend para o frontend — Validated in Phase 2: Streaming Chat
-- [x] Visualizacao diferenciada de tool calls (6+ tipos com UI propria) — Validated in Phase 3: Tool Visualization
-- [x] Troca de agente (Claude Code / Codex) em runtime sem perda de contexto — Validated in Phase 4: Configuration
-- [x] Troca de modelo por provider via registry de modelos — Validated in Phase 4: Configuration
-- [x] Carregamento de harness (CLAUDE.md, AGENTS.md, skills, hooks) aplicado ao system prompt — Validated in Phase 4: Configuration
+- ✓ Projeto scaffolded com Vite + React 19 + Tailwind 4 + shadcn/ui + TypeScript — v1.0
+- ✓ Backend Hono com endpoints e proxy config do Vite — v1.0
+- ✓ Tipos compartilhados (Message, SSEEvent, ToolCardVariant, AppState) — v1.0
+- ✓ Spike de validacao da API pi-agent-core (event types, subscribe, stream lifecycle) — v1.0
+- ✓ Autenticacao via API Key para conectar ao Claude e/ou Codex — v1.0
+- ✓ Backend valida a API Key com request de teste ao provider — v1.0
+- ✓ Credenciais armazenadas in-memory no servidor (nunca expostas ao frontend) — v1.0
+- ✓ Feedback visual de conexao (conectando, conectado, erro) — v1.0
+- ✓ Tela de conexao com selecao de provider e campo de API Key — v1.0
+- ✓ Chat interativo com streaming em tempo real (latencia < 500ms para primeiro token) — v1.0
+- ✓ SSE streaming de AgentEvent do backend para o frontend — v1.0
+- ✓ Visualizacao diferenciada de tool calls (8 tipos com UI propria) — v1.0
+- ✓ Troca de agente (Claude Code / Codex) em runtime sem perda de contexto — v1.0
+- ✓ Troca de modelo por provider via registry de modelos — v1.0
+- ✓ Carregamento de harness (CLAUDE.md, AGENTS.md, skills, hooks) aplicado ao system prompt — v1.0
 
 ### Active
 
@@ -35,16 +44,22 @@ Provar que pi-ai + pi-agent-core sustentam um chat web com streaming em tempo re
 - Edicao de arquivos inline ou terminal integrado — fora do escopo do POC
 - Gerenciamento de multiplas conversas simultaneas — uma conversa por vez
 - OAuth flow completo — API Key first, OAuth como stretch goal (ADR-005)
+- Extended thinking display — v2 requirement
+- Tool card expand/collapse — v2 requirement
+- Tool execution timing — v2 requirement
 
 ## Context
 
-- **Motivacao:** Validacao tecnica para decidir se pi-ai + pi-agent-core sao viaveis como base para um produto futuro de chat com LLMs
-- **Stack obrigatoria:** pi-ai e pi-agent-core sao o que esta sendo testado — nao podem ser substituidos
-- **Arquitetura decidida:** SPA (React + Vite + shadcn/ui) com Backend Proxy (Hono + Node.js), conforme 6 ADRs aceitas
-- **Conceitos pi-ai:** `stream(model, context)` retorna eventos (text_delta, toolcall_start/delta/end, thinking_delta, done); `getModel/getModels/getProviders` para registry; `getEnvApiKey` para auth
-- **Conceitos pi-agent-core:** `Agent` class com event subscriptions; `AgentTool<TParams, TDetails>` para tools; `AgentEvent` para ciclo de vida; `streamProxy` para apps browser
-- **Documentacao existente:** BRIEF, JOURNEY (6 fases), ARCHITECTURE (modulos, data flows, API surface, state shape), 6 ADRs em `.harn/docs/`
-- **Destino do codigo:** Pode servir de base para MVP se POC for bem-sucedido
+**Shipped v1.0 MVP** com ~4,000 LOC TypeScript/React em 2 dias (50 commits).
+
+**Tech stack validada:**
+- Frontend: React 19 + Vite 6 + Tailwind 4 + shadcn/ui
+- Backend: Hono 4 + @hono/node-server
+- Core: @mariozechner/pi-ai + @mariozechner/pi-agent-core
+- Streaming: SSE via fetch + ReadableStream (async generator pattern)
+- Markdown: react-markdown + remark-gfm + react-shiki
+
+**Conclusao tecnica:** A stack pi-ai + pi-agent-core e viavel para um produto de chat web. O streaming funciona bem, tool events fluem end-to-end, e o model/agent switching opera corretamente. Principais gaps para MVP: persistencia, multi-conversas, OAuth.
 
 ## Constraints
 
@@ -58,12 +73,16 @@ Provar que pi-ai + pi-agent-core sustentam um chat web com streaming em tempo re
 
 | Decision | Rationale | Outcome |
 |----------|-----------|---------|
-| SPA + Backend Proxy | APIs LLM nao permitem chamadas do browser; streamProxy existe para isso | Validated Phase 1 |
-| Hono como backend | Leve, TypeScript-first, streaming nativo, alinhado com pi-agent-core | Validated Phase 1 |
-| React local state (useReducer + Context) | POC simples, 1 usuario, sem persistencia, 3 telas | Validated Phase 1-4 |
-| SSE para streaming | Unidirecional server→client, nativo do browser, alinhado com AgentEvent | Validated Phase 2-3 |
-| API Key first, OAuth stretch | OAuth complexo demais para POC; API Key valida a stack igualmente | Validated Phase 1 |
-| Recreate Agent on switch | pi-agent-core nao suporta troca mid-session; nova instancia com history | Validated Phase 4 |
+| SPA + Backend Proxy | APIs LLM nao permitem chamadas do browser; streamProxy existe para isso | ✓ Good |
+| Hono como backend | Leve, TypeScript-first, streaming nativo, alinhado com pi-agent-core | ✓ Good |
+| React local state (useReducer + Context) | POC simples, 1 usuario, sem persistencia, 3 telas | ✓ Good |
+| SSE para streaming | Unidirecional server→client, nativo do browser, alinhado com AgentEvent | ✓ Good |
+| API Key first, OAuth stretch | OAuth complexo demais para POC; API Key valida a stack igualmente | ✓ Good |
+| Recreate Agent on switch | pi-agent-core nao suporta troca mid-session; nova instancia com history | ✓ Good |
+| Segment-based message model | Permite tool cards inline interleaved com texto no mesmo AssistantMessage | ✓ Good |
+| Promise anchor pattern para SSE | Evita que Hono feche stream prematuramente antes de agent_end | ✓ Good |
+| subscribe() before prompt() | Garante que nenhum event e perdido durante o agent loop | ✓ Good |
+| HarnessContext acima do Router | Harness state sobrevive navegacao entre /chat e /settings | ✓ Good |
 
 ## Evolution
 
@@ -83,4 +102,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-04-04 after Phase 4 completion (all phases complete)*
+*Last updated: 2026-04-04 after v1.0 milestone*
