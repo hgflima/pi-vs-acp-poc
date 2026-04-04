@@ -9,7 +9,7 @@ Requirements for milestone v1.1 OAuth Authentication. Each maps to roadmap phase
 
 ### Credential Infrastructure
 
-- [ ] **CRED-01**: Credential store suporta compound credentials (OAuth tokens + API Key) coexistindo por provider
+- [x] **CRED-01**: Credential store suporta compound credentials (OAuth tokens + API Key) coexistindo por provider
 - [ ] **CRED-02**: Agent factory usa async getApiKey resolver com token refresh transparente
 
 ### OAuth Authentication
@@ -17,7 +17,7 @@ Requirements for milestone v1.1 OAuth Authentication. Each maps to roadmap phase
 - [ ] **OAUTH-01**: User pode autenticar via OAuth PKCE com Anthropic (loginAnthropic via pi-ai)
 - [ ] **OAUTH-02**: User pode autenticar via OAuth PKCE com OpenAI Codex (loginOpenAICodex via pi-ai)
 - [ ] **OAUTH-03**: Tokens OAuth sao refreshed automaticamente antes de expirar
-- [ ] **OAUTH-04**: User pode usar API Key como alternativa ao OAuth para qualquer provider
+- [x] **OAUTH-04**: User pode usar API Key como alternativa ao OAuth para qualquer provider
 
 ### Connection UI
 
@@ -45,12 +45,12 @@ Requirements for milestone v1.1 OAuth Authentication. Each maps to roadmap phase
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| CRED-01 | Phase 5 | Pending |
+| CRED-01 | Phase 5 | Complete |
 | CRED-02 | Phase 5 | Pending |
 | OAUTH-01 | Phase 6 | Pending |
 | OAUTH-02 | Phase 7 | Pending |
 | OAUTH-03 | Phase 7 | Pending |
-| OAUTH-04 | Phase 5 | Pending |
+| OAUTH-04 | Phase 5 | Complete |
 | UI-01 | Phase 8 | Pending |
 | UI-02 | Phase 8 | Pending |
 | UI-03 | Phase 8 | Pending |

@@ -40,7 +40,7 @@ Full details: `.planning/milestones/v1.0-ROADMAP.md`
   3. Agent factory resolves credentials via async getApiKey that transparently returns the active credential (API Key or OAuth access token) for the current provider
   4. Credential store supports both Anthropic and OpenAI providers with either auth method
 **Plans**: 3 plans
-  - [ ] 05-01-PLAN.md — Refactor credential store to compound API Key + OAuth per provider; add GET /auth/status route
+  - [x] 05-01-PLAN.md — Refactor credential store to compound API Key + OAuth per provider; add GET /auth/status route
   - [ ] 05-02-PLAN.md — Async getApiKey resolver in agent factory with per-provider refresh mutex
   - [ ] 05-03-PLAN.md — Per-provider frontend auth state (ProviderAuthState, refactored useAuth, connection page)
 
