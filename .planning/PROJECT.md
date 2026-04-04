@@ -17,12 +17,13 @@ Provar que pi-ai + pi-agent-core sustentam um chat web com streaming em tempo re
 - [x] Chat interativo com streaming em tempo real (latencia < 500ms para primeiro token) — Validated in Phase 2: Streaming Chat
 - [x] SSE streaming de AgentEvent do backend para o frontend — Validated in Phase 2: Streaming Chat
 - [x] Visualizacao diferenciada de tool calls (6+ tipos com UI propria) — Validated in Phase 3: Tool Visualization
+- [x] Troca de agente (Claude Code / Codex) em runtime sem perda de contexto — Validated in Phase 4: Configuration
+- [x] Troca de modelo por provider via registry de modelos — Validated in Phase 4: Configuration
+- [x] Carregamento de harness (CLAUDE.md, AGENTS.md, skills, hooks) aplicado ao system prompt — Validated in Phase 4: Configuration
 
 ### Active
 
-- [ ] Troca de agente (Claude Code / Codex) em runtime sem perda de contexto
-- [ ] Troca de modelo por provider via registry de modelos
-- [ ] Carregamento de harness (CLAUDE.md, AGENTS.md, skills, hooks) aplicado ao system prompt
+(No active requirements — all validated or out of scope)
 
 ### Out of Scope
 
@@ -62,7 +63,7 @@ Provar que pi-ai + pi-agent-core sustentam um chat web com streaming em tempo re
 | React local state (useReducer + Context) | POC simples, 1 usuario, sem persistencia, 3 telas | — Pending |
 | SSE para streaming | Unidirecional server→client, nativo do browser, alinhado com AgentEvent | Validated Phase 2-3 |
 | API Key first, OAuth stretch | OAuth complexo demais para POC; API Key valida a stack igualmente | Validated Phase 1 |
-| Recreate Agent on switch | pi-agent-core nao suporta troca mid-session; nova instancia com history | — Pending |
+| Recreate Agent on switch | pi-agent-core nao suporta troca mid-session; nova instancia com history | Validated Phase 4 |
 
 ## Evolution
 
