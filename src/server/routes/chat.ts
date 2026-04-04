@@ -19,7 +19,6 @@ chatRoutes.post("/", async (c) => {
   }
 
   return streamSSE(c, async (stream) => {
-    // @ts-expect-error Plan 02 updates createAgent signature
     const agent = createAgent({ provider, modelId: model })
 
     const done = new Promise<void>((resolve) => {
