@@ -1,19 +1,25 @@
 import { Agent } from "@mariozechner/pi-agent-core"
 import { getModel } from "@mariozechner/pi-ai"
 import { pocTools } from "./tools"
+import { buildSystemPrompt } from "./harness"
+import { getActiveHarness } from "../routes/harness"
 
 interface CreateAgentOptions {
   provider: "anthropic" | "openai"
   modelId: string
   apiKey: string
+  systemPrompt?: string  // Optional: override system prompt (e.g., with harness)
 }
 
-export function createAgent({ provider, modelId, apiKey }: CreateAgentOptions): Agent {
+export function createAgent({ provider, modelId, apiKey, systemPrompt }: CreateAgentOptions): Agent {
   const model = getModel(provider, modelId as any)
+
+  // If no explicit systemPrompt, check for active harness
+  const finalPrompt = systemPrompt ?? buildSystemPrompt(getActiveHarness())
 
   return new Agent({
     initialState: {
-      systemPrompt: "You are a helpful assistant with access to tools. You can run bash commands, read files, and list directory contents. Use these tools when the user asks you to interact with the filesystem or run commands. Always use tools rather than guessing about file contents or command outputs.",
+      systemPrompt: finalPrompt,
       model,
       tools: pocTools,
     },
