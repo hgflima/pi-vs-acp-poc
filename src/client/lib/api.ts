@@ -1,4 +1,4 @@
-import type { Provider, ModelInfo, HarnessResult } from "./types"
+import type { Provider, ModelInfo, HarnessResult, AuthMethod } from "./types"
 
 const API_BASE = "/api"
 
@@ -8,6 +8,21 @@ export async function connectProvider(provider: Provider, key: string): Promise<
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ provider, key }),
   })
+  return res.json()
+}
+
+export interface AuthStatusResponse {
+  hasApiKey: boolean
+  hasOAuth: boolean
+  activeMethod: AuthMethod | null
+  oauthExpiry?: number
+}
+
+export async function fetchAuthStatus(provider: Provider): Promise<AuthStatusResponse> {
+  const res = await fetch(`${API_BASE}/auth/status?provider=${provider}`)
+  if (!res.ok) {
+    throw new Error(`Failed to fetch auth status: ${res.status}`)
+  }
   return res.json()
 }
 
