@@ -62,7 +62,7 @@ Requirements para a validacao tecnica. Cada um mapeia para fases do roadmap.
 
 ### Harness Loading
 
-- [ ] **HARN-01**: Interface para selecionar/apontar arquivos de harness (CLAUDE.md, AGENTS.md, skills, hooks)
+- [x] **HARN-01**: Interface para selecionar/apontar arquivos de harness (CLAUDE.md, AGENTS.md, skills, hooks)
 - [x] **HARN-02**: Backend carrega e aplica harness ao system prompt do agente
 - [x] **HARN-03**: Indicador visual de que o harness esta ativo
 - [x] **HARN-04**: Error handling para arquivo nao encontrado, formato invalido, harness muito grande
@@ -143,7 +143,7 @@ Deferred para apos validacao do POC. Tracked mas nao no roadmap atual.
 | MODEL-02 | Phase 4 | Complete |
 | MODEL-03 | Phase 4 | Complete |
 | MODEL-04 | Phase 4 | Complete |
-| HARN-01 | Phase 4 | Pending |
+| HARN-01 | Phase 4 | Complete |
 | HARN-02 | Phase 4 | Complete |
 | HARN-03 | Phase 4 | Complete |
 | HARN-04 | Phase 4 | Complete |
