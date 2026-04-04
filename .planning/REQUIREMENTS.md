@@ -51,7 +51,7 @@ Requirements para a validacao tecnica. Cada um mapeia para fases do roadmap.
 - [x] **AGENT-01**: Switcher na interface para trocar entre Claude Code e Codex
 - [x] **AGENT-02**: Troca de agente cria nova instancia de Agent (ADR-006) com history como contexto
 - [x] **AGENT-03**: Indicador visual do agente ativo
-- [ ] **AGENT-04**: Se o provider do agente selecionado nao estiver autenticado, solicitar auth
+- [x] **AGENT-04**: Se o provider do agente selecionado nao estiver autenticado, solicitar auth
 
 ### Model Switching
 
@@ -138,7 +138,7 @@ Deferred para apos validacao do POC. Tracked mas nao no roadmap atual.
 | AGENT-01 | Phase 4 | Complete |
 | AGENT-02 | Phase 4 | Complete |
 | AGENT-03 | Phase 4 | Complete |
-| AGENT-04 | Phase 4 | Pending |
+| AGENT-04 | Phase 4 | Complete |
 | MODEL-01 | Phase 4 | Complete |
 | MODEL-02 | Phase 4 | Complete |
 | MODEL-03 | Phase 4 | Complete |
