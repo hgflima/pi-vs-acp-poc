@@ -95,7 +95,7 @@ Plans:
 - [x] 04-02-PLAN.md -- Frontend infrastructure (shadcn install, useAgent hook, useHarness hook, API helpers)
 - [x] 04-03-PLAN.md -- Agent/model switching UI (popover, inline auth, ChatHeader rewrite, ChatLayout wiring)
 - [x] 04-04-PLAN.md -- Settings page (harness picker, file status display, /settings route)
-- [ ] 04-05-PLAN.md -- Fix harness state lost on route navigation (gap closure from UAT)
+- [x] 04-05-PLAN.md -- Fix harness state lost on route navigation (gap closure from UAT)
 
 **UI hint**: yes
 
