@@ -1,6 +1,5 @@
 import { useCallback } from "react"
 import { useChat } from "@/client/hooks/use-chat"
-import { useAuth } from "@/client/hooks/use-auth"
 import { useAgent } from "@/client/hooks/use-agent"
 import { useHarness } from "@/client/hooks/use-harness"
 import { ChatHeader } from "./chat-header"
@@ -13,7 +12,6 @@ import type { AgentId } from "@/client/lib/types"
 export function ChatLayout() {
   const { messages, streaming, error, sendMessage, stopGeneration, clearMessages, clearError } =
     useChat()
-  const { auth } = useAuth()
   const agent = useAgent()
   const { harness } = useHarness()
 
