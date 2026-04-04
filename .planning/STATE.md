@@ -4,7 +4,7 @@ milestone: v1.0
 milestone_name: milestone
 status: executing
 stopped_at: Completed 04-04-PLAN.md
-last_updated: "2026-04-04T11:13:07.413Z"
+last_updated: "2026-04-04T11:14:55.310Z"
 last_activity: 2026-04-04
 progress:
   total_phases: 4
@@ -62,6 +62,7 @@ Progress: [███████░░░] 67%
 | Phase 03 P03 | 2min | 2 tasks | 9 files |
 | Phase 04 P01 | 3min | 3 tasks | 6 files |
 | Phase 04 P02 | 3min | 2 tasks | 6 files |
+| Phase 04 P03 | 3min | 2 tasks | 4 files |
 | Phase 04 P04 | 2min | 2 tasks | 4 files |
 
 ## Accumulated Context
@@ -101,6 +102,9 @@ Recent decisions affecting current work:
 - [Phase 04]: fetchModels returns needsAuth on 401 for inline auth UI (Pitfall 6)
 - [Phase 04]: Model set to null during agent transition, then to defaultModel once list arrives (Pitfall 2)
 - [Phase 04]: switchAgent/switchModel only update local state; ChatLayout calls clearMessages (D-05/D-06)
+- [Phase 04]: Popover uses controlled open state with explicit setOpen(false) on every selection (Pitfall 5 defense)
+- [Phase 04]: Harness dot is a clickable Link to /settings wrapped in Tooltip per D-09
+- [Phase 04]: ChatLayout calls clearMessages before switchAgent/switchModel (D-05 clear-on-switch)
 - [Phase 04]: Drag and drop populates input for manual confirmation (browser security limits full path)
 - [Phase 04]: Load Harness triggers loadHarness then navigates to /chat on success
 
@@ -116,6 +120,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-04-04T11:13:07.410Z
-Stopped at: Completed 04-04-PLAN.md
+Last session: 2026-04-04T11:14:55.308Z
+Stopped at: Completed all Phase 04 plans
 Resume file: None
