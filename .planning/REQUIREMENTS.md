@@ -25,13 +25,6 @@ Requirements for milestone v1.1 OAuth Authentication. Each maps to roadmap phase
 - [ ] **UI-02**: Botao OAuth abre browser para flow e faz polling de status ate completar
 - [ ] **UI-03**: Indicador visual de status do token (connected, expiring, expired)
 
-## Future Requirements
-
-### Extended OAuth
-
-- **OAUTH-05**: Logout/revoke OAuth token por provider
-- **OAUTH-06**: Branded callback page em vez de plain text
-
 ## Out of Scope
 
 | Feature | Reason |
@@ -41,25 +34,32 @@ Requirements for milestone v1.1 OAuth Authentication. Each maps to roadmap phase
 | Multi-user OAuth sessions | Single-user POC |
 | OAuth para providers alem de Anthropic/OpenAI | Apenas os 2 providers suportados por pi-ai |
 
+## Future Requirements
+
+### Extended OAuth
+
+- **OAUTH-05**: Logout/revoke OAuth token por provider
+- **OAUTH-06**: Branded callback page em vez de plain text
+
 ## Traceability
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| CRED-01 | — | Pending |
-| CRED-02 | — | Pending |
-| OAUTH-01 | — | Pending |
-| OAUTH-02 | — | Pending |
-| OAUTH-03 | — | Pending |
-| OAUTH-04 | — | Pending |
-| UI-01 | — | Pending |
-| UI-02 | — | Pending |
-| UI-03 | — | Pending |
+| CRED-01 | Phase 5 | Pending |
+| CRED-02 | Phase 5 | Pending |
+| OAUTH-01 | Phase 6 | Pending |
+| OAUTH-02 | Phase 7 | Pending |
+| OAUTH-03 | Phase 7 | Pending |
+| OAUTH-04 | Phase 5 | Pending |
+| UI-01 | Phase 8 | Pending |
+| UI-02 | Phase 8 | Pending |
+| UI-03 | Phase 8 | Pending |
 
 **Coverage:**
-- v1.1 requirements: 9 total
-- Mapped to phases: 0
-- Unmapped: 9
+- v1.1 requirements: 9 active
+- Mapped to phases: 9/9
+- Unmapped: 0
 
 ---
 *Requirements defined: 2026-04-04*
-*Last updated: 2026-04-04 after initial definition*
+*Last updated: 2026-04-04 after roadmap revision — OAUTH-01 re-added, Anthropic OAuth prioritized*
