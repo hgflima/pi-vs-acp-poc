@@ -1,5 +1,5 @@
 import type { Provider } from "@/client/lib/types"
-import { cn } from "@/client/lib/cn"
+import { cn } from "@/client/lib/utils"
 
 interface SegmentedControlProps {
   value: Provider

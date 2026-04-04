@@ -11,7 +11,7 @@ import sql from "highlight.js/lib/languages/sql";
 import yaml from "highlight.js/lib/languages/yaml";
 import markdown from "highlight.js/lib/languages/markdown";
 import { Check, Copy } from "lucide-react";
-import { cn } from "@/client/lib/cn";
+import { cn } from "@/client/lib/utils";
 import "highlight.js/styles/github-dark.css";
 
 hljs.registerLanguage("python", python);

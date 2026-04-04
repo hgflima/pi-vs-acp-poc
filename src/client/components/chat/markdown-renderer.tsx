@@ -1,7 +1,7 @@
 import Markdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import { CodeBlock } from "./code-block";
-import { cn } from "@/client/lib/cn";
+import { cn } from "@/client/lib/utils";
 
 interface MarkdownRendererProps {
   content: string;
