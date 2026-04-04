@@ -3,10 +3,19 @@ export type Provider = "anthropic" | "openai"
 
 export type AuthStatus = "disconnected" | "connecting" | "connected" | "error"
 
-export interface AuthState {
+// D-05: auth method per provider (prepares UI-03 badges in Phase 8)
+export type AuthMethod = "apiKey" | "oauth"
+
+// D-06: independent auth state per provider
+export interface ProviderAuthState {
   status: AuthStatus
-  provider: Provider | null
+  authMethod: AuthMethod | null
   error: string | null
+  oauthExpiry?: number
+}
+
+export interface AuthState {
+  providers: Map<Provider, ProviderAuthState>
 }
 
 // --- Messages (D-13: segment-based model) ---
