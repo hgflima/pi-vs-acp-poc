@@ -39,7 +39,10 @@ Full details: `.planning/milestones/v1.0-ROADMAP.md`
   2. Credential store accepts both API Key (string) and OAuth credentials (access token, refresh token, expiry) per provider without collision
   3. Agent factory resolves credentials via async getApiKey that transparently returns the active credential (API Key or OAuth access token) for the current provider
   4. Credential store supports both Anthropic and OpenAI providers with either auth method
-**Plans**: TBD
+**Plans**: 3 plans
+  - [ ] 05-01-PLAN.md — Refactor credential store to compound API Key + OAuth per provider; add GET /auth/status route
+  - [ ] 05-02-PLAN.md — Async getApiKey resolver in agent factory with per-provider refresh mutex
+  - [ ] 05-03-PLAN.md — Per-provider frontend auth state (ProviderAuthState, refactored useAuth, connection page)
 
 ### Phase 6: Anthropic OAuth Flow
 **Goal**: User can authenticate with Anthropic via OAuth PKCE and use the resulting token for chat
@@ -86,7 +89,7 @@ Full details: `.planning/milestones/v1.0-ROADMAP.md`
 | 2. Streaming Chat | v1.0 | 4/4 | Complete | 2026-04-03 |
 | 3. Tool Visualization | v1.0 | 4/4 | Complete | 2026-04-03 |
 | 4. Configuration | v1.0 | 5/5 | Complete | 2026-04-04 |
-| 5. Credential Infrastructure | v1.1 | 0/0 | Not started | - |
+| 5. Credential Infrastructure | v1.1 | 0/3 | Not started | - |
 | 6. Anthropic OAuth Flow | v1.1 | 0/0 | Not started | - |
 | 7. OpenAI OAuth Flow | v1.1 | 0/0 | Not started | - |
 | 8. OAuth Connection UI | v1.1 | 0/0 | Not started | - |
