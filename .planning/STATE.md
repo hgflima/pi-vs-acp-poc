@@ -2,12 +2,12 @@
 gsd_state_version: 1.0
 milestone: v1.1
 milestone_name: OAuth Authentication
-status: blocked
-stopped_at: "Completed 07-04 gap closure plan; SC#3 re-verification still FAIL post-fix (Cause B confirmed — pi-agent-core emits zero message_update events for Codex). Phase 7 remains blocked — Phase 7.2 upstream investigation required in pi-ai/pi-agent-core"
-last_updated: "2026-04-05T19:09:08Z"
+status: Phase still blocked — Phase 7.2 upstream investigation required (pi-ai/pi-agent-core)
+stopped_at: "Phase 07.1 context gathered (4 decisions: D-01 diagnóstico via error-surfacing, D-02 fix strategy deferred to post-diagnosis, D-03 message_end case + SSE error, D-04 SC#3+SC#4 green minimum)"
+last_updated: "2026-04-05T19:46:40.016Z"
 last_activity: 2026-04-05
 progress:
-  total_phases: 4
+  total_phases: 5
   completed_phases: 3
   total_plans: 9
   completed_plans: 9
@@ -62,6 +62,10 @@ Progress: [░░░░░░░░░░] 0%
 
 ## Accumulated Context
 
+### Roadmap Evolution
+
+- Phase 7.1 inserted after Phase 7: solucao do problema encontrado e documentado na fase 7 (URGENT)
+
 ### Decisions
 
 All v1.0 decisions logged in PROJECT.md Key Decisions table.
@@ -109,6 +113,6 @@ None.
 
 ## Session Continuity
 
-Last session: 2026-04-05T19:09:08Z
-Stopped at: Completed 07-04 stream-adapter gap closure plan. Diagnostic confirmed Cause B (pi-agent-core emits zero message_update events for Codex). Defensive switch-exhaustiveness fix applied — SC#3 still FAIL post-fix. Phase 7 still blocked, Phase 7.2 needed for upstream investigation.
-Resume file: None
+Last session: 2026-04-05T19:46:40.013Z
+Stopped at: Phase 07.1 context gathered (4 decisions: D-01 diagnóstico via error-surfacing, D-02 fix strategy deferred to post-diagnosis, D-03 message_end case + SSE error, D-04 SC#3+SC#4 green minimum)
+Resume file: .planning/phases/07.1-solucao-do-problema-encontrado-e-documentado-na-fase-7/07.1-CONTEXT.md
