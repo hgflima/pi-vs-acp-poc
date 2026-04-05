@@ -2,15 +2,15 @@
 gsd_state_version: 1.0
 milestone: v1.1
 milestone_name: OAuth Authentication
-status: verifying
-stopped_at: Phase 7 context gathered
-last_updated: "2026-04-05T14:59:35.781Z"
+status: executing
+stopped_at: Completed 07-01 provider-remap plan
+last_updated: "2026-04-05T17:12:33.777Z"
 last_activity: 2026-04-05
 progress:
   total_phases: 4
   completed_phases: 2
-  total_plans: 5
-  completed_plans: 5
+  total_plans: 8
+  completed_plans: 6
   percent: 0
 ---
 
@@ -21,13 +21,13 @@ progress:
 See: .planning/PROJECT.md (updated 2026-04-04)
 
 **Core value:** Provar que pi-ai + pi-agent-core sustentam um chat web com streaming em tempo real, tool calls visiveis e troca de agentes
-**Current focus:** Phase 06 — anthropic-oauth-flow
+**Current focus:** Phase 07 — openai-oauth-flow
 
 ## Current Position
 
-Phase: 7
-Plan: Not started
-Status: Phase complete — ready for verification
+Phase: 07 (openai-oauth-flow) — EXECUTING
+Plan: 2 of 3
+Status: Ready to execute
 Last activity: 2026-04-05
 
 Progress: [░░░░░░░░░░] 0%
@@ -55,6 +55,7 @@ Progress: [░░░░░░░░░░] 0%
 | Phase 05 P03 | 10 min | 5 tasks | 5 files |
 | Phase 06-anthropic-oauth-flow P01 | 2 min | 2 tasks | 2 files |
 | Phase 06-anthropic-oauth-flow P02 | 32 min | 2 tasks | 1 files |
+| Phase 07-openai-oauth-flow P01 | 2min | 3 tasks | 3 files |
 
 ## Accumulated Context
 
@@ -81,6 +82,9 @@ Recent decisions affecting current work:
 - [Phase 06-anthropic-oauth-flow]: Plan 06-01: D-02 realized — port 53692 pre-check returns HTTP 409 with Claude Code CLI conflict message
 - [Phase 06-anthropic-oauth-flow]: Plan 06-02: UAT PASS — Anthropic OAuth token accepted by /api/chat; Feb 2026 sk-ant-oat ban risk did NOT materialise in practice
 - [Phase 06-anthropic-oauth-flow]: Plan 06-02: /api/chat contract confirmed — expects message/model fields (not messages/modelId); Test 3 plan curl corrected inline
+- [Phase 07-openai-oauth-flow]: Plan 07-01: resolvePiProvider centralizes pi-ai call-site routing (D-01) — Provider type stays 'anthropic' | 'openai' while backend internally remaps to 'openai-codex' when OAuth active
+- [Phase 07-openai-oauth-flow]: Plan 07-01: forceExpireOAuth lives in credentials.ts (touches store internal state), always enabled (D-07) — no NODE_ENV gate per POC local-only philosophy
+- [Phase 07-openai-oauth-flow]: Plan 07-01: 'as any' cast on modelId removed from setup.ts once PiProvider type aligned with pi-ai's KnownProvider
 
 ### Pending Todos
 
@@ -93,6 +97,6 @@ None.
 
 ## Session Continuity
 
-Last session: 2026-04-05T14:59:35.779Z
-Stopped at: Phase 7 context gathered
-Resume file: .planning/phases/07-openai-oauth-flow/07-CONTEXT.md
+Last session: 2026-04-05T17:12:33.774Z
+Stopped at: Completed 07-01 provider-remap plan
+Resume file: None
