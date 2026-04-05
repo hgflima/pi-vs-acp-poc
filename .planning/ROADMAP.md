@@ -71,7 +71,7 @@ Full details: `.planning/milestones/v1.0-ROADMAP.md`
   - [x] 07-01-provider-remap-PLAN.md — Add resolvePiProvider + forceExpireOAuth helpers, wire remap into getModel (setup.ts) and getModels (models.ts)
   - [x] 07-02-oauth-routes-PLAN.md — Extend POST /start to dispatch loginOpenAICodex with port 1455 pre-check; add POST /debug/force-expire endpoint
   - [x] 07-03-uat-PLAN.md — Scaffold 07-UAT.md and run end-to-end curl validation (SC#1-SC#5) including auto-refresh via force-expire
-  - [ ] 07-04-stream-adapter-gap-closure-PLAN.md — Diagnose + fix adaptAgentEvents silent fall-through for openai-codex streams; re-verify SC#3 and SC#4 (closes UAT FAIL gap)
+  - [x] 07-04-stream-adapter-gap-closure-PLAN.md — Diagnose + fix adaptAgentEvents silent fall-through for openai-codex streams; re-verify SC#3 and SC#4 (closes UAT FAIL gap)
 
 ### Phase 8: OAuth Connection UI
 **Goal**: Connection page lets the user choose between OAuth and API Key per provider, with visual feedback throughout the OAuth flow and token lifecycle
