@@ -70,7 +70,7 @@ Full details: `.planning/milestones/v1.0-ROADMAP.md`
 **Plans**: 3 plans
   - [x] 07-01-provider-remap-PLAN.md — Add resolvePiProvider + forceExpireOAuth helpers, wire remap into getModel (setup.ts) and getModels (models.ts)
   - [x] 07-02-oauth-routes-PLAN.md — Extend POST /start to dispatch loginOpenAICodex with port 1455 pre-check; add POST /debug/force-expire endpoint
-  - [ ] 07-03-uat-PLAN.md — Scaffold 07-UAT.md and run end-to-end curl validation (SC#1-SC#5) including auto-refresh via force-expire
+  - [x] 07-03-uat-PLAN.md — Scaffold 07-UAT.md and run end-to-end curl validation (SC#1-SC#5) including auto-refresh via force-expire
 
 ### Phase 8: OAuth Connection UI
 **Goal**: Connection page lets the user choose between OAuth and API Key per provider, with visual feedback throughout the OAuth flow and token lifecycle
@@ -96,5 +96,5 @@ Full details: `.planning/milestones/v1.0-ROADMAP.md`
 | 4. Configuration | v1.0 | 5/5 | Complete | 2026-04-04 |
 | 5. Credential Infrastructure | v1.1 | 3/3 | Complete   | 2026-04-04 |
 | 6. Anthropic OAuth Flow | v1.1 | 0/2 | Not started | - |
-| 7. OpenAI OAuth Flow | v1.1 | 0/3 | Not started | - |
+| 7. OpenAI OAuth Flow | v1.1 | 3/3 | Gap Closure (UAT FAIL — SC#3) | - |
 | 8. OAuth Connection UI | v1.1 | 0/0 | Not started | - |
