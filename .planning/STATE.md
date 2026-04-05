@@ -3,14 +3,14 @@ gsd_state_version: 1.0
 milestone: v1.1
 milestone_name: OAuth Authentication
 status: executing
-stopped_at: Completed 07-01 provider-remap plan
-last_updated: "2026-04-05T17:12:33.777Z"
+stopped_at: Completed 07-02 oauth-routes plan
+last_updated: "2026-04-05T17:18:34.157Z"
 last_activity: 2026-04-05
 progress:
   total_phases: 4
   completed_phases: 2
   total_plans: 8
-  completed_plans: 6
+  completed_plans: 7
   percent: 0
 ---
 
@@ -26,7 +26,7 @@ See: .planning/PROJECT.md (updated 2026-04-04)
 ## Current Position
 
 Phase: 07 (openai-oauth-flow) — EXECUTING
-Plan: 2 of 3
+Plan: 3 of 3
 Status: Ready to execute
 Last activity: 2026-04-05
 
@@ -56,6 +56,7 @@ Progress: [░░░░░░░░░░] 0%
 | Phase 06-anthropic-oauth-flow P01 | 2 min | 2 tasks | 2 files |
 | Phase 06-anthropic-oauth-flow P02 | 32 min | 2 tasks | 1 files |
 | Phase 07-openai-oauth-flow P01 | 2min | 3 tasks | 3 files |
+| Phase 07-openai-oauth-flow P02 | 3 min | 2 tasks | 1 files |
 
 ## Accumulated Context
 
@@ -85,6 +86,9 @@ Recent decisions affecting current work:
 - [Phase 07-openai-oauth-flow]: Plan 07-01: resolvePiProvider centralizes pi-ai call-site routing (D-01) — Provider type stays 'anthropic' | 'openai' while backend internally remaps to 'openai-codex' when OAuth active
 - [Phase 07-openai-oauth-flow]: Plan 07-01: forceExpireOAuth lives in credentials.ts (touches store internal state), always enabled (D-07) — no NODE_ENV gate per POC local-only philosophy
 - [Phase 07-openai-oauth-flow]: Plan 07-01: 'as any' cast on modelId removed from setup.ts once PiProvider type aligned with pi-ai's KnownProvider
+- [Phase 07-openai-oauth-flow]: Plan 07-02: Provider-dispatch via typed helper functions (portForProvider, loginFnForProvider, portConflictMessage) instead of inline ternaries — single-responsibility branch points keep /start handler readable
+- [Phase 07-openai-oauth-flow]: Plan 07-02: D-04 onManualCodeInput NOT wired for openai — web UI has no CLI paste path; port 1455 pre-check prevents loginOpenAICodex from falling back to manual flow
+- [Phase 07-openai-oauth-flow]: Plan 07-02: Debug endpoint colocated in oauth.ts (not separate /debug router) — scoped under /api/auth/oauth/debug/* inheriting existing mount
 
 ### Pending Todos
 
@@ -97,6 +101,6 @@ None.
 
 ## Session Continuity
 
-Last session: 2026-04-05T17:12:33.774Z
-Stopped at: Completed 07-01 provider-remap plan
+Last session: 2026-04-05T17:18:34.155Z
+Stopped at: Completed 07-02 oauth-routes plan
 Resume file: None

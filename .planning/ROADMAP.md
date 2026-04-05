@@ -69,7 +69,7 @@ Full details: `.planning/milestones/v1.0-ROADMAP.md`
   5. If port 1455 is occupied (e.g., by Codex CLI), the user gets a clear error message explaining the conflict
 **Plans**: 3 plans
   - [x] 07-01-provider-remap-PLAN.md — Add resolvePiProvider + forceExpireOAuth helpers, wire remap into getModel (setup.ts) and getModels (models.ts)
-  - [ ] 07-02-oauth-routes-PLAN.md — Extend POST /start to dispatch loginOpenAICodex with port 1455 pre-check; add POST /debug/force-expire endpoint
+  - [x] 07-02-oauth-routes-PLAN.md — Extend POST /start to dispatch loginOpenAICodex with port 1455 pre-check; add POST /debug/force-expire endpoint
   - [ ] 07-03-uat-PLAN.md — Scaffold 07-UAT.md and run end-to-end curl validation (SC#1-SC#5) including auto-refresh via force-expire
 
 ### Phase 8: OAuth Connection UI
