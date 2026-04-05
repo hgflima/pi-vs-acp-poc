@@ -67,10 +67,11 @@ Full details: `.planning/milestones/v1.0-ROADMAP.md`
   3. User can send chat messages using the OAuth token (the token actually works for API calls, not just token acquisition)
   4. When the OAuth token approaches expiry, it is refreshed automatically without user intervention or chat interruption
   5. If port 1455 is occupied (e.g., by Codex CLI), the user gets a clear error message explaining the conflict
-**Plans**: 3 plans
+**Plans**: 4 plans (includes Phase 7.1 gap closure)
   - [x] 07-01-provider-remap-PLAN.md — Add resolvePiProvider + forceExpireOAuth helpers, wire remap into getModel (setup.ts) and getModels (models.ts)
   - [x] 07-02-oauth-routes-PLAN.md — Extend POST /start to dispatch loginOpenAICodex with port 1455 pre-check; add POST /debug/force-expire endpoint
   - [x] 07-03-uat-PLAN.md — Scaffold 07-UAT.md and run end-to-end curl validation (SC#1-SC#5) including auto-refresh via force-expire
+  - [ ] 07-04-stream-adapter-gap-closure-PLAN.md — Diagnose + fix adaptAgentEvents silent fall-through for openai-codex streams; re-verify SC#3 and SC#4 (closes UAT FAIL gap)
 
 ### Phase 8: OAuth Connection UI
 **Goal**: Connection page lets the user choose between OAuth and API Key per provider, with visual feedback throughout the OAuth flow and token lifecycle
@@ -96,5 +97,5 @@ Full details: `.planning/milestones/v1.0-ROADMAP.md`
 | 4. Configuration | v1.0 | 5/5 | Complete | 2026-04-04 |
 | 5. Credential Infrastructure | v1.1 | 3/3 | Complete   | 2026-04-04 |
 | 6. Anthropic OAuth Flow | v1.1 | 0/2 | Not started | - |
-| 7. OpenAI OAuth Flow | v1.1 | 3/3 | Gap Closure (UAT FAIL — SC#3) | - |
+| 7. OpenAI OAuth Flow | v1.1 | 3/4 | Gap Closure (Plan 07-04 planned — SC#3/SC#4 re-verify) | - |
 | 8. OAuth Connection UI | v1.1 | 0/0 | Not started | - |
