@@ -3,7 +3,7 @@ import type { SSEStream } from "hono/streaming"
 
 // DIAGNOSTIC LOGGING — Phase 7.1 gap closure (07-04-stream-adapter-gap-closure-PLAN.md).
 // Remove or set to false in Task 2 after root cause is confirmed and fix lands.
-const DEBUG_EVENTS = true
+const DEBUG_EVENTS = false
 
 function logEvent(event: unknown): void {
   if (!DEBUG_EVENTS) return
@@ -48,11 +48,48 @@ export function adaptAgentEvents({ agent, stream, onDone }: AdaptOptions): () =>
       switch (event.type) {
         case "message_update": {
           const ame = event.assistantMessageEvent
-          if (ame.type === "text_delta") {
-            void stream.writeSSE({
-              event: "text_delta",
-              data: JSON.stringify({ data: ame.delta }),
-            })
+          // Phase 7.1: handle text_delta (primary content), thinking_delta (reasoning visibility),
+          // and surface an SSE `stream_warning` event for any AssistantMessageEvent subtype not
+          // currently represented in the client protocol so silent fall-through cannot recur.
+          // AssistantMessageEvent subtypes (pi-ai types.d.ts): start, text_start, text_delta, text_end,
+          // thinking_start, thinking_delta, thinking_end, toolcall_start, toolcall_delta, toolcall_end,
+          // done, error. text_delta is the only one that carries user-visible assistant content in the
+          // current client contract — the others are lifecycle markers (no-op) or reasoning traces.
+          switch (ame.type) {
+            case "text_delta":
+              void stream.writeSSE({
+                event: "text_delta",
+                data: JSON.stringify({ data: ame.delta }),
+              })
+              break
+            case "thinking_delta":
+              // Reasoning traces from Codex responses. Client currently does not render these but
+              // emitting them as a distinct SSE event keeps the protocol visible for future UI work.
+              void stream.writeSSE({
+                event: "thinking_delta",
+                data: JSON.stringify({ data: ame.delta }),
+              })
+              break
+            case "error":
+              // Surface upstream stream-level errors as SSE error events so the client can display
+              // them instead of receiving a silent `done` with no content (root cause of this gap).
+              void stream.writeSSE({
+                event: "error",
+                data: JSON.stringify({ message: ame.error?.errorMessage ?? "Stream error" }),
+              })
+              break
+            case "start":
+            case "text_start":
+            case "text_end":
+            case "thinking_start":
+            case "thinking_end":
+            case "toolcall_start":
+            case "toolcall_delta":
+            case "toolcall_end":
+            case "done":
+              // Lifecycle markers — no SSE emission. toolcall_* are superseded by tool_execution_*
+              // events at the AgentEvent layer, so the client receives tool info via those.
+              break
           }
           break
         }
