@@ -1,8 +1,8 @@
 ---
 phase: 06-anthropic-oauth-flow
 type: uat
-status: pending
-executed: null
+status: PASS
+executed: 2026-04-05
 scope: "End-to-end validation of Anthropic OAuth PKCE flow per D-05"
 requirements: [OAUTH-01]
 ---
@@ -41,10 +41,16 @@ curl -sS -X POST http://localhost:3001/api/auth/oauth/start \
 
 **Actual:**
 ```
-[paste response here]
+HTTP 200
+{
+  "status": "started",
+  "provider": "anthropic",
+  "authUrl": "https://claude.ai/oauth/authorize?..."
+}
 ```
+(authUrl starts with `https://claude.ai/oauth/authorize` with PKCE params attached)
 
-**Result:** [ PASS | FAIL ]
+**Result:** PASS
 
 ---
 
@@ -72,18 +78,31 @@ curl -sS "http://localhost:3001/api/auth/status?provider=anthropic" | jq .
 
 **Actual (2a):**
 ```
-[paste response here]
+{
+  "status": "pending",
+  "provider": "anthropic",
+  "authUrl": "https://claude.ai/oauth/authorize?..."
+}
 ```
 **Actual (2c):**
 ```
-[paste response here]
+{
+  "status": "ok",
+  "provider": "anthropic"
+}
 ```
 **Actual (2d):**
 ```
-[paste response here]
+{
+  "hasApiKey": false,
+  "hasOAuth": true,
+  "activeMethod": "oauth",
+  "oauthExpiry": <unix-ms>
+}
 ```
+Status transitioned pending → ok after browser consent; Phase 5 `/api/auth/status` confirms `hasOAuth:true`, `activeMethod:"oauth"`.
 
-**Result:** [ PASS | FAIL ]
+**Result:** PASS
 
 ---
 
@@ -104,14 +123,28 @@ curl -sS -N -X POST http://localhost:3001/api/chat \
 
 **Expected (BLOCKED, per Pitfall 1):** Error response or SSE error event containing text like "OAuth authentication is currently not supported" or "invalid authentication method". This is the documented Feb 2026 Anthropic policy rejecting `sk-ant-oat*` tokens for non-Claude-Code apps.
 
+> **NOTE — Plan curl authored incorrectly (documentation bug, NOT a code bug):**
+> The curl above sends `messages` / `modelId`, but the `/api/chat` endpoint contract expects
+> `message` / `model` (see `src/server/routes/chat.ts:10` and `src/client/hooks/use-chat.ts:200` —
+> the real frontend caller). Running the plan's curl as written returned `"No model configured"`
+> because both `message` and `model` destructured to `undefined`. The `/api/chat` endpoint itself
+> is correct and aligned with the real frontend caller; only this UAT curl was mis-authored.
+>
+> **Corrected curl (this is what actually passed):**
+> ```bash
+> curl -sS -N -X POST http://localhost:3001/api/chat \
+>   -H "Content-Type: application/json" \
+>   -d '{"provider":"anthropic","model":"claude-haiku-4-5-20251001","message":"Say OK and nothing else"}'
+> ```
+
 **Actual:**
 ```
-[paste first 20-30 lines of stream response here]
+SSE stream emitted assistant content events; stream completed with "OK" in the assistant response.
+OAuth token from Test 2 was used by pi-agent-core to call Anthropic's API successfully.
 ```
+No Feb 2026 `sk-ant-oat*` rejection observed — OAuth token worked end-to-end for a real chat request.
 
-**Result:** [ PASS (token works end-to-end) | BLOCKED (upstream policy rejects — expected risk per STATE.md) | FAIL (plumbing bug) ]
-
-**If BLOCKED:** Record the exact error message. This is still a successful phase completion — the code is correct, the API policy is enforced. Note the outcome in 06-SUMMARY.md under "Known Upstream Limitations".
+**Result:** PASS (token works end-to-end)
 
 ---
 
@@ -140,27 +173,33 @@ kill $NC_PID 2>/dev/null
 
 **Actual:**
 ```
-[paste response + HTTP code here]
+HTTP 409
+{
+  "status": "error",
+  "message": "Port 53692 is already in use by another process. This port is required by the Anthropic OAuth callback. If you have Claude Code CLI running, please stop it and try again."
+}
 ```
+Port pre-check triggered on the `nc` listener; /start returned the expected 409 + Claude Code CLI conflict message.
 
-**Result:** [ PASS | FAIL ]
+**Result:** PASS
 
 ---
 
 ## Final Outcome
 
-**Overall:** [ PASS | BLOCKED | FAIL ]
+**Overall:** PASS
 
 **Summary:**
-- SC#1 (auth URL returned): [ PASS | FAIL ]
-- SC#2 (status polling + credentials stored): [ PASS | FAIL ]
-- SC#3 (OAuth token works for chat): [ PASS | BLOCKED | FAIL ]
-- SC#4 (port conflict handled): [ PASS | FAIL ]
+- SC#1 (auth URL returned): PASS
+- SC#2 (status polling + credentials stored): PASS
+- SC#3 (OAuth token works for chat): PASS
+- SC#4 (port conflict handled): PASS
 
 **Follow-up actions:**
-- [list any items, or "None"]
+- Phase 8 UI should send `message` / `model` fields per the existing /api/chat contract (already true in `src/client/hooks/use-chat.ts:200`).
+- Update future UAT plan template to verify curl payloads match actual endpoint schemas before publishing. The Test 3 curl in plan 06-02 was authored with wrong field names (`messages` / `modelId` vs. endpoint contract `message` / `model`); manual correction was needed during execution.
 
-**Executed by:** [name]
-**Executed at:** [ISO timestamp]
+**Executed by:** Henrique (human tester via Claude Code orchestration)
+**Executed at:** 2026-04-05T13:34:42Z
 
 ---
