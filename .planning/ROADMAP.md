@@ -53,7 +53,9 @@ Full details: `.planning/milestones/v1.0-ROADMAP.md`
   2. After user completes OAuth consent, backend stores the OAuth credentials and a status polling endpoint reports success
   3. User can send chat messages using the Anthropic OAuth token (verified with real API call)
   4. If port 53692 is occupied, the user gets a clear error message explaining the conflict
-**Plans**: TBD
+**Plans**: 2 plans
+  - [ ] 06-01-PLAN.md — Implement Anthropic OAuth routes (POST /start, GET /status) with per-provider PendingSession Map and port 53692 pre-check; mount at /api/auth/oauth
+  - [ ] 06-02-PLAN.md — Manual UAT validation via curl (SC#1-SC#4) per D-05; scaffold 06-UAT.md and run end-to-end verification
 
 ### Phase 7: OpenAI OAuth Flow
 **Goal**: User can authenticate with OpenAI Codex via OAuth PKCE and use the resulting token for chat, with automatic refresh before expiry
@@ -90,6 +92,6 @@ Full details: `.planning/milestones/v1.0-ROADMAP.md`
 | 3. Tool Visualization | v1.0 | 4/4 | Complete | 2026-04-03 |
 | 4. Configuration | v1.0 | 5/5 | Complete | 2026-04-04 |
 | 5. Credential Infrastructure | v1.1 | 3/3 | Complete   | 2026-04-04 |
-| 6. Anthropic OAuth Flow | v1.1 | 0/0 | Not started | - |
+| 6. Anthropic OAuth Flow | v1.1 | 0/2 | Not started | - |
 | 7. OpenAI OAuth Flow | v1.1 | 0/0 | Not started | - |
 | 8. OAuth Connection UI | v1.1 | 0/0 | Not started | - |
