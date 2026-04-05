@@ -1,7 +1,7 @@
 import { Hono } from "hono"
-import { loginAnthropic } from "@mariozechner/pi-ai/oauth"
+import { loginAnthropic, loginOpenAICodex } from "@mariozechner/pi-ai/oauth"
 import { createServer } from "node:http"
-import { storeOAuthTokens, type Provider } from "../lib/credentials"
+import { forceExpireOAuth, storeOAuthTokens, type Provider } from "../lib/credentials"
 
 type SessionStatus = "pending" | "done" | "error"
 
@@ -14,6 +14,7 @@ interface PendingSession {
 
 const pendingSessions = new Map<Provider, PendingSession>()
 const ANTHROPIC_OAUTH_PORT = 53692
+const OPENAI_OAUTH_PORT = 1455
 
 async function ensurePortFree(port: number, host = "127.0.0.1"): Promise<void> {
   await new Promise<void>((resolve, reject) => {
@@ -25,15 +26,30 @@ async function ensurePortFree(port: number, host = "127.0.0.1"): Promise<void> {
   })
 }
 
+function portForProvider(provider: Provider): number {
+  return provider === "anthropic" ? ANTHROPIC_OAUTH_PORT : OPENAI_OAUTH_PORT
+}
+
+function loginFnForProvider(provider: Provider) {
+  return provider === "anthropic" ? loginAnthropic : loginOpenAICodex
+}
+
+function portConflictMessage(provider: Provider): string {
+  if (provider === "anthropic") {
+    return "Port 53692 is already in use by another process. This port is required by the Anthropic OAuth callback. If you have Claude Code CLI running, please stop it and try again."
+  }
+  return "Port 1455 is already in use by another process. This port is required by the OpenAI Codex OAuth callback. If you have Codex CLI running, please stop it and try again."
+}
+
 const oauthRoutes = new Hono()
 
 oauthRoutes.post("/start", async (c) => {
   const body = await c.req.json<{ provider?: Provider }>().catch(() => ({ provider: undefined }))
   const provider = body.provider
 
-  if (provider !== "anthropic") {
+  if (provider !== "anthropic" && provider !== "openai") {
     return c.json(
-      { status: "error", message: "Only 'anthropic' is supported in Phase 6" },
+      { status: "error", message: "Invalid provider. Use 'anthropic' or 'openai'." },
       400
     )
   }
@@ -43,21 +59,17 @@ oauthRoutes.post("/start", async (c) => {
 
   // D-02: pre-check port 53692 before calling loginAnthropic
   try {
-    await ensurePortFree(ANTHROPIC_OAUTH_PORT)
+    await ensurePortFree(portForProvider(provider))
   } catch (err: unknown) {
     const code = (err as NodeJS.ErrnoException)?.code
     if (code === "EADDRINUSE") {
       return c.json(
-        {
-          status: "error",
-          message:
-            "Port 53692 is already in use by another process. This port is required by the Anthropic OAuth callback. If you have Claude Code CLI running, please stop it and try again.",
-        },
+        { status: "error", message: portConflictMessage(provider) },
         409
       )
     }
     return c.json(
-      { status: "error", message: `Could not probe port 53692: ${code ?? "unknown error"}` },
+      { status: "error", message: `Could not probe port ${portForProvider(provider)}: ${code ?? "unknown error"}` },
       500
     )
   }
@@ -78,7 +90,8 @@ oauthRoutes.post("/start", async (c) => {
   pendingSessions.set(provider, session)
 
   // Pattern 4: Background promise lifecycle — not awaited in route handler
-  loginAnthropic({
+  const loginFn = loginFnForProvider(provider)
+  loginFn({
     onAuth: (info) => resolveAuthUrl(info.url),
     onPrompt: async () => "",
     onProgress: (msg) => console.log(`[oauth:${provider}] ${msg}`),
