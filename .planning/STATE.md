@@ -2,15 +2,15 @@
 gsd_state_version: 1.0
 milestone: v1.1
 milestone_name: OAuth Authentication
-status: executing
-stopped_at: Completed 06-anthropic-oauth-flow-01-PLAN.md
-last_updated: "2026-04-05T13:06:00.754Z"
+status: verifying
+stopped_at: Completed 06-anthropic-oauth-flow-02-PLAN.md (UAT PASS)
+last_updated: "2026-04-05T13:38:32.563Z"
 last_activity: 2026-04-05
 progress:
   total_phases: 4
-  completed_phases: 1
+  completed_phases: 2
   total_plans: 5
-  completed_plans: 4
+  completed_plans: 5
   percent: 0
 ---
 
@@ -27,7 +27,7 @@ See: .planning/PROJECT.md (updated 2026-04-04)
 
 Phase: 06 (anthropic-oauth-flow) — EXECUTING
 Plan: 2 of 2
-Status: Ready to execute
+Status: Phase complete — ready for verification
 Last activity: 2026-04-05
 
 Progress: [░░░░░░░░░░] 0%
@@ -54,6 +54,7 @@ Progress: [░░░░░░░░░░] 0%
 | Phase 05-credential-infrastructure P02 | 8min | 3 tasks | 2 files |
 | Phase 05 P03 | 10 min | 5 tasks | 5 files |
 | Phase 06-anthropic-oauth-flow P01 | 2 min | 2 tasks | 2 files |
+| Phase 06-anthropic-oauth-flow P02 | 32 min | 2 tasks | 1 files |
 
 ## Accumulated Context
 
@@ -78,6 +79,8 @@ Recent decisions affecting current work:
 - [Phase 06-anthropic-oauth-flow]: Plan 06-01: Promise-resolver with rejectAuthUrl safety handles loginAnthropic rejection before onAuth fires
 - [Phase 06-anthropic-oauth-flow]: Plan 06-01: GET /status auto-clears session on done/error (Phase 5's /api/auth/status is authoritative post-completion)
 - [Phase 06-anthropic-oauth-flow]: Plan 06-01: D-02 realized — port 53692 pre-check returns HTTP 409 with Claude Code CLI conflict message
+- [Phase 06-anthropic-oauth-flow]: Plan 06-02: UAT PASS — Anthropic OAuth token accepted by /api/chat; Feb 2026 sk-ant-oat ban risk did NOT materialise in practice
+- [Phase 06-anthropic-oauth-flow]: Plan 06-02: /api/chat contract confirmed — expects message/model fields (not messages/modelId); Test 3 plan curl corrected inline
 
 ### Pending Todos
 
@@ -90,6 +93,6 @@ None.
 
 ## Session Continuity
 
-Last session: 2026-04-05T13:06:00.752Z
-Stopped at: Completed 06-anthropic-oauth-flow-01-PLAN.md
+Last session: 2026-04-05T13:38:32.561Z
+Stopped at: Completed 06-anthropic-oauth-flow-02-PLAN.md (UAT PASS)
 Resume file: None
