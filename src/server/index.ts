@@ -1,6 +1,7 @@
 import { serve } from "@hono/node-server"
 import { Hono } from "hono"
 import { authRoutes } from "./routes/auth"
+import { oauthRoutes } from "./routes/oauth"
 import { chatRoutes } from "./routes/chat"
 import { modelRoutes } from "./routes/models"
 import { harnessRoutes } from "./routes/harness"
@@ -9,6 +10,7 @@ const app = new Hono()
 
 // Routes
 app.route("/api/auth", authRoutes)
+app.route("/api/auth/oauth", oauthRoutes)
 app.route("/api/chat", chatRoutes)
 app.route("/api/models", modelRoutes)
 app.route("/api/harness", harnessRoutes)
