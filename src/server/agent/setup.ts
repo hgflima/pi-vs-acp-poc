@@ -5,7 +5,7 @@ import type { OAuthCredentials } from "@mariozechner/pi-ai"
 import { pocTools } from "./tools"
 import { buildSystemPrompt } from "./harness"
 import { getActiveHarness } from "../routes/harness"
-import { getActiveCredential, storeOAuthTokens, type Provider } from "../lib/credentials"
+import { getActiveCredential, resolvePiProvider, storeOAuthTokens, type Provider } from "../lib/credentials"
 
 // Refresh 60s before expiry to avoid mid-request expiration
 const REFRESH_BUFFER_MS = 60_000
@@ -59,7 +59,7 @@ interface CreateAgentOptions {
 }
 
 export function createAgent({ provider, modelId, systemPrompt }: CreateAgentOptions): Agent {
-  const model = getModel(provider, modelId as any)
+  const model = getModel(resolvePiProvider(provider), modelId)
 
   // If no explicit systemPrompt, check for active harness
   const finalPrompt = systemPrompt ?? buildSystemPrompt(getActiveHarness())
