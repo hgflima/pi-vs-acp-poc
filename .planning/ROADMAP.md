@@ -73,6 +73,17 @@ Full details: `.planning/milestones/v1.0-ROADMAP.md`
   - [x] 07-03-uat-PLAN.md — Scaffold 07-UAT.md and run end-to-end curl validation (SC#1-SC#5) including auto-refresh via force-expire
   - [x] 07-04-stream-adapter-gap-closure-PLAN.md — Diagnose + fix adaptAgentEvents silent fall-through for openai-codex streams; re-verify SC#3 and SC#4 (closes UAT FAIL gap)
 
+### Phase 07.1: solucao do problema encontrado e documentado na fase 7 (INSERTED)
+
+**Goal:** Close SC#3 and SC#4 for Phase 7 (OAUTH-02/OAUTH-03) via D-03 error-surfacing + D-02 diagnostic-gated fix
+**Requirements**: OAUTH-02, OAUTH-03
+**Depends on:** Phase 7
+**Plans:** 2 plans
+
+Plans:
+- [ ] 07.1-01-error-surfacing-PLAN.md — Add case "message_end" to stream-adapter.ts (D-03), re-run SC#3 curl, capture upstream errorMessage in diagnostic log
+- [ ] 07.1-02-fix-and-reverify-PLAN.md — Triage diagnostic → apply D-02 fix branch (our code / patch-package) → re-verify SC#3+SC#4 → propagate PASS across UAT/VERIFICATION/REQUIREMENTS/ROADMAP
+
 ### Phase 8: OAuth Connection UI
 **Goal**: Connection page lets the user choose between OAuth and API Key per provider, with visual feedback throughout the OAuth flow and token lifecycle
 **Depends on**: Phase 7
