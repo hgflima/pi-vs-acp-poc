@@ -1,0 +1,44 @@
+[stream-adapter] type=agent_start
+[stream-adapter] type=turn_start
+[stream-adapter] type=message_start
+[stream-adapter] type=message_end
+[stream-adapter] type=message_start
+[stream-adapter] type=message_end
+[stream-adapter] type=turn_end
+[stream-adapter] type=agent_end
+
+--- ANALYSIS ---
+Captured: POST /api/chat with provider=openai, model=gpt-5.1, message="Say OK and nothing else"
+Backend: dev:backend running on http://localhost:3001, OAuth credential stored (hasOAuth:true, activeMethod:oauth)
+SSE client output: single "event: done\ndata: {}" frame (zero text_delta events, matches UAT Test 3b FAIL)
+
+Unique event.type values observed: agent_start, turn_start, message_start, message_end, turn_end, agent_end
+Unique ame.type values observed (inside message_update): NONE — zero message_update events fired
+
+Confirmed root cause: B (Agent emits no message_update events for openai-codex responses)
+- The log shows the Agent loop completing cleanly (agent_start → ... → agent_end)
+- TWO message_start/message_end pairs appear: (1) for the user prompt (agent-loop.js line 51-52),
+  (2) for the assistant response via the `!addedPartial` fallback path (agent-loop.js line 201-203
+  OR line 214-216) — which fires when pi-ai's stream produces NO events that set partialMessage.
+- For pi-ai's openai-codex-responses provider to trigger the !addedPartial fallback, either:
+  (a) pi-ai's stream threw BEFORE pushing the `start` event (line 168 of openai-codex-responses.js),
+      meaning processResponsesStream's for-await loop over mapCodexEvents yielded zero events before
+      an error — e.g., a hard HTTP failure caught by the retry loop's final throw (line 159, 163);
+  (b) pi-ai's stream pushed `start` but processStream completed without yielding ANY SSE events whose
+      switch case matches in agent-loop.js lines 172-190 (text_start, text_delta, text_end,
+      thinking_start/delta/end, toolcall_start/delta/end) — meaning the HTTP body arrived but contained
+      no response.output_text.delta / response.reasoning_summary_text.delta / etc. events.
+- In EITHER sub-case, the stream-adapter's `case "message_update"` block is never entered because
+  there are no message_update events to receive. The switch-on-ame.type hypothesis (Cause A) is
+  REFUTED — it's not a matching failure, it's an event-emission failure upstream.
+
+Fix direction for Task 2: Apply the Cause A "exhaustive inner switch" fix as a defensive measure per
+the plan's Cause B instructions. This makes the stream-adapter correct for when message_update events
+DO arrive (e.g., for Anthropic in Phases 2-4/6 where it already works, and for any future Codex
+responses that DO stream text_delta). Additionally, surface a CHECKPOINT in SUMMARY.md recommending
+investigation of pi-ai's openai-codex-responses.js stream behaviour: is the ChatGPT backend-api
+returning an HTTP 200 with a terminating/empty SSE body when a Codex model is requested via
+`originator=pi` OAuth scope, or is processStream swallowing events, or is there a payload shape
+mismatch preventing response.output_item.added / response.output_text.delta from firing. Root cause
+B is UPSTREAM OF the stream-adapter — the fix in Task 2 does not resolve the underlying gap, it only
+removes the silent-fall-through anti-pattern so future diagnostic bleed-through is visible.

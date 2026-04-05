@@ -1,0 +1,65 @@
+^D
+> dev:backend
+> tsx watch src/server/index.ts
+
+Backend running on http://localhost:3001
+[stream-adapter] type=agent_start
+[stream-adapter] type=turn_start
+[stream-adapter] type=message_start
+[stream-adapter] type=message_end
+[stream-adapter] type=message_start
+[stream-adapter] type=message_end
+[stream-adapter] type=turn_end
+[stream-adapter] type=agent_end
+[90m3:54:35 PM[39m [96m[tsx][39m [95mchange[39m in [92m./src/server/lib/stream-adapter.ts[39m [33mRestarting...[39m
+cnode:events:486
+      throw er; // Unhandled 'error' event
+      ^
+
+Error: listen EADDRINUSE: address already in use :::3001
+[90m    at Server.setupListenHandle [as _listen2] (node:net:1948:16)[39m
+[90m    at listenInCluster (node:net:2005:12)[39m
+[90m    at Server.listen (node:net:2110:7)[39m
+    at serve [90m(file:///Users/henriquelima/Documents/dev/personal/pi-ai-poc/[39mnode_modules/[4m@hono/node-server[24m/dist/index.mjs:629:10[90m)[39m
+    at <anonymous> [90m(/Users/henriquelima/Documents/dev/personal/pi-ai-poc/[39msrc/server/index.ts:22:1[90m)[39m
+[90m    at ModuleJob.run (node:internal/modules/esm/module_job:430:25)[39m
+[90m    at async onImport.tracePromise.__proto__ (node:internal/modules/esm/loader:661:26)[39m
+[90m    at async asyncRunEntryPointWithESMLoader (node:internal/modules/run_main:101:5)[39m
+Emitted 'error' event on Server instance at:
+[90m    at emitErrorNT (node:net:1984:8)[39m
+[90m    at process.processTicksAndRejections (node:internal/process/task_queues:90:21)[39m {
+  code: [32m'EADDRINUSE'[39m,
+  errno: [33m-48[39m,
+  syscall: [32m'listen'[39m,
+  address: [32m'::'[39m,
+  port: [33m3001[39m
+}
+
+Node.js v24.14.1
+[90m3:54:41 PM[39m [96m[tsx][39m [95mchange[39m in [92m./src/server/lib/stream-adapter.ts[39m [33mRerunning...[39m
+cBackend running on http://localhost:3001
+[90m3:55:16 PM[39m [96m[tsx][39m [95mchange[39m in [92m./src/server/lib/stream-adapter.ts[39m [33mRestarting...[39m
+cnode:events:486
+      throw er; // Unhandled 'error' event
+      ^
+
+Error: listen EADDRINUSE: address already in use :::3001
+[90m    at Server.setupListenHandle [as _listen2] (node:net:1948:16)[39m
+[90m    at listenInCluster (node:net:2005:12)[39m
+[90m    at Server.listen (node:net:2110:7)[39m
+    at serve [90m(file:///Users/henriquelima/Documents/dev/personal/pi-ai-poc/[39mnode_modules/[4m@hono/node-server[24m/dist/index.mjs:629:10[90m)[39m
+    at <anonymous> [90m(/Users/henriquelima/Documents/dev/personal/pi-ai-poc/[39msrc/server/index.ts:22:1[90m)[39m
+[90m    at ModuleJob.run (node:internal/modules/esm/module_job:430:25)[39m
+[90m    at async onImport.tracePromise.__proto__ (node:internal/modules/esm/loader:661:26)[39m
+[90m    at async asyncRunEntryPointWithESMLoader (node:internal/modules/run_main:101:5)[39m
+Emitted 'error' event on Server instance at:
+[90m    at emitErrorNT (node:net:1984:8)[39m
+[90m    at process.processTicksAndRejections (node:internal/process/task_queues:90:21)[39m {
+  code: [32m'EADDRINUSE'[39m,
+  errno: [33m-48[39m,
+  syscall: [32m'listen'[39m,
+  address: [32m'::'[39m,
+  port: [33m3001[39m
+}
+
+Node.js v24.14.1

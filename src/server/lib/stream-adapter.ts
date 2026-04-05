@@ -1,6 +1,18 @@
 import type { Agent, AgentEvent } from "@mariozechner/pi-agent-core"
 import type { SSEStream } from "hono/streaming"
 
+// DIAGNOSTIC LOGGING — Phase 7.1 gap closure (07-04-stream-adapter-gap-closure-PLAN.md).
+// Remove or set to false in Task 2 after root cause is confirmed and fix lands.
+const DEBUG_EVENTS = true
+
+function logEvent(event: unknown): void {
+  if (!DEBUG_EVENTS) return
+  const e = event as { type?: string; assistantMessageEvent?: { type?: string } }
+  const inner = e.assistantMessageEvent ? ` ame.type=${e.assistantMessageEvent.type}` : ""
+  // eslint-disable-next-line no-console
+  console.log(`[stream-adapter] type=${e.type}${inner}`)
+}
+
 const MAX_RESULT_LENGTH = 10240
 
 function extractTextFromResult(result: any): string {
@@ -31,6 +43,7 @@ interface AdaptOptions {
 
 export function adaptAgentEvents({ agent, stream, onDone }: AdaptOptions): () => void {
   const unsubscribe = agent.subscribe((event: AgentEvent) => {
+    logEvent(event)
     try {
       switch (event.type) {
         case "message_update": {
