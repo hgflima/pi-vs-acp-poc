@@ -29,10 +29,10 @@ Provar que pi-ai + pi-agent-core sustentam um chat web com streaming em tempo re
 - ✓ Troca de agente (Claude Code / Codex) em runtime sem perda de contexto — v1.0
 - ✓ Troca de modelo por provider via registry de modelos — v1.0
 - ✓ Carregamento de harness (CLAUDE.md, AGENTS.md, skills, hooks) aplicado ao system prompt — v1.0
+- ✓ OAuth flow para Anthropic (Claude Code) — v1.1 (validado em Phase 6: auth URL exposto, credenciais persistidas, token OAuth aceito em /api/chat, conflito de porta 53692 tratado)
 
 ### Active
 
-- [ ] OAuth flow para Anthropic (Claude Code)
 - [ ] OAuth flow para OpenAI (Codex)
 - [ ] Coexistencia: usuario escolhe entre OAuth ou API Key por provider
 - [ ] UI de conexao atualizada para suportar ambos os metodos
@@ -115,4 +115,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-04-04 after Phase 5 (Credential Infrastructure) complete — compound credential store + async OAuth resolver infrastructure ready for Phase 6-8*
+*Last updated: 2026-04-05 after Phase 6 (Anthropic OAuth Flow) complete — PKCE flow working end-to-end, OAuth token validates against Anthropic API, Feb 2026 `sk-ant-oat*` ban risk did not materialise*
