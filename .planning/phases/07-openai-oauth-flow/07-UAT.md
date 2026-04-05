@@ -223,3 +223,60 @@ Codex CLI running, please stop it and try again."
 **Executed at:** 2026-04-05
 
 ---
+
+## Re-verification (Phase 7.1 gap closure)
+
+**Phase 7.1 plan:** 07-04-stream-adapter-gap-closure-PLAN.md
+**Re-verified:** 2026-04-05T19:09:08Z
+**Root cause (from .planning/debug/stream-events-07-04.log):** Cause B — pi-agent-core Agent loop emits ZERO `message_update` events for openai-codex responses. Captured sequence (8 events): `agent_start → turn_start → message_start → message_end → message_start → message_end → turn_end → agent_end`. The second `message_start/message_end` pair is the assistant response via pi-agent-core's `!addedPartial` fallback path (agent-loop.js lines 201-203/214-216), which fires when pi-ai's stream produces no events that set `partialMessage`.
+**Fix applied (commits f5b3bd69, 589b292a):** Exhaustive inner `switch (ame.type)` covering all 12 AssistantMessageEvent subtypes (text_delta, thinking_delta, error + 9 lifecycle no-ops). Silent fall-through is now structurally impossible. **DEFENSIVE, NOT CURATIVE** — because pi-agent-core emits no `message_update` events for Codex, the `case "message_update"` block is never entered for Codex responses, so the switch improvement has no effect on the symptom. Correctness improvement stands regardless.
+
+### SC#3 Re-run — Chat stream with OAuth token (Codex model)
+
+**curl:**
+```bash
+curl -sS -N -X POST http://localhost:3001/api/chat \
+  -H "Content-Type: application/json" \
+  -d '{"provider":"openai","model":"gpt-5.1","message":"Say OK and nothing else"}'
+```
+
+**Actual (SSE output, 3 lines):**
+```
+event: done
+data: {}
+
+```
+
+**text_delta event count:** 0
+**event count:** 1 (only `event: done`)
+**Concatenated assistant content:** (empty)
+**Closing event:** `event: done`
+
+**Result:** FAIL — same symptom as original UAT. Defensive fix did NOT resolve gap. Confirms upstream blocker in pi-agent-core / pi-ai openai-codex-responses provider, not in stream-adapter.
+
+---
+
+### SC#4 Re-run — Auto-refresh via force-expire + chat
+
+**Result:** SKIPPED — no point testing auto-refresh mid-stream when the stream itself produces no content. SC#4 remains dependent on SC#3 passing.
+
+---
+
+### Updated Final Outcome
+
+**Overall (post-Phase-7.1):** FAIL
+
+- SC#1 (auth URL returned): PASS (unchanged)
+- SC#2 (status polling + credentials stored): PASS (unchanged)
+- SC#3 (OAuth token works for Codex chat + D-01/D-02 remap): FAIL — gap is upstream of stream-adapter
+- SC#4 (auto-refresh via force-expire + chat): SKIPPED (depends on SC#3)
+- SC#5 (port 1455 conflict handled): PASS (unchanged)
+
+**Phase 7 status:** STILL BLOCKED — next step is Phase 7.2 investigation of pi-ai `openai-codex-responses` provider stream behaviour (or wait for pi-mono patch).
+**OAUTH-02:** STILL INCOMPLETE
+**OAUTH-03:** STILL INCOMPLETE
+
+**Re-verified by:** henriquelima (via Claude orchestrator)
+**Re-verified at:** 2026-04-05T19:09:08Z
+
+---
