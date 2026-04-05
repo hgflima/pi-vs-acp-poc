@@ -54,7 +54,7 @@ Full details: `.planning/milestones/v1.0-ROADMAP.md`
   3. User can send chat messages using the Anthropic OAuth token (verified with real API call)
   4. If port 53692 is occupied, the user gets a clear error message explaining the conflict
 **Plans**: 2 plans
-  - [ ] 06-01-PLAN.md — Implement Anthropic OAuth routes (POST /start, GET /status) with per-provider PendingSession Map and port 53692 pre-check; mount at /api/auth/oauth
+  - [x] 06-01-PLAN.md — Implement Anthropic OAuth routes (POST /start, GET /status) with per-provider PendingSession Map and port 53692 pre-check; mount at /api/auth/oauth
   - [ ] 06-02-PLAN.md — Manual UAT validation via curl (SC#1-SC#4) per D-05; scaffold 06-UAT.md and run end-to-end verification
 
 ### Phase 7: OpenAI OAuth Flow

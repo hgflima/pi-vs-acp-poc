@@ -14,7 +14,7 @@ Requirements for milestone v1.1 OAuth Authentication. Each maps to roadmap phase
 
 ### OAuth Authentication
 
-- [ ] **OAUTH-01**: User pode autenticar via OAuth PKCE com Anthropic (loginAnthropic via pi-ai)
+- [x] **OAUTH-01**: User pode autenticar via OAuth PKCE com Anthropic (loginAnthropic via pi-ai)
 - [ ] **OAUTH-02**: User pode autenticar via OAuth PKCE com OpenAI Codex (loginOpenAICodex via pi-ai)
 - [ ] **OAUTH-03**: Tokens OAuth sao refreshed automaticamente antes de expirar
 - [x] **OAUTH-04**: User pode usar API Key como alternativa ao OAuth para qualquer provider
@@ -47,7 +47,7 @@ Requirements for milestone v1.1 OAuth Authentication. Each maps to roadmap phase
 |-------------|-------|--------|
 | CRED-01 | Phase 5 | Complete |
 | CRED-02 | Phase 5 | Complete |
-| OAUTH-01 | Phase 6 | Pending |
+| OAUTH-01 | Phase 6 | Complete |
 | OAUTH-02 | Phase 7 | Pending |
 | OAUTH-03 | Phase 7 | Pending |
 | OAUTH-04 | Phase 5 | Complete |
