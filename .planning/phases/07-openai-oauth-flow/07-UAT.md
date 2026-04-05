@@ -1,8 +1,8 @@
 ---
 phase: 07-openai-oauth-flow
 type: uat
-status: pending
-executed: null
+status: FAIL
+executed: 2026-04-05
 scope: "End-to-end validation of OpenAI Codex OAuth PKCE flow + auto-refresh per D-06/D-08"
 requirements: [OAUTH-02, OAUTH-03]
 ---
@@ -23,7 +23,7 @@ End-of-phase validation uses manual UAT via curl. Flow: start OAuth via `curl PO
 
 ## Prerequisites
 
-- Backend running: `npm run dev:server` (port 3001)
+- Backend running: `npm run dev:backend` (port 3001) — **scaffold correction**: docs originally said `dev:server` which does not exist
 - ChatGPT Plus/Pro subscription (required for OpenAI Codex OAuth — auth.openai.com login)
 - Port 1455 free (check with `lsof -nP -iTCP:1455 -sTCP:LISTEN`)
 - Browser available to complete OAuth consent
@@ -43,10 +43,12 @@ curl -sS -X POST http://localhost:3001/api/auth/oauth/start \
 
 **Actual:**
 ```
-[paste response here]
+HTTP 200 with JSON body containing status:"started", provider:"openai",
+and a complete authUrl starting with https://auth.openai.com/...
+(Full URL captured by operator; not reproduced here to avoid leaking PKCE state.)
 ```
 
-**Result:** [ PASS | FAIL ]
+**Result:** PASS
 
 ---
 
@@ -74,18 +76,26 @@ curl -sS "http://localhost:3001/api/auth/status?provider=openai" | jq .
 
 **Actual (2a):**
 ```
-[paste response here]
+{"status":"pending","provider":"openai","authUrl":"https://auth.openai.com/..."}
+```
+**Actual (2b — browser flow):**
+```
+First attempt failed with "State mismatch" (stale state from a prior /start call).
+Second attempt with a fresh /start call succeeded — pi-ai success page rendered
+at http://127.0.0.1:1455/callback.
 ```
 **Actual (2c):**
 ```
-[paste response here]
+{"status":"ok","provider":"openai"}
 ```
 **Actual (2d):**
 ```
-[paste response here]
+{"hasApiKey":<bool>,"hasOAuth":true,"activeMethod":"oauth","oauthExpiry":1776275325880}
 ```
 
-**Result:** [ PASS | FAIL ]
+**Result:** PASS
+
+**Note:** Consent flow requires state to be fresh per /start invocation — reusing an older authUrl after a new /start is called triggers "State mismatch" as expected.
 
 ---
 
@@ -97,9 +107,9 @@ This test validates BOTH that the OAuth token works AND that the Plan 01 provide
 ```bash
 curl -sS "http://localhost:3001/api/models?provider=openai" | jq '.models[].id'
 ```
-**Expected:** List contains Codex model IDs like `gpt-5.1`, `gpt-5.1-codex`, `gpt-5.1-codex-max`, `gpt-5.2`, `gpt-5.2-codex` — NOT `gpt-4o`, `gpt-4o-mini`, `gpt-5`, etc. (If standard OpenAI models appear, the resolvePiProvider remap is not wired correctly — FAIL this test and route back to Plan 01 gap closure.)
+**Expected:** List contains Codex model IDs like `gpt-5.1`, `gpt-5.1-codex`, `gpt-5.1-codex-max`, `gpt-5.2`, `gpt-5.2-codex` — NOT `gpt-4o`, `gpt-4o-mini`, `gpt-5`, etc.
 
-**Step 3b.** With OAuth credentials stored from Test 2, send a chat request to a Codex model. Note the request body uses `message`, `model`, `provider` (NOT `messages`, `modelId` — the chat route contract is `{message, model, provider}`):
+**Step 3b.** With OAuth credentials stored from Test 2, send a chat request to a Codex model:
 ```bash
 curl -sS -N -X POST http://localhost:3001/api/chat \
   -H "Content-Type: application/json" \
@@ -110,96 +120,64 @@ curl -sS -N -X POST http://localhost:3001/api/chat \
   }'
 ```
 
-**Expected (PASS):** SSE stream with assistant content events; stream completes with assistant content containing "OK" (or similar short acknowledgment).
-
-**Expected (BLOCKED, per RESEARCH.md Pitfall 2):** Error response or SSE error event containing text like "insufficient scope", "model.request", or "unauthorized_client". This means the `openid profile email offline_access` scopes are insufficient for the Codex backend despite pi-ai routing through `chatgpt.com/backend-api`. Document the exact error.
+**Expected (PASS):** SSE stream with assistant content events; stream completes with assistant content containing "OK".
 
 **Actual (3a — model list):**
 ```
-[paste response here]
+Codex models returned:
+  gpt-5.1
+  gpt-5.1-codex-max
+  gpt-5.1-codex-mini
+  gpt-5.2
+  gpt-5.2-codex
+  gpt-5.3-codex
+  gpt-5.3-codex-spark
+  gpt-5.4
+  gpt-5.4-mini
+Zero standard OpenAI models (no gpt-4o, gpt-4o-mini, gpt-5, gpt-4-turbo).
+D-01/D-02 provider remap confirmed wired correctly.
 ```
-**Actual (3b — first 20-30 lines of stream):**
+**Actual (3b — stream output):**
 ```
-[paste response here]
+HTTP 200 with SSE stream containing only a single event: done marker.
+Zero text_delta events. Zero tool_start events. Zero error events.
+Reproduced identically with model:"gpt-5.1" and model:"gpt-5.1-codex-max".
+
+Symptom: stream closes cleanly (no exception surfaced) but never emits
+any assistant content — the Agent loop appears to complete without the
+Codex backend returning any text chunks via pi-agent-core's event bus.
 ```
 
-**Result:** [ PASS (token works end-to-end + Codex models returned) | BLOCKED (upstream policy rejects — Pitfall 2 materialized) | FAIL (plumbing bug or remap broken) ]
+**Result:** FAIL (plumbing-level gap — SSE stream emits no assistant content)
 
-**If BLOCKED:** Record the exact error message. Note in 07-SUMMARY.md under "Known Upstream Limitations". Phase 7 is still technically complete (the code is correct, pi-ai's scope choice is the blocker).
+**Analysis:**
+- Not BLOCKED: no "insufficient scope" / "unauthorized_client" / "model.request" error surfaced. If pi-ai's scope list were wrong for the Codex backend, we would expect an error event — instead we get a silent, successful-looking stream with no content.
+- Possible root causes (for Phase 7.1 debug):
+  1. `adaptAgentEvents` in `src/server/lib/stream-adapter.ts` may not be subscribing to the event type pi-ai emits for Codex responses (OpenAI's chat API streaming format differs from Anthropic's).
+  2. The `openai-codex` provider slug in pi-ai may route requests but not emit the standard `text_delta` stream events that `adaptAgentEvents` expects (codex responses may come through a different event name).
+  3. The ChatGPT backend may be returning 200 with an empty response body when the OAuth scopes don't grant model access — a silent denial rather than an error. `curl -v` against the raw pi-ai call would confirm.
+- Recommended next step: `/gsd:debug` session targeting the stream-adapter event subscription for the `openai-codex` provider, with verbose logging on Agent events to see what pi-agent-core actually emits for Codex responses.
 
 ---
 
 ### Test 4 — SC#4: Auto-refresh via force-expire + chat
 
-This test proves the end-to-end refresh cycle (mutex → refreshOpenAICodexToken → storeOAuthTokens → new access token in chat stream) without waiting 6h.
+**Result:** SKIPPED (depends on Test 3b producing a working chat stream — cannot validate refresh cycle when baseline chat flow is broken).
 
-**Step 4a.** Capture the current `oauthExpiry` from /api/auth/status:
-```bash
-curl -sS "http://localhost:3001/api/auth/status?provider=openai" | jq .oauthExpiry
-```
-**Expected:** A large epoch-ms number (current time + ~6h).
-
-**Step 4b.** Force-expire the credential:
-```bash
-curl -sS -X POST "http://localhost:3001/api/auth/oauth/debug/force-expire?provider=openai" | jq .
-```
-**Expected:** `{"status":"ok","provider":"openai","before":<original-expiry>,"after":<around-now>,"message":"Forced expiry on openai OAuth credential. Next chat request will trigger refresh."}`
-
-**Step 4c.** Verify expiry is now in the past:
-```bash
-curl -sS "http://localhost:3001/api/auth/status?provider=openai" | jq '.oauthExpiry, ((.oauthExpiry / 1000) | todate)'
-```
-**Expected:** oauthExpiry is less than current time (i.e., already expired). The ISO date should be ~1 second in the past.
-
-**Step 4d.** Send a chat request — this should trigger the refresh path in `resolveCredential` (setup.ts). The refresh happens transparently before pi-ai receives the access token.
-```bash
-curl -sS -N -X POST http://localhost:3001/api/chat \
-  -H "Content-Type: application/json" \
-  -d '{
-    "provider":"openai",
-    "model":"gpt-5.1",
-    "message":"Say OK and nothing else"
-  }'
-```
-**Expected:** Same as Test 3 — SSE stream with assistant content. No 401 errors in the stream (which would indicate refresh failed and an expired token was sent).
-
-**Step 4e.** Verify `oauthExpiry` moved forward (the refresh happened):
-```bash
-curl -sS "http://localhost:3001/api/auth/status?provider=openai" | jq .oauthExpiry
-```
-**Expected:** A NEW large epoch-ms number (current time + ~6h) — MUST be greater than the `after` value captured in Step 4b. Proves `refreshOpenAICodexToken` was called and `storeOAuthTokens` wrote fresh credentials.
-
-**Actual (4a — initial expiry):**
-```
-[paste value here]
-```
-**Actual (4b — force-expire response):**
-```
-[paste response here]
-```
-**Actual (4c — expiry after force):**
-```
-[paste response here]
-```
-**Actual (4d — chat response first 20-30 lines):**
-```
-[paste response here]
-```
-**Actual (4e — expiry after chat):**
-```
-[paste value here]
-```
-
-**Result:** [ PASS (4e expiry > 4b after value, chat succeeded) | BLOCKED (chat succeeded but refresh didn't happen — expiry unchanged; possible if Phase 5 60s buffer logic has a bug, but unlikely) | FAIL (chat 401'd or refresh threw) ]
+Re-run Test 4 after Test 3b is green.
 
 ---
 
 ### Test 5 — SC#5: Port 1455 conflict returns 409 with Codex CLI message
 
-**Step 5a.** Occupy port 1455 with a stand-in listener:
+**Step 5a.** Occupy port 1455 with a stand-in listener.
+
+**Scaffold correction:** The original scaffold used `nc -l 1455 &`, which on this system bound to `*:1455` (wildcard) but did NOT block a new listener on `127.0.0.1:1455` specifically. The detection path uses an explicit 127.0.0.1 bind check, so the `nc` approach did not trigger the conflict.
+
+Working approach — Python explicit bind on 127.0.0.1:1455:
 ```bash
-nc -l 1455 &
-NC_PID=$!
+python3 -c "import socket; s=socket.socket(); s.bind(('127.0.0.1',1455)); s.listen(1); input()" &
+PY_PID=$!
 sleep 1
 ```
 
@@ -210,37 +188,38 @@ curl -sS -w "\nHTTP %{http_code}\n" -X POST http://localhost:3001/api/auth/oauth
   -d '{"provider":"openai"}'
 ```
 
-**Expected:** HTTP 409, JSON body `{"status":"error","message":"Port 1455 is already in use by another process. This port is required by the OpenAI Codex OAuth callback. If you have Codex CLI running, please stop it and try again."}`
-
-**Step 5c.** Clean up:
-```bash
-kill $NC_PID 2>/dev/null
-```
+**Expected:** HTTP 409, JSON body containing verbatim `"Port 1455 is already in use"` and `"Codex CLI"`.
 
 **Actual:**
 ```
-[paste response + HTTP code here]
+HTTP 409 with message: "Port 1455 is already in use by another process.
+This port is required by the OpenAI Codex OAuth callback. If you have
+Codex CLI running, please stop it and try again."
 ```
 
-**Result:** [ PASS | FAIL ]
+**Step 5c.** Cleanup: `kill $PY_PID 2>/dev/null`
+
+**Result:** PASS
 
 ---
 
 ## Final Outcome
 
-**Overall:** [ PASS | BLOCKED | FAIL ]
+**Overall:** FAIL
 
 **Summary:**
-- SC#1 (auth URL returned): [ PASS | FAIL ]
-- SC#2 (status polling + credentials stored): [ PASS | FAIL ]
-- SC#3 (OAuth token works for Codex chat + D-01/D-02 remap): [ PASS | BLOCKED | FAIL ]
-- SC#4 (auto-refresh via force-expire + chat): [ PASS | BLOCKED | FAIL ]
-- SC#5 (port 1455 conflict handled): [ PASS | FAIL ]
+- SC#1 (auth URL returned): PASS
+- SC#2 (status polling + credentials stored): PASS
+- SC#3 (OAuth token works for Codex chat + D-01/D-02 remap): FAIL (stream emits only `event: done`, no content — plumbing gap)
+- SC#4 (auto-refresh via force-expire + chat): SKIPPED (depends on SC#3)
+- SC#5 (port 1455 conflict handled): PASS
 
 **Follow-up actions:**
-- [list any items, or "None"]
+- **Gap closure (Phase 7.1):** Debug why `/api/chat` SSE stream emits no `text_delta` events for Codex models. Investigate `adaptAgentEvents` event subscription + pi-agent-core event names for `openai-codex` provider. Likely fix: stream-adapter needs to listen for OpenAI-style streaming events (delta.content, completion chunks) in addition to Anthropic-style events, OR the Codex provider emits a different event name than expected.
+- **Retest SC#4** after SC#3 is green.
+- **Scaffold fix** (non-blocking): update plan templates and UAT scaffold generator — `dev:server` → `dev:backend`; port-conflict stand-in guidance should recommend explicit 127.0.0.1 bind (Python snippet) instead of bare `nc -l`.
 
-**Executed by:** [name]
-**Executed at:** [ISO timestamp]
+**Executed by:** henriquelima
+**Executed at:** 2026-04-05
 
 ---
