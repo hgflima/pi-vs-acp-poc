@@ -156,4 +156,39 @@ oauthRoutes.get("/status", (c) => {
   return c.json({ status: "error", provider, message: errorMessage })
 })
 
+// D-06: Dev/UAT helper — force-expire the stored OAuth credential for a provider so the next
+// chat request triggers resolveCredential's refresh path (60s buffer). Exercises the end-to-end
+// refresh cycle (mutex, refresh{Anthropic,OpenAICodex}Token, storeOAuthTokens, new access token
+// into pi-agent-core mid-stream) without waiting for the natural ~6h token lifetime.
+// D-07: Always enabled (no environment gate) — POC is local-only, single-user, in-memory, no deploy.
+oauthRoutes.post("/debug/force-expire", (c) => {
+  const provider = c.req.query("provider") as Provider | undefined
+  if (!provider || !["anthropic", "openai"].includes(provider)) {
+    return c.json(
+      { status: "error", message: "Invalid provider. Use 'anthropic' or 'openai'." },
+      400
+    )
+  }
+
+  const result = forceExpireOAuth(provider)
+  if (!result) {
+    return c.json(
+      {
+        status: "error",
+        provider,
+        message: `No OAuth credential stored for ${provider}. Complete OAuth login first.`,
+      },
+      404
+    )
+  }
+
+  return c.json({
+    status: "ok",
+    provider,
+    before: result.before,
+    after: result.after,
+    message: `Forced expiry on ${provider} OAuth credential. Next chat request will trigger refresh.`,
+  })
+})
+
 export { oauthRoutes }
