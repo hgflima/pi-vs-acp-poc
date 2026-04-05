@@ -1,6 +1,6 @@
 import { Hono } from "hono"
 import { getModels } from "@mariozechner/pi-ai"
-import { hasAnyCredential } from "../lib/credentials"
+import { hasAnyCredential, resolvePiProvider } from "../lib/credentials"
 
 const modelRoutes = new Hono()
 
@@ -17,7 +17,7 @@ modelRoutes.get("/", (c) => {
     return c.json({ error: "Not authenticated", needsAuth: true }, 401)
   }
 
-  const models = getModels(provider)
+  const models = getModels(resolvePiProvider(typedProvider))
   return c.json({
     models: models.map((m) => ({
       id: m.id,
