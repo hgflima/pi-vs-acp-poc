@@ -5,6 +5,8 @@ status: draft
 shadcn_initialized: true
 preset: base-nova
 created: 2026-04-06
+revised: 2026-04-06
+revision: 2
 ---
 
 # Phase 8 — UI Design Contract
@@ -89,6 +91,14 @@ Accent reserved for: OAuth login buttons ("Login with Claude", "Login with Codex
 
 ---
 
+## Visual Focal Point
+
+**Disconnected state:** The full-width OAuth login button ("Login with Claude" / "Login with Codex") is the primary visual anchor. It is the only accent-colored element in the card content area and occupies the full width of the tab panel, drawing the eye immediately.
+
+**Connected state:** The full-width "Go to Chat" button is the primary visual anchor, using accent color at full width.
+
+---
+
 ## Component Inventory
 
 ### New Components Needed
@@ -102,7 +112,7 @@ Accent reserved for: OAuth login buttons ("Login with Claude", "Login with Codex
 | Component | File | Usage |
 |-----------|------|-------|
 | `Card` / `CardHeader` / `CardContent` / `CardTitle` / `CardDescription` | `ui/card.tsx` | Main connection page layout |
-| `Button` | `ui/button.tsx` | Login buttons, Connect API Key, Go to Chat, Disconnect, Cancel |
+| `Button` | `ui/button.tsx` | Login buttons, Connect API Key, Go to Chat, Disconnect, Cancel authorization |
 | `Badge` | `ui/badge.tsx` | Auth method badge ([OAuth] / [API Key]) |
 | `Input` | `ui/input.tsx` | API Key text input |
 | `SegmentedControl` | `connection/segmented-control.tsx` | Provider selector (Anthropic / OpenAI) |
@@ -127,7 +137,7 @@ Accent reserved for: OAuth login buttons ("Login with Claude", "Login with Codex
 | State | What User Sees | Key Elements |
 |-------|---------------|--------------|
 | **Disconnected (initial)** | Provider selector + auth method tabs. OAuth tab active by default (D-02). Login button enabled. | Tabs: OAuth / API Key. OAuth tab shows login button. API Key tab shows input + connect button. |
-| **OAuth polling** | Login button replaced with spinner + "Waiting for authorization..." text. Cancel link below. Provider selector and tabs disabled. | Loader2 spinning. Text: "Waiting for authorization..." Button variant: secondary/disabled. Cancel: text link below. |
+| **OAuth polling** | Login button replaced with spinner + "Waiting for authorization..." text. "Cancel authorization" link below. Provider selector and tabs disabled. | Loader2 spinning. Text: "Waiting for authorization..." Button variant: secondary/disabled. "Cancel authorization": text link below. |
 | **OAuth success** | Connected summary: auth method badge [OAuth] + green health badge. "Go to Chat" and "Disconnect" buttons. No auto-redirect (D-11). | Badge: [OAuth] green. Buttons: "Go to Chat" (primary), "Disconnect" (destructive outline). |
 | **OAuth error** | Error message below the login button. Login button re-enabled. | Text: error message from backend. Color: destructive. Button: re-enabled to retry. |
 | **API Key connecting** | Connect button shows spinner + "Connecting..." | Same pattern as existing v1.0 connection page. |
@@ -147,7 +157,7 @@ Accent reserved for: OAuth login buttons ("Login with Claude", "Login with Codex
 | 5 | Frontend polls `GET /api/auth/oauth/status?provider={p}` every 2000ms |
 | 6a | Status `"ok"` -> call `refreshStatus(provider)` to update auth state -> show connected summary |
 | 6b | Status `"error"` -> stop polling -> show error message |
-| 6c | User clicks Cancel -> stop polling -> reset to disconnected |
+| 6c | User clicks "Cancel authorization" -> stop polling -> reset to disconnected |
 
 ### Popup Window Spec
 
@@ -200,7 +210,7 @@ Accent reserved for: OAuth login buttons ("Login with Claude", "Login with Codex
 +----------------------------------------------+
 |  [  (spinner)  Waiting for authorization...  ]|
 |                                               |
-|              Cancel                           |
+|           Cancel authorization                |
 +----------------------------------------------+
 ```
 
@@ -254,7 +264,7 @@ Accent reserved for: OAuth login buttons ("Login with Claude", "Login with Codex
 | Card title | "Pi AI Chat" |
 | Card description | "Connect to your LLM provider to start chatting" |
 | OAuth polling text | "Waiting for authorization..." |
-| OAuth cancel link | "Cancel" |
+| OAuth cancel link | "Cancel authorization" |
 | Connected heading | "Connected" |
 | Expired heading | "Session Expired" |
 | Auth method badge: OAuth | "OAuth" |
@@ -295,6 +305,7 @@ No third-party registries declared (components.json `registries: {}`).
 | Popup window | `rel="noopener"` implied by `window.open` to different origin |
 | Focus management | After OAuth completes or errors, focus returns to the primary CTA button |
 | Color contrast | Green/yellow/red badges use 800-weight text on 100-weight background (>4.5:1 contrast ratio in light mode) |
+| API Key visibility toggle | `Eye` icon button uses `aria-label="Show API key"`; `EyeOff` icon button uses `aria-label="Hide API key"` |
 
 ---
 
