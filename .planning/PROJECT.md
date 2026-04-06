@@ -115,4 +115,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-04-05 after Phase 6 (Anthropic OAuth Flow) complete — PKCE flow working end-to-end, OAuth token validates against Anthropic API, Feb 2026 `sk-ant-oat*` ban risk did not materialise*
+*Last updated: 2026-04-06 after Phase 7.1 (gap closure) complete — OpenAI Codex OAuth streaming fixed (toStoreProvider reverse-map), SC#3+SC#4 PASS, OAUTH-02+OAUTH-03 closed. Phase 8 (OAuth Connection UI) unblocked.*
