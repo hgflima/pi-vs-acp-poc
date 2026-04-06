@@ -2,15 +2,15 @@
 gsd_state_version: 1.0
 milestone: v1.1
 milestone_name: OAuth Authentication
-status: verifying
-stopped_at: "Completed 07.1-01-error-surfacing-PLAN.md (D-03 shipped, SC#3 Outcome 3 escalation)"
-last_updated: "2026-04-06T06:48:13.492Z"
-last_activity: 2026-04-06
+status: executing
+stopped_at: "Phase 07.1 context gathered (4 decisions: D-01 diagnóstico via error-surfacing, D-02 fix strategy deferred to post-diagnosis, D-03 message_end case + SSE error, D-04 SC#3+SC#4 green minimum)"
+last_updated: "2026-04-06T06:41:13.197Z"
+last_activity: 2026-04-06 -- Phase 07.1 execution started
 progress:
   total_phases: 5
   completed_phases: 3
   total_plans: 11
-  completed_plans: 10
+  completed_plans: 9
   percent: 0
 ---
 
@@ -21,14 +21,14 @@ progress:
 See: .planning/PROJECT.md (updated 2026-04-04)
 
 **Core value:** Provar que pi-ai + pi-agent-core sustentam um chat web com streaming em tempo real, tool calls visiveis e troca de agentes
-**Current focus:** Phase 07 — openai-oauth-flow
+**Current focus:** Phase 07.1 — solucao-do-problema-encontrado-e-documentado-na-fase-7
 
 ## Current Position
 
-Phase: 07 (openai-oauth-flow) — BLOCKED
-Plan: 4 of 4 (07-04 gap closure executed; SC#3 still FAIL post-fix)
-Status: Phase complete — ready for verification
-Last activity: 2026-04-06
+Phase: 07.1 (solucao-do-problema-encontrado-e-documentado-na-fase-7) — EXECUTING
+Plan: 1 of 2
+Status: Executing Phase 07.1
+Last activity: 2026-04-06 -- Phase 07.1 execution started
 
 Progress: [░░░░░░░░░░] 0%
 
@@ -59,7 +59,6 @@ Progress: [░░░░░░░░░░] 0%
 | Phase 07-openai-oauth-flow P02 | 3 min | 2 tasks | 1 files |
 | Phase 07-openai-oauth-flow P03 | 45min | 2 tasks | 1 files |
 | Phase 07-openai-oauth-flow P04 | 75min | 3 tasks | 3 files |
-| Phase 07.1 P01 | 4min | 2 tasks | 2 files |
 
 ## Accumulated Context
 
@@ -101,8 +100,6 @@ Recent decisions affecting current work:
 - [Phase 07-openai-oauth-flow]: Plan 07-04 diagnose-first confirmed Cause B: pi-agent-core Agent loop emits ZERO message_update events for openai-codex responses. Captured 8-event sequence: agent_start → turn_start → message_start → message_end → message_start → message_end → turn_end → agent_end. Second message_start/message_end pair is the !addedPartial fallback (agent-loop.js 201-203/214-216). Cause A and Cause C ruled out empirically.
 - [Phase 07-openai-oauth-flow]: Plan 07-04 exhaustive switch on AssistantMessageEvent.type applied to stream-adapter.ts — defensive, not curative. Fixes a future class of silent fall-through bugs but does NOT resolve the current upstream gap. Re-verification shows SC#3 still FAIL with identical symptom. Phase 7 remains blocked pending Phase 7.2 upstream investigation in pi-ai/pi-agent-core.
 - [Phase 07-openai-oauth-flow]: Plan 07-04 DEBUG_EVENTS flag retained in source (gated const false) — provides quick re-enable path for Phase 7.2 diagnostic logging without re-scaffolding.
-- [Phase 07.1]: D-03 implemented: case 'message_end' in stream-adapter.ts emits SSE event:error when stopReason==='error' && errorMessage present. Permanent fix (not debug-gated). Closes the silent error-dropping gap from Phase 07-04.
-- [Phase 07.1]: SC#3 diagnostic classified Outcome 3 (escalation): OAuth credentials unavailable in worktree, D-02 decision tree handoff to Plan 07.1-02 with live browser consent requirement.
 
 ### Pending Todos
 
@@ -116,6 +113,6 @@ None.
 
 ## Session Continuity
 
-Last session: 2026-04-06T06:48:13.489Z
-Stopped at: Completed 07.1-01-error-surfacing-PLAN.md (D-03 shipped, SC#3 Outcome 3 escalation)
-Resume file: None
+Last session: 2026-04-05T19:46:40.013Z
+Stopped at: Phase 07.1 context gathered (4 decisions: D-01 diagnóstico via error-surfacing, D-02 fix strategy deferred to post-diagnosis, D-03 message_end case + SSE error, D-04 SC#3+SC#4 green minimum)
+Resume file: .planning/phases/07.1-solucao-do-problema-encontrado-e-documentado-na-fase-7/07.1-CONTEXT.md
