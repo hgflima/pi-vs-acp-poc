@@ -1,38 +1,51 @@
-import { useState, useEffect } from "react"
-import { useNavigate } from "react-router"
+import { useState, useEffect, useRef } from "react"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/client/components/ui/card"
-import { Input } from "@/client/components/ui/input"
-import { Button } from "@/client/components/ui/button"
+import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/client/components/ui/tabs"
 import { SegmentedControl } from "./segmented-control"
+import { OAuthTab } from "./oauth-tab"
+import { ApiKeyTab } from "./api-key-tab"
+import { ConnectedSummary, getTokenHealth } from "./connected-summary"
 import { useAuth } from "@/client/hooks/use-auth"
 import type { Provider } from "@/client/lib/types"
-import { Loader2, Check, Eye, EyeOff } from "lucide-react"
 
 export function ConnectionPage() {
-  const navigate = useNavigate()
   const [provider, setProvider] = useState<Provider>("anthropic")
-  const { getProviderAuth, connect } = useAuth()
+  const [authMethod, setAuthMethod] = useState<"oauth" | "apiKey">("oauth") // D-02: OAuth default
+  const { getProviderAuth, connect, disconnect, refreshStatus, startOAuth, cancelOAuth } = useAuth()
   const auth = getProviderAuth(provider)
-  const [apiKey, setApiKey] = useState("")
-  const [showKey, setShowKey] = useState(false)
+  const healthTimerRef = useRef<ReturnType<typeof setInterval> | null>(null)
+  const [, forceUpdate] = useState(0) // triggers re-render for health badge recalculation
 
-  // Auto-redirect after successful connection (D-04)
+  // On mount / provider change: refresh status to get latest oauthExpiry
   useEffect(() => {
-    if (auth.status === "connected") {
-      const timer = setTimeout(() => navigate("/chat"), 1500)
-      return () => clearTimeout(timer)
+    refreshStatus(provider)
+  }, [provider, refreshStatus])
+
+  // Periodic health re-evaluation (Pitfall 5): 60s timer for OAuth badge transitions
+  useEffect(() => {
+    if (auth.status === "connected" && auth.authMethod === "oauth") {
+      healthTimerRef.current = setInterval(() => {
+        forceUpdate(c => c + 1)
+      }, 60_000)
     }
-  }, [auth.status, navigate])
+    return () => {
+      if (healthTimerRef.current) {
+        clearInterval(healthTimerRef.current)
+        healthTimerRef.current = null
+      }
+    }
+  }, [auth.status, auth.authMethod])
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
-    if (!apiKey.trim()) return
-    await connect(provider, apiKey)
-  }
-
-  const isConnecting = auth.status === "connecting"
   const isConnected = auth.status === "connected"
-  const hasError = auth.status === "error"
+  const isPolling = auth.status === "connecting" && authMethod === "oauth"
+  // getTokenHealth used for health badge — computed on each render
+  void getTokenHealth(auth.authMethod, auth.oauthExpiry)
+
+  const handleStartOAuth = () => startOAuth(provider)
+  const handleCancelOAuth = () => cancelOAuth(provider)
+  const handleConnect = async (apiKey: string) => { await connect(provider, apiKey) }
+  const handleDisconnect = async () => { await disconnect(provider) }
+  const handleReAuth = () => { startOAuth(provider) }
 
   return (
     <div className="flex min-h-screen items-center justify-center bg-background p-4">
@@ -41,64 +54,53 @@ export function ConnectionPage() {
           <CardTitle className="text-2xl">Pi AI Chat</CardTitle>
           <CardDescription>Connect to your LLM provider to start chatting</CardDescription>
         </CardHeader>
-        <CardContent>
-          <form onSubmit={handleSubmit} className="space-y-6">
-            {/* Provider selection (D-01) */}
-            <div className="space-y-2">
-              <label className="text-sm font-medium">Provider</label>
-              <SegmentedControl
-                value={provider}
-                onChange={setProvider}
-                disabled={isConnecting || isConnected}
+        <CardContent className="space-y-6">
+          {/* Provider selector — disabled during polling (D-05) and when connected */}
+          <div className="space-y-2">
+            <label className="text-sm font-semibold">Provider</label>
+            <SegmentedControl
+              value={provider}
+              onChange={setProvider}
+              disabled={isPolling || isConnected}
+            />
+          </div>
+
+          {/* Connected summary — shown above tabs when connected (D-11) */}
+          {isConnected && (
+            <ConnectedSummary
+              authMethod={auth.authMethod}
+              oauthExpiry={auth.oauthExpiry}
+              onDisconnect={handleDisconnect}
+              onReAuth={handleReAuth}
+            />
+          )}
+
+          {/* Auth method tabs — ALWAYS rendered (D-01, D-12).
+              When connected, tabs remain visible below ConnectedSummary so user
+              can switch auth method without disconnecting first. */}
+          <Tabs value={authMethod} onValueChange={(v) => setAuthMethod(v as "oauth" | "apiKey")}>
+            <TabsList className="w-full">
+              <TabsTrigger value="oauth" disabled={isPolling} className="flex-1">OAuth</TabsTrigger>
+              <TabsTrigger value="apiKey" disabled={isPolling} className="flex-1">API Key</TabsTrigger>
+            </TabsList>
+            <TabsContent value="oauth" className="mt-4">
+              <OAuthTab
+                provider={provider}
+                status={auth.status}
+                error={auth.error}
+                onStartOAuth={handleStartOAuth}
+                onCancelOAuth={handleCancelOAuth}
               />
-            </div>
-
-            {/* API Key input (D-02) */}
-            <div className="space-y-2">
-              <label className="text-sm font-medium">API Key</label>
-              <div className="relative">
-                <Input
-                  type={showKey ? "text" : "password"}
-                  placeholder={provider === "anthropic" ? "sk-ant-..." : "sk-..."}
-                  value={apiKey}
-                  onChange={(e) => setApiKey(e.target.value)}
-                  disabled={isConnecting || isConnected}
-                  className="pr-10"
-                />
-                <button
-                  type="button"
-                  onClick={() => setShowKey(!showKey)}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
-                  tabIndex={-1}
-                >
-                  {showKey ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
-                </button>
-              </div>
-            </div>
-
-            {/* Connect button with inline feedback (D-03, D-05) */}
-            <Button
-              type="submit"
-              className="w-full"
-              disabled={isConnecting || isConnected || !apiKey.trim()}
-            >
-              {isConnecting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-              {isConnected && <Check className="mr-2 h-4 w-4" />}
-              {isConnecting ? "Connecting..." : isConnected ? "Connected!" : hasError ? "Try Again" : "Connect"}
-            </Button>
-
-            {/* Inline error feedback (D-03) */}
-            {hasError && auth.error && (
-              <p className="text-sm text-destructive text-center">{auth.error}</p>
-            )}
-
-            {/* Connected feedback (D-04) */}
-            {isConnected && (
-              <p className="text-sm text-green-600 text-center">
-                Redirecting to chat...
-              </p>
-            )}
-          </form>
+            </TabsContent>
+            <TabsContent value="apiKey" className="mt-4">
+              <ApiKeyTab
+                provider={provider}
+                status={auth.status}
+                error={auth.error}
+                onConnect={handleConnect}
+              />
+            </TabsContent>
+          </Tabs>
         </CardContent>
       </Card>
     </div>
