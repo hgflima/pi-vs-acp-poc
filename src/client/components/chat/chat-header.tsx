@@ -21,6 +21,7 @@ interface ChatHeaderProps {
   agentLoading: boolean
   needsAuth: boolean
   agentProvider: Provider
+  connectedAgents: Set<AgentId>
   onAgentSwitch: (id: AgentId) => void
   onModelSwitch: (modelId: string) => void
   onAuthenticate: (apiKey: string) => Promise<boolean>
@@ -45,6 +46,7 @@ export function ChatHeader({
   agentLoading,
   needsAuth,
   agentProvider,
+  connectedAgents,
   onAgentSwitch,
   onModelSwitch,
   onAuthenticate,
@@ -69,6 +71,7 @@ export function ChatHeader({
             loading={agentLoading}
             needsAuth={needsAuth}
             provider={agentProvider}
+            connectedAgents={connectedAgents}
             onAgentSwitch={onAgentSwitch}
             onModelSwitch={onModelSwitch}
             onAuthenticate={onAuthenticate}

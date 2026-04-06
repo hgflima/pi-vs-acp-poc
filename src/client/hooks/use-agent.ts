@@ -1,7 +1,7 @@
 import { useState, useCallback, useEffect } from "react"
-import type { AgentId, ModelInfo, Provider } from "@/client/lib/types"
+import type { AgentId, AgentConfig, ModelInfo, Provider } from "@/client/lib/types"
 import { AGENT_CONFIG } from "@/client/lib/types"
-import { fetchModels, connectProvider } from "@/client/lib/api"
+import { fetchModels, connectProvider, fetchAuthStatus } from "@/client/lib/api"
 
 interface UseAgentReturn {
   current: AgentId
@@ -12,6 +12,7 @@ interface UseAgentReturn {
   availableModels: ModelInfo[]
   loading: boolean
   needsAuth: boolean
+  connectedAgents: Set<AgentId>
   switchAgent: (id: AgentId) => void
   switchModel: (modelId: string) => void
   authenticate: (apiKey: string) => Promise<boolean>
@@ -24,6 +25,42 @@ export function useAgent(): UseAgentReturn {
   const [availableModels, setAvailableModels] = useState<ModelInfo[]>([])
   const [loading, setLoading] = useState(false)
   const [needsAuth, setNeedsAuth] = useState(false)
+  const [connectedAgents, setConnectedAgents] = useState<Set<AgentId>>(new Set())
+
+  // On mount: check which providers are authenticated and auto-select the right agent
+  useEffect(() => {
+    let cancelled = false
+
+    Promise.all(
+      (Object.entries(AGENT_CONFIG) as [AgentId, AgentConfig][]).map(
+        async ([id, config]) => {
+          try {
+            const status = await fetchAuthStatus(config.provider)
+            return { id, connected: status.hasApiKey || status.hasOAuth }
+          } catch {
+            return { id, connected: false }
+          }
+        }
+      )
+    ).then((results) => {
+      if (cancelled) return
+
+      const connected = new Set<AgentId>()
+      for (const { id, connected: isConnected } of results) {
+        if (isConnected) connected.add(id)
+      }
+      setConnectedAgents(connected)
+
+      // If default agent is not connected but another is, switch to the connected one
+      if (!connected.has("claude-code") && connected.size > 0) {
+        const first = [...connected][0]
+        setCurrent(first)
+        setModel(AGENT_CONFIG[first].defaultModel)
+      }
+    })
+
+    return () => { cancelled = true }
+  }, [])
 
   const config = AGENT_CONFIG[current]
   const provider = config.provider
@@ -80,6 +117,7 @@ export function useAgent(): UseAgentReturn {
 
     if (success) {
       setNeedsAuth(false)
+      setConnectedAgents((prev) => new Set([...prev, current]))
       // Re-fetch models after successful auth
       setLoading(true)
       fetchModels(provider)
@@ -109,6 +147,7 @@ export function useAgent(): UseAgentReturn {
     availableModels,
     loading,
     needsAuth,
+    connectedAgents,
     switchAgent,
     switchModel,
     authenticate,

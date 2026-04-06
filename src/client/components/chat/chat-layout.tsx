@@ -70,6 +70,7 @@ export function ChatLayout() {
         agentLoading={agent.loading}
         needsAuth={agent.needsAuth}
         agentProvider={agent.provider}
+        connectedAgents={agent.connectedAgents}
         onAgentSwitch={handleAgentSwitch}
         onModelSwitch={handleModelSwitch}
         onAuthenticate={agent.authenticate}

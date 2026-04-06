@@ -13,6 +13,7 @@ interface AgentModelPopoverProps {
   loading: boolean
   needsAuth: boolean
   provider: Provider
+  connectedAgents: Set<AgentId>
   onAgentSwitch: (id: AgentId) => void
   onModelSwitch: (modelId: string) => void
   onAuthenticate: (apiKey: string) => Promise<boolean>
@@ -31,6 +32,7 @@ export function AgentModelPopover({
   loading,
   needsAuth,
   provider,
+  connectedAgents,
   onAgentSwitch,
   onModelSwitch,
   onAuthenticate,
@@ -80,7 +82,7 @@ export function AgentModelPopover({
                   className="h-4 w-4 text-muted-foreground"
                 />
                 <span className="ml-2 font-medium">{config.label}</span>
-                {id === current && (
+                {connectedAgents.has(id) && (
                   <span className="ml-auto h-2 w-2 rounded-full bg-green-500" />
                 )}
               </button>
