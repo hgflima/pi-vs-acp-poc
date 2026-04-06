@@ -3,15 +3,15 @@ gsd_state_version: 1.0
 milestone: v1.1
 milestone_name: OAuth Authentication
 status: executing
-stopped_at: Completed 08-01-PLAN.md
-last_updated: "2026-04-06T09:15:05.085Z"
-last_activity: 2026-04-06
+stopped_at: Phase 8 UI-SPEC approved
+last_updated: "2026-04-06T09:10:56.256Z"
+last_activity: 2026-04-06 -- Phase 08 execution started
 progress:
   total_phases: 5
   completed_phases: 4
   total_plans: 13
-  completed_plans: 12
-  percent: 92
+  completed_plans: 11
+  percent: 0
 ---
 
 # Project State
@@ -26,11 +26,11 @@ See: .planning/PROJECT.md (updated 2026-04-04)
 ## Current Position
 
 Phase: 08 (oauth-connection-ui) — EXECUTING
-Plan: 2 of 2
-Status: Plan 01 complete, executing Plan 02
-Last activity: 2026-04-06
+Plan: 1 of 2
+Status: Executing Phase 08
+Last activity: 2026-04-06 -- Phase 08 execution started
 
-Progress: [█████████░] 92%
+Progress: [░░░░░░░░░░] 0%
 
 ## Performance Metrics
 
@@ -60,7 +60,6 @@ Progress: [█████████░] 92%
 | Phase 07-openai-oauth-flow P03 | 45min | 2 tasks | 1 files |
 | Phase 07-openai-oauth-flow P04 | 75min | 3 tasks | 3 files |
 | Phase 07.1 P02 | 4min | 4 tasks | 5 files |
-| Phase 08-oauth-connection-ui P01 | 2min | 3 tasks | 4 files |
 
 ## Accumulated Context
 
@@ -104,8 +103,6 @@ Recent decisions affecting current work:
 - [Phase 07-openai-oauth-flow]: Plan 07-04 DEBUG_EVENTS flag retained in source (gated const false) — provides quick re-enable path for Phase 7.2 diagnostic logging without re-scaffolding.
 - [Phase 07.1]: D-02 Branch A selected: toStoreProvider() in setup.ts reverse-maps openai-codex to openai for credential store lookup -- root cause of SC#3 FAIL
 - [Phase 07.1]: Phase 7 fully verified (5/5 SC PASS): OAUTH-02 and OAUTH-03 complete, Phase 7 + 7.1 closed
-- [Phase 08-oauth-connection-ui]: Plan 08-01: stopPolling extracted as shared helper reused by startOAuth, cancelOAuth, and disconnect
-- [Phase 08-oauth-connection-ui]: Plan 08-01: Polling guard checks pollingRef.has(provider) before AND after async fetchOAuthStatus to prevent stale closure actions
 
 ### Pending Todos
 
@@ -118,6 +115,6 @@ None.
 
 ## Session Continuity
 
-Last session: 2026-04-06T09:15:05.082Z
-Stopped at: Completed 08-01-PLAN.md
-Resume file: None
+Last session: 2026-04-06T08:32:02.880Z
+Stopped at: Phase 8 UI-SPEC approved
+Resume file: .planning/phases/08-oauth-connection-ui/08-UI-SPEC.md
