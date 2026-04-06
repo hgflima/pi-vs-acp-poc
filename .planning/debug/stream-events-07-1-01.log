@@ -1,0 +1,83 @@
+# SC#3 Re-run Diagnostic -- Phase 7.1 Plan 01 (post-D-03 fix)
+# Captured: 2026-04-06T06:45:14Z
+# Backend commit: d7d7eaa95bd81e73aa5d51ad74faa0360dc2bc46
+# stream-adapter.ts case "message_end" branch active: yes
+
+## Curl command
+curl -sS -N -X POST http://localhost:3001/api/chat \
+  -H "Content-Type: application/json" \
+  -d '{"provider":"openai","model":"gpt-5.1","message":"Say OK and nothing else"}'
+
+## Raw SSE output
+Backend started from worktree with D-03 fix applied (commit d7d7eaa9).
+OAuth credentials NOT present (in-memory store empty after fresh backend start).
+Backend returned HTTP 401 before reaching Agent/stream-adapter code path:
+
+{"error":"Not authenticated"}
+
+SC#3 curl could not reach the stream-adapter code path because resolveCredential
+in chat.ts rejects with 401 before createAgent is called. This is the expected
+behavior per Phase 05 credential infrastructure design (in-memory store, no
+persistence across restarts).
+
+## Event count
+- event: text_delta    -> 0
+- event: error         -> 0
+- event: done          -> 0
+- event: thinking_delta -> 0
+- event: tool_start    -> 0
+- event: tool_update   -> 0
+- event: tool_end      -> 0
+
+## Outcome classification (1, 2, or 3 per Plan 07.1-01 Task 2 interpretation)
+Outcome: 3
+
+## Extracted errorMessage (if Outcome 2)
+N/A -- backend rejected before reaching Agent/stream-adapter (no OAuth credentials available)
+
+## Diagnostic interpretation
+The D-03 fix (case "message_end" emitting SSE event:error when stopReason==="error" &&
+errorMessage present) is committed and TypeScript-clean, but could not be empirically
+validated because the in-memory credential store has no OAuth token. The backend's
+chat route correctly enforces authentication (HTTP 401) BEFORE constructing the Agent,
+so the stream-adapter code path is never reached. This is an environmental precondition
+failure, NOT a code issue. The D-03 code path will be exercised when Plan 07.1-02
+runs with live OAuth credentials (browser consent required).
+
+The key question remains: when SC#3 runs with valid OAuth credentials and the Codex
+chat stream fails, will message_end.errorMessage contain a concrete upstream error
+(e.g. "401 unauthorized", "No API key", HTTP error from chatgpt.com/backend-api)?
+The D-03 branch is correctly wired to surface it if present.
+
+## Escalation
+D-01 escalation triggered by environmental precondition: OAuth credentials unavailable
+in automated worktree context (no browser consent possible). Escalation path:
+- Plan 07.1-02 MUST run on the main repo (not a worktree) with the backend already
+  running and OAuth credentials stored from a fresh browser consent flow.
+- Alternatively, the user can start the backend from this worktree, complete OAuth
+  consent in browser, then re-run the SC#3 curl manually to capture the errorMessage.
+- The D-03 fix from Task 1 (commit d7d7eaa9) is merged and will be active on any
+  backend start -- no additional code changes needed to surface the error.
+
+## Handoff to Plan 07.1-02
+Plan 07.1-02 should:
+1. Start backend with D-03 fix active (already in stream-adapter.ts).
+2. Complete OpenAI OAuth browser consent to store credentials.
+3. Re-run SC#3 curl (exact command in "Curl command" section above).
+4. Inspect SSE output for event:error with concrete errorMessage.
+5. Based on the errorMessage content, apply D-02 decision tree:
+   - "No API key" -> resolveCredential bug in our code
+   - HTTP 401/403/scope error -> pi-ai header/scope issue (patch-package)
+   - "Failed after retries" / network -> upstream connectivity
+   - "No response body" -> ChatGPT backend empty response (Cause C, patch-package)
+   - If NO event:error appears (only event:done) -> D-01 deeper escalation:
+     re-enable DEBUG_EVENTS=true, capture full AgentEvent sequence, inspect
+     message_end.message object shape to determine if errorMessage is populated.
+
+## Environment notes
+- Executed in Claude Code worktree: .claude/worktrees/agent-a93e3e03
+- Backend started via ./node_modules/.bin/tsx src/server/index.ts
+- OAuth status at test time: {"hasApiKey":false,"hasOAuth":false,"activeMethod":null}
+- Browser consent cannot be performed in automated agent context
+- D-03 fix is committed and will be active on next backend start from any checkout
+  that includes commit d7d7eaa9 or later
