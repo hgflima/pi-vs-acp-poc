@@ -26,6 +26,42 @@ export async function fetchAuthStatus(provider: Provider): Promise<AuthStatusRes
   return res.json()
 }
 
+export async function startOAuth(provider: Provider): Promise<{
+  status: "started" | "error"
+  provider: Provider
+  authUrl?: string
+  message?: string
+}> {
+  const res = await fetch(`${API_BASE}/auth/oauth/start`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ provider }),
+  })
+  return res.json()
+}
+
+export async function fetchOAuthStatus(provider: Provider): Promise<{
+  status: "pending" | "ok" | "error" | "none"
+  provider: Provider
+  authUrl?: string
+  message?: string
+}> {
+  const res = await fetch(`${API_BASE}/auth/oauth/status?provider=${provider}`)
+  return res.json()
+}
+
+export async function disconnectProvider(provider: Provider): Promise<{
+  status: "ok" | "error"
+  message?: string
+}> {
+  const res = await fetch(`${API_BASE}/auth/disconnect`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ provider }),
+  })
+  return res.json()
+}
+
 export async function healthCheck(): Promise<{ status: string }> {
   const res = await fetch(`${API_BASE}/health`)
   return res.json()
