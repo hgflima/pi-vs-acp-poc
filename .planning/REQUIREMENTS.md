@@ -15,8 +15,8 @@ Requirements for milestone v1.1 OAuth Authentication. Each maps to roadmap phase
 ### OAuth Authentication
 
 - [x] **OAUTH-01**: User pode autenticar via OAuth PKCE com Anthropic (loginAnthropic via pi-ai)
-- [ ] **OAUTH-02**: User pode autenticar via OAuth PKCE com OpenAI Codex (loginOpenAICodex via pi-ai)
-- [ ] **OAUTH-03**: Tokens OAuth sao refreshed automaticamente antes de expirar
+- [x] **OAUTH-02**: User pode autenticar via OAuth PKCE com OpenAI Codex (loginOpenAICodex via pi-ai)
+- [x] **OAUTH-03**: Tokens OAuth sao refreshed automaticamente antes de expirar
 - [x] **OAUTH-04**: User pode usar API Key como alternativa ao OAuth para qualquer provider
 
 ### Connection UI
@@ -48,8 +48,8 @@ Requirements for milestone v1.1 OAuth Authentication. Each maps to roadmap phase
 | CRED-01 | Phase 5 | Complete |
 | CRED-02 | Phase 5 | Complete |
 | OAUTH-01 | Phase 6 | Complete |
-| OAUTH-02 | Phase 7 | In Progress (UAT FAIL — SC#3 gap) |
-| OAUTH-03 | Phase 7 | In Progress (UAT SKIPPED — depends on SC#3) |
+| OAUTH-02 | Phase 7 | Complete |
+| OAUTH-03 | Phase 7 | Complete |
 | OAUTH-04 | Phase 5 | Complete |
 | UI-01 | Phase 8 | Pending |
 | UI-02 | Phase 8 | Pending |
@@ -62,4 +62,4 @@ Requirements for milestone v1.1 OAuth Authentication. Each maps to roadmap phase
 
 ---
 *Requirements defined: 2026-04-04*
-*Last updated: 2026-04-04 after roadmap revision — OAUTH-01 re-added, Anthropic OAuth prioritized*
+*Last updated: 2026-04-06 after Phase 7.1 closure — OAUTH-02 and OAUTH-03 completed via D-03 error-surfacing + D-02 Branch A fix (toStoreProvider)*

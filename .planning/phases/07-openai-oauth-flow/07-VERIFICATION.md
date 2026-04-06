@@ -1,12 +1,12 @@
 ---
 phase: 07-openai-oauth-flow
 verified: 2026-04-05T00:00:00Z
-status: gaps_found
-score: 4/5 success criteria verified
-re_verification: false
+status: verified
+score: 5/5 success criteria verified
+re_verification: true
 gaps:
   - truth: "User can send chat messages using the OAuth token (the token actually works for API calls, not just token acquisition)"
-    status: failed
+    status: resolved
     reason: "SSE stream for POST /api/chat with provider=openai and a Codex model (gpt-5.1, gpt-5.1-codex-max) closes cleanly with only a `done` event — zero `text_delta` events emitted. No error event surfaced. The OAuth credential is stored and the provider remap routes to openai-codex correctly, but assistant content never reaches the SSE stream."
     artifacts:
       - path: "src/server/lib/stream-adapter.ts"
@@ -16,7 +16,7 @@ gaps:
       - "If pi-agent-core emits a different event name for OpenAI-style streaming chunks (e.g. 'content_block_delta', 'delta', or a provider-specific variant), add a matching case branch to adaptAgentEvents in src/server/lib/stream-adapter.ts"
       - "After stream-adapter fix lands, re-run SC#3 (POST /api/chat with provider=openai, model=gpt-5.1) and SC#4 (force-expire + chat) to close the gap"
   - truth: "When the OAuth token approaches expiry, it is refreshed automatically without user intervention or chat interruption"
-    status: failed
+    status: resolved
     reason: "SC#4 (auto-refresh via force-expire + chat) was SKIPPED in UAT because it depends on SC#3 producing a working chat stream. The refresh infrastructure (resolveCredential with 60s buffer, refreshOpenAICodexToken, per-provider mutex) exists and was implemented in Phase 5/6 — it cannot be validated empirically until SC#3 is green."
     artifacts:
       - path: "src/server/agent/setup.ts"
@@ -29,8 +29,8 @@ gaps:
 
 **Phase Goal:** User can authenticate with OpenAI Codex via OAuth PKCE and use the resulting token for chat, with automatic refresh before expiry
 **Verified:** 2026-04-05
-**Status:** gaps_found
-**Re-verification:** No — initial verification
+**Status:** verified
+**Re-verification:** Yes — Phase 7.1 final closure (2026-04-06)
 
 ## Goal Achievement
 
@@ -40,11 +40,11 @@ gaps:
 | --- | ----------------------------------------------------------------------------------------------------------------- | ----------- | ------------------------------------------------------------------------------------------------------ |
 | 1   | Backend endpoint initiates OpenAI OAuth PKCE flow via pi-ai and returns the auth URL to the frontend             | VERIFIED    | UAT SC#1 PASS — POST /api/auth/oauth/start returned HTTP 200 with non-empty authUrl (auth.openai.com) |
 | 2   | After user completes OAuth consent, backend stores the OAuth credentials and a status polling endpoint reports success | VERIFIED | UAT SC#2 PASS — status polling showed pending → ok; /api/auth/status returned hasOAuth:true, activeMethod:oauth, oauthExpiry set |
-| 3   | User can send chat messages using the OAuth token (the token actually works for API calls, not just token acquisition) | FAILED  | UAT SC#3 FAIL — POST /api/chat returned HTTP 200 SSE stream with only `event: done`, zero `text_delta` events. No error emitted. Reproduced on gpt-5.1 and gpt-5.1-codex-max. |
-| 4   | When the OAuth token approaches expiry, it is refreshed automatically without user intervention or chat interruption | FAILED   | UAT SC#4 SKIPPED — depends on SC#3. Infrastructure present (resolveCredential + refreshOpenAICodexToken + mutex) but not empirically validated. |
+| 3   | User can send chat messages using the OAuth token (the token actually works for API calls, not just token acquisition) | VERIFIED | UAT SC#3 PASS (Phase 7.1 final closure) — POST /api/chat returned SSE stream with event:text_delta containing "OK". Fix: toStoreProvider() reverse-maps "openai-codex" to "openai" for credential store lookup. |
+| 4   | When the OAuth token approaches expiry, it is refreshed automatically without user intervention or chat interruption | VERIFIED | UAT SC#4 PASS (Phase 7.1 final closure) — force-expire set oauthExpiry to past, chat request triggered auto-refresh, oauthExpiry advanced from 1776324468599 to 1776324576399. |
 | 5   | If port 1455 is occupied (e.g., by Codex CLI), the user gets a clear error message explaining the conflict        | VERIFIED    | UAT SC#5 PASS — HTTP 409 returned with verbatim Codex CLI message when 127.0.0.1:1455 was bound       |
 
-**Score:** 3/5 truths verified (SC#3 failed, SC#4 skipped/depends on SC#3)
+**Score:** 5/5 truths verified (SC#3 and SC#4 resolved in Phase 7.1 final closure)
 
 ---
 
@@ -98,10 +98,10 @@ gaps:
 
 | Requirement | Source Plans | Description | Status | Evidence |
 | ----------- | ----------- | ----------- | ------ | -------- |
-| OAUTH-02 | 07-01, 07-02, 07-03 | User pode autenticar via OAuth PKCE com OpenAI Codex (loginOpenAICodex via pi-ai) | PARTIAL | Token acquisition (SC#1, SC#2) verified live. Chat with acquired token (SC#3) failed — OAUTH-02 requires the token "actually works" for API calls. Per 07-03 SUMMARY: "OAUTH-02 NOT yet verified end-to-end — SC#3 failed." |
-| OAUTH-03 | 07-01, 07-02, 07-03 | Tokens OAuth sao refreshed automaticamente antes de expirar | BLOCKED | SC#4 (force-expire + chat) was skipped. Infrastructure (resolveCredential + refreshOpenAICodexToken + mutex) is implemented and wired; empirical validation requires SC#3 to be green first. Per 07-03 SUMMARY: "OAUTH-03 NOT yet verified end-to-end." |
+| OAUTH-02 | 07-01, 07-02, 07-03, 07.1-02 | User pode autenticar via OAuth PKCE com OpenAI Codex (loginOpenAICodex via pi-ai) | COMPLETE | SC#3 PASS (Phase 7.1 final closure) — OAuth token works for Codex chat. Fix: toStoreProvider() in setup.ts reverse-maps "openai-codex" to "openai" for credential store lookup. |
+| OAUTH-03 | 07-01, 07-02, 07-03, 07.1-02 | Tokens OAuth sao refreshed automaticamente antes de expirar | COMPLETE | SC#4 PASS (Phase 7.1 final closure) — force-expire + chat triggers auto-refresh. oauthExpiry advanced from 1776324468599 to 1776324576399. |
 
-**Note:** REQUIREMENTS.md marks both OAUTH-02 and OAUTH-03 as `[x] Complete` in the requirements list and maps them to Phase 7. These marks are premature — the 07-03 SUMMARY explicitly records `requirements-completed: []` with an explanation that requirements will be marked complete only after Phase 7.1 gap closure lands SC#3.
+**Note:** OAUTH-02 and OAUTH-03 confirmed complete after Phase 7.1 final closure (2026-04-06). SC#3 and SC#4 both PASS.
 
 ---
 
@@ -156,3 +156,16 @@ Requirements OAUTH-02 and OAUTH-03 must NOT be considered satisfied until Phase 
 
 _Verified: 2026-04-05_
 _Verifier: Claude (gsd-verifier)_
+
+---
+
+## Phase 7.1 Closure (re-verified 2026-04-06)
+
+Both gaps resolved. SC#3 and SC#4 now PASS per 07-UAT.md "Re-verification (Phase 7.1 — final closure)" section.
+
+**Fix applied:** Branch A (our code) — added `toStoreProvider()` helper in `src/server/agent/setup.ts` that reverse-maps pi-ai's `"openai-codex"` slug back to the credential store's canonical `"openai"` Provider key inside the `getApiKey` callback. Root cause: `resolvePiProvider` remaps `"openai"` to `"openai-codex"` for OAuth, but pi-agent-core's Agent passes that slug to `getApiKey`, where `getActiveCredential("openai-codex")` returned `null` (store keys by `"openai"`).
+
+**Root cause:** Credential store key mismatch — pi-ai uses `"openai-codex"` internally but our store keys by `"openai"`. The `getApiKey` callback received the remapped slug and could not find the credential.
+
+**Re-verified by:** henriquelima
+**Re-verified at:** 2026-04-06T07:32:00Z
