@@ -3,15 +3,15 @@ gsd_state_version: 1.0
 milestone: v1.1
 milestone_name: OAuth Authentication
 status: executing
-stopped_at: Phase 8 context gathered
-last_updated: "2026-04-06T08:13:13.274Z"
+stopped_at: Completed 08-01-PLAN.md
+last_updated: "2026-04-06T09:15:05.085Z"
 last_activity: 2026-04-06
 progress:
   total_phases: 5
   completed_phases: 4
-  total_plans: 11
-  completed_plans: 11
-  percent: 0
+  total_plans: 13
+  completed_plans: 12
+  percent: 92
 ---
 
 # Project State
@@ -21,16 +21,16 @@ progress:
 See: .planning/PROJECT.md (updated 2026-04-04)
 
 **Core value:** Provar que pi-ai + pi-agent-core sustentam um chat web com streaming em tempo real, tool calls visiveis e troca de agentes
-**Current focus:** Phase 07.1 COMPLETE — next: Phase 8 (OAuth Connection UI)
+**Current focus:** Phase 08 — oauth-connection-ui
 
 ## Current Position
 
-Phase: 8
-Plan: Not started
-Status: Ready to execute
+Phase: 08 (oauth-connection-ui) — EXECUTING
+Plan: 2 of 2
+Status: Plan 01 complete, executing Plan 02
 Last activity: 2026-04-06
 
-Progress: [░░░░░░░░░░] 0%
+Progress: [█████████░] 92%
 
 ## Performance Metrics
 
@@ -60,6 +60,7 @@ Progress: [░░░░░░░░░░] 0%
 | Phase 07-openai-oauth-flow P03 | 45min | 2 tasks | 1 files |
 | Phase 07-openai-oauth-flow P04 | 75min | 3 tasks | 3 files |
 | Phase 07.1 P02 | 4min | 4 tasks | 5 files |
+| Phase 08-oauth-connection-ui P01 | 2min | 3 tasks | 4 files |
 
 ## Accumulated Context
 
@@ -103,6 +104,8 @@ Recent decisions affecting current work:
 - [Phase 07-openai-oauth-flow]: Plan 07-04 DEBUG_EVENTS flag retained in source (gated const false) — provides quick re-enable path for Phase 7.2 diagnostic logging without re-scaffolding.
 - [Phase 07.1]: D-02 Branch A selected: toStoreProvider() in setup.ts reverse-maps openai-codex to openai for credential store lookup -- root cause of SC#3 FAIL
 - [Phase 07.1]: Phase 7 fully verified (5/5 SC PASS): OAUTH-02 and OAUTH-03 complete, Phase 7 + 7.1 closed
+- [Phase 08-oauth-connection-ui]: Plan 08-01: stopPolling extracted as shared helper reused by startOAuth, cancelOAuth, and disconnect
+- [Phase 08-oauth-connection-ui]: Plan 08-01: Polling guard checks pollingRef.has(provider) before AND after async fetchOAuthStatus to prevent stale closure actions
 
 ### Pending Todos
 
@@ -115,6 +118,6 @@ None.
 
 ## Session Continuity
 
-Last session: 2026-04-06T08:13:13.272Z
-Stopped at: Phase 8 context gathered
-Resume file: .planning/phases/08-oauth-connection-ui/08-CONTEXT.md
+Last session: 2026-04-06T09:15:05.082Z
+Stopped at: Completed 08-01-PLAN.md
+Resume file: None

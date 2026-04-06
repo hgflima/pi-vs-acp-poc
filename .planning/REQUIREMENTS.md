@@ -21,9 +21,9 @@ Requirements for milestone v1.1 OAuth Authentication. Each maps to roadmap phase
 
 ### Connection UI
 
-- [ ] **UI-01**: Tela de conexao mostra selector de metodo de auth (OAuth vs API Key) por provider
-- [ ] **UI-02**: Botao OAuth abre browser para flow e faz polling de status ate completar
-- [ ] **UI-03**: Indicador visual de status do token (connected, expiring, expired)
+- [x] **UI-01**: Tela de conexao mostra selector de metodo de auth (OAuth vs API Key) por provider
+- [x] **UI-02**: Botao OAuth abre browser para flow e faz polling de status ate completar
+- [x] **UI-03**: Indicador visual de status do token (connected, expiring, expired)
 
 ## Out of Scope
 
@@ -51,9 +51,9 @@ Requirements for milestone v1.1 OAuth Authentication. Each maps to roadmap phase
 | OAUTH-02 | Phase 7 | Complete |
 | OAUTH-03 | Phase 7 | Complete |
 | OAUTH-04 | Phase 5 | Complete |
-| UI-01 | Phase 8 | Pending |
-| UI-02 | Phase 8 | Pending |
-| UI-03 | Phase 8 | Pending |
+| UI-01 | Phase 8 | Complete |
+| UI-02 | Phase 8 | Complete |
+| UI-03 | Phase 8 | Complete |
 
 **Coverage:**
 - v1.1 requirements: 9 active
