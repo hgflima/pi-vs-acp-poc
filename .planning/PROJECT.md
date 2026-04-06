@@ -30,12 +30,13 @@ Provar que pi-ai + pi-agent-core sustentam um chat web com streaming em tempo re
 - ✓ Troca de modelo por provider via registry de modelos — v1.0
 - ✓ Carregamento de harness (CLAUDE.md, AGENTS.md, skills, hooks) aplicado ao system prompt — v1.0
 - ✓ OAuth flow para Anthropic (Claude Code) — v1.1 (validado em Phase 6: auth URL exposto, credenciais persistidas, token OAuth aceito em /api/chat, conflito de porta 53692 tratado)
+- ✓ OAuth flow para OpenAI (Codex) — v1.1 (validado em Phase 7: OAuth flow completo, streaming funcional, provider mapping corrigido em 7.1)
+- ✓ Coexistencia: usuario escolhe entre OAuth ou API Key por provider — v1.1 (validado em Phase 8: tabs OAuth/API Key, troca sem desconectar)
+- ✓ UI de conexao atualizada para suportar ambos os metodos — v1.1 (validado em Phase 8: ConnectedSummary com badges, token health, auto-detect de provider no chat)
 
 ### Active
 
-- [ ] OAuth flow para OpenAI (Codex)
-- [ ] Coexistencia: usuario escolhe entre OAuth ou API Key por provider
-- [ ] UI de conexao atualizada para suportar ambos os metodos
+(nenhum — milestone v1.1 completo)
 
 ### Out of Scope
 
@@ -115,4 +116,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-04-06 after Phase 7.1 (gap closure) complete — OpenAI Codex OAuth streaming fixed (toStoreProvider reverse-map), SC#3+SC#4 PASS, OAUTH-02+OAUTH-03 closed. Phase 8 (OAuth Connection UI) unblocked.*
+*Last updated: 2026-04-06 after Phase 8 complete — OAuth Connection UI with tabs, token health badges, auto-detect of authenticated provider. Milestone v1.1 (OAuth Authentication) feature-complete.*
