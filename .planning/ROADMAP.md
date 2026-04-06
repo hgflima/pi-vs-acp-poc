@@ -97,7 +97,7 @@ Plans:
 
 Plans:
 - [x] 08-01-PLAN.md — Backend disconnect endpoint, shadcn Tabs install, OAuth/disconnect API functions, useAuth hook extensions
-- [ ] 08-02-PLAN.md — OAuthTab, ApiKeyTab, ConnectedSummary components + ConnectionPage refactor with tabs and token health
+- [x] 08-02-PLAN.md — OAuthTab, ApiKeyTab, ConnectedSummary components + ConnectionPage refactor with tabs and token health
 
 ## Progress
 

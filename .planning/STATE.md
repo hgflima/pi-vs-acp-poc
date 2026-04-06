@@ -2,15 +2,15 @@
 gsd_state_version: 1.0
 milestone: v1.1
 milestone_name: OAuth Authentication
-status: executing
-stopped_at: Completed 08-01-PLAN.md
-last_updated: "2026-04-06T09:15:05.085Z"
+status: verifying
+stopped_at: Completed 08-02-PLAN.md (auto tasks) — awaiting human verification checkpoint
+last_updated: "2026-04-06T09:20:27.145Z"
 last_activity: 2026-04-06
 progress:
   total_phases: 5
-  completed_phases: 4
+  completed_phases: 5
   total_plans: 13
-  completed_plans: 12
+  completed_plans: 13
   percent: 92
 ---
 
@@ -27,7 +27,7 @@ See: .planning/PROJECT.md (updated 2026-04-04)
 
 Phase: 08 (oauth-connection-ui) — EXECUTING
 Plan: 2 of 2
-Status: Plan 01 complete, executing Plan 02
+Status: Phase complete — ready for verification
 Last activity: 2026-04-06
 
 Progress: [█████████░] 92%
@@ -61,6 +61,7 @@ Progress: [█████████░] 92%
 | Phase 07-openai-oauth-flow P04 | 75min | 3 tasks | 3 files |
 | Phase 07.1 P02 | 4min | 4 tasks | 5 files |
 | Phase 08-oauth-connection-ui P01 | 2min | 3 tasks | 4 files |
+| Phase 08-oauth-connection-ui P02 | 3min | 3 tasks | 4 files |
 
 ## Accumulated Context
 
@@ -106,6 +107,8 @@ Recent decisions affecting current work:
 - [Phase 07.1]: Phase 7 fully verified (5/5 SC PASS): OAUTH-02 and OAUTH-03 complete, Phase 7 + 7.1 closed
 - [Phase 08-oauth-connection-ui]: Plan 08-01: stopPolling extracted as shared helper reused by startOAuth, cancelOAuth, and disconnect
 - [Phase 08-oauth-connection-ui]: Plan 08-01: Polling guard checks pollingRef.has(provider) before AND after async fetchOAuthStatus to prevent stale closure actions
+- [Phase 08-oauth-connection-ui]: Plan 08-02: D-12 tabs always visible when connected — user can switch auth method without disconnecting first
+- [Phase 08-oauth-connection-ui]: Plan 08-02: D-11 no auto-redirect — user clicks Go to Chat manually
 
 ### Pending Todos
 
@@ -118,6 +121,6 @@ None.
 
 ## Session Continuity
 
-Last session: 2026-04-06T09:15:05.082Z
-Stopped at: Completed 08-01-PLAN.md
+Last session: 2026-04-06T09:20:27.143Z
+Stopped at: Completed 08-02-PLAN.md (auto tasks) — awaiting human verification checkpoint
 Resume file: None
