@@ -1,7 +1,7 @@
 ---
 phase: 07-openai-oauth-flow
 type: uat
-status: FAIL
+status: PASS
 executed: 2026-04-05
 scope: "End-to-end validation of OpenAI Codex OAuth PKCE flow + auto-refresh per D-06/D-08"
 requirements: [OAUTH-02, OAUTH-03]
@@ -278,5 +278,70 @@ data: {}
 
 **Re-verified by:** henriquelima (via Claude orchestrator)
 **Re-verified at:** 2026-04-05T19:09:08Z
+
+---
+
+## Re-verification (Phase 7.1 — final closure)
+
+**Phase 7.1 plans:** 07.1-01-error-surfacing-PLAN.md, 07.1-02-fix-and-reverify-PLAN.md
+**Re-verified:** 2026-04-06T07:32:00Z
+**Fix applied:** Branch A (our code) — added `toStoreProvider()` helper in `src/server/agent/setup.ts` that reverse-maps pi-ai's `"openai-codex"` slug back to the credential store's canonical `"openai"` Provider key inside the `getApiKey` callback
+**Root cause:** `resolvePiProvider` remaps `"openai"` to `"openai-codex"` for OAuth, but pi-agent-core's Agent passes that remapped slug to `getApiKey`, where `getActiveCredential("openai-codex")` returned `null` because the credential store keys by the original `"openai"` Provider. The "No API key" error was never surfaced in the SSE stream because the earlier Plan 07-04 diagnostic (Cause B) captured the symptom before D-03's `message_end` error-surfacing was in place.
+
+### SC#3 Re-run — Chat stream with OAuth token (Codex model)
+
+**curl:**
+```bash
+curl -sS -N -X POST http://localhost:3001/api/chat \
+  -H "Content-Type: application/json" \
+  -d '{"provider":"openai","model":"gpt-5.1","message":"Say OK and nothing else"}'
+```
+
+**Actual (SSE output):**
+```
+event: text_delta
+data: {"data":"OK"}
+
+event: done
+data: {}
+```
+
+**text_delta event count:** 1
+**Concatenated assistant content:** "OK"
+**event: error count:** 0
+**Closing event:** `event: done`
+
+**Result:** PASS — real assistant content received via OAuth Codex chat stream.
+
+---
+
+### SC#4 Re-run — Auto-refresh via force-expire + chat
+
+**Before expiry (oauthExpiry):** 1776324468599
+**Force-expire:** set to 1775460560238 (forced to past)
+**Chat result:** PASS (text_delta with content received)
+**After expiry (oauthExpiry):** 1776324576399
+**Advanced:** YES (1776324576399 > 1776324468599)
+
+**Result:** PASS — force-expire set credential to past, chat request triggered auto-refresh via `resolveCredential` mutex, new oauthExpiry is later than original pre-force-expire value.
+
+---
+
+### Updated Final Outcome
+
+**Overall (post-Phase-7.1-final-closure):** PASS
+
+- SC#1 (auth URL returned): PASS (unchanged)
+- SC#2 (status polling + credentials stored): PASS (unchanged)
+- SC#3 (OAuth token works for Codex chat + D-01/D-02 remap): PASS
+- SC#4 (auto-refresh via force-expire + chat): PASS
+- SC#5 (port 1455 conflict handled): PASS (unchanged)
+
+**Phase 7 status:** COMPLETE
+**OAUTH-02:** Complete
+**OAUTH-03:** Complete
+
+**Re-verified by:** henriquelima
+**Re-verified at:** 2026-04-06T07:32:00Z
 
 ---
