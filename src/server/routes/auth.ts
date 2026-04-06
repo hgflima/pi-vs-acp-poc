@@ -1,6 +1,6 @@
 import { Hono } from "hono"
 import { getModel, streamSimple } from "@mariozechner/pi-ai"
-import { storeApiKey, getAuthStatus } from "../lib/credentials"
+import { storeApiKey, getAuthStatus, clearByType } from "../lib/credentials"
 
 const authRoutes = new Hono()
 
@@ -81,6 +81,16 @@ authRoutes.get("/status", (c) => {
     return c.json({ error: "Invalid provider. Use 'anthropic' or 'openai'." }, 400)
   }
   return c.json(getAuthStatus(provider))
+})
+
+authRoutes.post("/disconnect", async (c) => {
+  const { provider } = await c.req.json<{ provider: "anthropic" | "openai" }>()
+  if (!provider || !["anthropic", "openai"].includes(provider)) {
+    return c.json({ status: "error", message: "Invalid provider. Use 'anthropic' or 'openai'." }, 400)
+  }
+  clearByType(provider, "apiKey")
+  clearByType(provider, "oauth")
+  return c.json({ status: "ok", provider })
 })
 
 export { authRoutes }
