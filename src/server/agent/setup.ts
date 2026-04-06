@@ -5,7 +5,16 @@ import type { OAuthCredentials } from "@mariozechner/pi-ai"
 import { pocTools } from "./tools"
 import { buildSystemPrompt } from "./harness"
 import { getActiveHarness } from "../routes/harness"
-import { getActiveCredential, resolvePiProvider, storeOAuthTokens, type Provider } from "../lib/credentials"
+import { getActiveCredential, resolvePiProvider, storeOAuthTokens, type Provider, type PiProvider } from "../lib/credentials"
+
+// Reverse-map pi-ai provider slugs back to our credential store's Provider key.
+// pi-agent-core's getApiKey callback receives the provider slug from the model
+// (e.g. "openai-codex" when OAuth is active), but our credential store keys by
+// the canonical Provider ("openai"). This undoes resolvePiProvider's remap.
+function toStoreProvider(piProvider: string): Provider {
+  if (piProvider === "openai-codex") return "openai"
+  return piProvider as Provider
+}
 
 // Refresh 60s before expiry to avoid mid-request expiration
 const REFRESH_BUFFER_MS = 60_000
@@ -70,6 +79,6 @@ export function createAgent({ provider, modelId, systemPrompt }: CreateAgentOpti
       model,
       tools: pocTools,
     },
-    getApiKey: (p) => resolveCredential(p as Provider),
+    getApiKey: (p) => resolveCredential(toStoreProvider(p)),
   })
 }
