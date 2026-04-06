@@ -94,6 +94,30 @@ export function adaptAgentEvents({ agent, stream, onDone }: AdaptOptions): () =>
           break
         }
 
+        case "message_end": {
+          // Phase 7.1 D-03: surface upstream stream-level errors that pi-agent-core delivers
+          // via message_end (when pi-ai throws BEFORE pushing any "start" event — e.g. Codex
+          // HTTP failures from openai-codex-responses.js lines 79/144/159/163/166). Without this
+          // branch the errorMessage is silently dropped and the client only sees `event: done`
+          // (the gap diagnosed in Phase 7 Plan 07-04).
+          // Mirrors the shape used by `case "message_update" → case "error"` above: the client
+          // receives `event: error` with `{ message: <human-readable reason> }` in data.
+          if (
+            event.message.stopReason === "error" &&
+            event.message.errorMessage
+          ) {
+            void stream.writeSSE({
+              event: "error",
+              data: JSON.stringify({ message: event.message.errorMessage }),
+            })
+          }
+          // stopReason === "aborted" (user cancelled) and normal completion reasons
+          // (stop, length, etc.) intentionally emit no SSE — `case "agent_end"` handles
+          // the terminal `event: done`. Keeping this no-op explicit so the switch stays
+          // exhaustive on the currently-handled AgentEvent types.
+          break
+        }
+
         case "tool_execution_start":
           void stream.writeSSE({
             event: "tool_start",
