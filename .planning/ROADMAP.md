@@ -93,8 +93,11 @@ Plans:
   2. Clicking the OAuth button opens the provider consent page in a new browser window and shows a "waiting for authorization" state
   3. After OAuth completes (or fails), the connection page updates automatically without manual refresh
   4. Connected state shows which auth method is active (API Key badge vs OAuth badge) and token health (connected, expiring soon, expired) for both providers
-**Plans**: TBD
-**UI hint**: yes
+**Plans**: 2 plans
+
+Plans:
+- [ ] 08-01-PLAN.md — Backend disconnect endpoint, shadcn Tabs install, OAuth/disconnect API functions, useAuth hook extensions
+- [ ] 08-02-PLAN.md — OAuthTab, ApiKeyTab, ConnectedSummary components + ConnectionPage refactor with tabs and token health
 
 ## Progress
 
@@ -110,4 +113,4 @@ Plans:
 | 6. Anthropic OAuth Flow | v1.1 | 0/2 | Not started | - |
 | 7. OpenAI OAuth Flow | v1.1 | 4/4 | Complete | 2026-04-06 |
 | 7.1. Solucao do Problema (Phase 7 Gap Closure) | v1.1 | 2/2 | Complete | 2026-04-06 |
-| 8. OAuth Connection UI | v1.1 | 0/0 | Not started | - |
+| 8. OAuth Connection UI | v1.1 | 0/2 | Not started | - |
