@@ -2,16 +2,16 @@
 gsd_state_version: 1.0
 milestone: v1.1
 milestone_name: OAuth Authentication
-status: executing
-stopped_at: Phase 8 UI-SPEC approved
-last_updated: "2026-04-06T09:10:56.256Z"
-last_activity: 2026-04-06 -- Phase 08 execution started
+status: verifying
+stopped_at: Completed 08-02-PLAN.md (auto tasks) — awaiting human verification checkpoint
+last_updated: "2026-04-06T09:20:27.145Z"
+last_activity: 2026-04-06
 progress:
   total_phases: 5
-  completed_phases: 4
+  completed_phases: 5
   total_plans: 13
-  completed_plans: 11
-  percent: 0
+  completed_plans: 13
+  percent: 92
 ---
 
 # Project State
@@ -26,11 +26,11 @@ See: .planning/PROJECT.md (updated 2026-04-04)
 ## Current Position
 
 Phase: 08 (oauth-connection-ui) — EXECUTING
-Plan: 1 of 2
-Status: Executing Phase 08
-Last activity: 2026-04-06 -- Phase 08 execution started
+Plan: 2 of 2
+Status: Phase complete — ready for verification
+Last activity: 2026-04-06
 
-Progress: [░░░░░░░░░░] 0%
+Progress: [█████████░] 92%
 
 ## Performance Metrics
 
@@ -60,6 +60,8 @@ Progress: [░░░░░░░░░░] 0%
 | Phase 07-openai-oauth-flow P03 | 45min | 2 tasks | 1 files |
 | Phase 07-openai-oauth-flow P04 | 75min | 3 tasks | 3 files |
 | Phase 07.1 P02 | 4min | 4 tasks | 5 files |
+| Phase 08-oauth-connection-ui P01 | 2min | 3 tasks | 4 files |
+| Phase 08-oauth-connection-ui P02 | 3min | 3 tasks | 4 files |
 
 ## Accumulated Context
 
@@ -103,6 +105,10 @@ Recent decisions affecting current work:
 - [Phase 07-openai-oauth-flow]: Plan 07-04 DEBUG_EVENTS flag retained in source (gated const false) — provides quick re-enable path for Phase 7.2 diagnostic logging without re-scaffolding.
 - [Phase 07.1]: D-02 Branch A selected: toStoreProvider() in setup.ts reverse-maps openai-codex to openai for credential store lookup -- root cause of SC#3 FAIL
 - [Phase 07.1]: Phase 7 fully verified (5/5 SC PASS): OAUTH-02 and OAUTH-03 complete, Phase 7 + 7.1 closed
+- [Phase 08-oauth-connection-ui]: Plan 08-01: stopPolling extracted as shared helper reused by startOAuth, cancelOAuth, and disconnect
+- [Phase 08-oauth-connection-ui]: Plan 08-01: Polling guard checks pollingRef.has(provider) before AND after async fetchOAuthStatus to prevent stale closure actions
+- [Phase 08-oauth-connection-ui]: Plan 08-02: D-12 tabs always visible when connected — user can switch auth method without disconnecting first
+- [Phase 08-oauth-connection-ui]: Plan 08-02: D-11 no auto-redirect — user clicks Go to Chat manually
 
 ### Pending Todos
 
@@ -115,6 +121,6 @@ None.
 
 ## Session Continuity
 
-Last session: 2026-04-06T08:32:02.880Z
-Stopped at: Phase 8 UI-SPEC approved
-Resume file: .planning/phases/08-oauth-connection-ui/08-UI-SPEC.md
+Last session: 2026-04-06T09:20:27.143Z
+Stopped at: Completed 08-02-PLAN.md (auto tasks) — awaiting human verification checkpoint
+Resume file: None
