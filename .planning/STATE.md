@@ -3,14 +3,14 @@ gsd_state_version: 1.0
 milestone: v1.1
 milestone_name: OAuth Authentication
 status: executing
-stopped_at: "Phase 07.1 context gathered (4 decisions: D-01 diagnóstico via error-surfacing, D-02 fix strategy deferred to post-diagnosis, D-03 message_end case + SSE error, D-04 SC#3+SC#4 green minimum)"
-last_updated: "2026-04-06T06:41:13.197Z"
-last_activity: 2026-04-06 -- Phase 07.1 execution started
+stopped_at: Completed 07.1-02-fix-and-reverify-PLAN.md — Phase 7 and Phase 7.1 fully closed
+last_updated: "2026-04-06T07:37:01.627Z"
+last_activity: 2026-04-06
 progress:
   total_phases: 5
-  completed_phases: 3
+  completed_phases: 4
   total_plans: 11
-  completed_plans: 9
+  completed_plans: 11
   percent: 0
 ---
 
@@ -21,14 +21,14 @@ progress:
 See: .planning/PROJECT.md (updated 2026-04-04)
 
 **Core value:** Provar que pi-ai + pi-agent-core sustentam um chat web com streaming em tempo real, tool calls visiveis e troca de agentes
-**Current focus:** Phase 07.1 — solucao-do-problema-encontrado-e-documentado-na-fase-7
+**Current focus:** Phase 07.1 COMPLETE — next: Phase 8 (OAuth Connection UI)
 
 ## Current Position
 
 Phase: 07.1 (solucao-do-problema-encontrado-e-documentado-na-fase-7) — EXECUTING
-Plan: 1 of 2
-Status: Executing Phase 07.1
-Last activity: 2026-04-06 -- Phase 07.1 execution started
+Plan: 2 of 2
+Status: Ready to execute
+Last activity: 2026-04-06
 
 Progress: [░░░░░░░░░░] 0%
 
@@ -59,6 +59,7 @@ Progress: [░░░░░░░░░░] 0%
 | Phase 07-openai-oauth-flow P02 | 3 min | 2 tasks | 1 files |
 | Phase 07-openai-oauth-flow P03 | 45min | 2 tasks | 1 files |
 | Phase 07-openai-oauth-flow P04 | 75min | 3 tasks | 3 files |
+| Phase 07.1 P02 | 4min | 4 tasks | 5 files |
 
 ## Accumulated Context
 
@@ -100,6 +101,8 @@ Recent decisions affecting current work:
 - [Phase 07-openai-oauth-flow]: Plan 07-04 diagnose-first confirmed Cause B: pi-agent-core Agent loop emits ZERO message_update events for openai-codex responses. Captured 8-event sequence: agent_start → turn_start → message_start → message_end → message_start → message_end → turn_end → agent_end. Second message_start/message_end pair is the !addedPartial fallback (agent-loop.js 201-203/214-216). Cause A and Cause C ruled out empirically.
 - [Phase 07-openai-oauth-flow]: Plan 07-04 exhaustive switch on AssistantMessageEvent.type applied to stream-adapter.ts — defensive, not curative. Fixes a future class of silent fall-through bugs but does NOT resolve the current upstream gap. Re-verification shows SC#3 still FAIL with identical symptom. Phase 7 remains blocked pending Phase 7.2 upstream investigation in pi-ai/pi-agent-core.
 - [Phase 07-openai-oauth-flow]: Plan 07-04 DEBUG_EVENTS flag retained in source (gated const false) — provides quick re-enable path for Phase 7.2 diagnostic logging without re-scaffolding.
+- [Phase 07.1]: D-02 Branch A selected: toStoreProvider() in setup.ts reverse-maps openai-codex to openai for credential store lookup -- root cause of SC#3 FAIL
+- [Phase 07.1]: Phase 7 fully verified (5/5 SC PASS): OAUTH-02 and OAUTH-03 complete, Phase 7 + 7.1 closed
 
 ### Pending Todos
 
@@ -107,12 +110,11 @@ None.
 
 ### Blockers/Concerns
 
-- Phase 6 risk: OpenAI OAuth scope may be insufficient (pi-ai requests `openid profile email offline_access` but Codex API may require `model.request`). Must validate empirically with live test.
 - Port 1455 is hardcoded by pi-ai for OpenAI OAuth callback; conflicts with Codex CLI if running simultaneously.
-- Phase 7 SC#3 UPSTREAM gap (post-Plan-07-04): Root cause confirmed as Cause B — pi-agent-core Agent loop emits zero message_update events for openai-codex responses (falls through to !addedPartial path). Our stream-adapter defensive fix (exhaustive switch) did NOT resolve the symptom. Gap is upstream of our code, in pi-ai's openai-codex-responses provider or pi-agent-core's message_update emission logic. Blocks Phase 7 closure and Phase 8 chat wiring for OpenAI. Phase 7.2 required to patch pi-ai locally or write a provider-specific event normalizer in the POC.
+- ~~Phase 7 SC#3 UPSTREAM gap~~ RESOLVED (Phase 7.1): Root cause was credential store key mismatch (getApiKey received "openai-codex" but store keys by "openai"). Fixed via toStoreProvider() in setup.ts. SC#3 and SC#4 both PASS.
 
 ## Session Continuity
 
-Last session: 2026-04-05T19:46:40.013Z
-Stopped at: Phase 07.1 context gathered (4 decisions: D-01 diagnóstico via error-surfacing, D-02 fix strategy deferred to post-diagnosis, D-03 message_end case + SSE error, D-04 SC#3+SC#4 green minimum)
-Resume file: .planning/phases/07.1-solucao-do-problema-encontrado-e-documentado-na-fase-7/07.1-CONTEXT.md
+Last session: 2026-04-06T07:37:01.625Z
+Stopped at: Completed 07.1-02-fix-and-reverify-PLAN.md — Phase 7 and Phase 7.1 fully closed
+Resume file: None

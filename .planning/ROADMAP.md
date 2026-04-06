@@ -78,7 +78,7 @@ Full details: `.planning/milestones/v1.0-ROADMAP.md`
 **Goal:** Close SC#3 and SC#4 for Phase 7 (OAUTH-02/OAUTH-03) via D-03 error-surfacing + D-02 diagnostic-gated fix
 **Requirements**: OAUTH-02, OAUTH-03
 **Depends on:** Phase 7
-**Plans:** 2/2 plans executed — COMPLETE
+**Plans:** 2/2 plans complete
 
 Plans:
 - [x] 07.1-01-error-surfacing-PLAN.md — Add case "message_end" to stream-adapter.ts (D-03), re-run SC#3 curl, capture upstream errorMessage in diagnostic log
