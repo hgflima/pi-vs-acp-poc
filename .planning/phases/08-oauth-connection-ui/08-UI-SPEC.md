@@ -48,14 +48,15 @@ Exceptions: none
 | Role | Size | Weight | Line Height |
 |------|------|--------|-------------|
 | Body | 14px | 400 (regular) | 1.5 |
-| Label | 14px | 500 (medium) | 1.4 |
+| Label | 14px | 600 (semibold) | 1.4 |
 | Heading | 24px | 600 (semibold) | 1.2 |
 | Caption | 12px | 400 (regular) | 1.5 |
 
 Notes:
+- Two weights only: 400 (regular) and 600 (semibold).
 - Heading (24px) used for card title "Pi AI Chat" (matches existing `text-2xl`).
 - Body (14px) used for descriptions, polling status text, error messages.
-- Label (14px/500) used for "Provider", auth method tab labels. Matches existing `text-sm font-medium` pattern.
+- Label (14px/600) used for "Provider", auth method tab labels. Visually distinct from Body at the same 14px size via semibold weight. Maps to existing `text-sm font-semibold` pattern.
 - Caption (12px) used for badge text ([OAuth] / [API Key]), secondary helper text.
 
 ---
@@ -101,7 +102,7 @@ Accent reserved for: OAuth login buttons ("Login with Claude", "Login with Codex
 | Component | File | Usage |
 |-----------|------|-------|
 | `Card` / `CardHeader` / `CardContent` / `CardTitle` / `CardDescription` | `ui/card.tsx` | Main connection page layout |
-| `Button` | `ui/button.tsx` | Login buttons, Connect, Go to Chat, Disconnect, Cancel |
+| `Button` | `ui/button.tsx` | Login buttons, Connect API Key, Go to Chat, Disconnect, Cancel |
 | `Badge` | `ui/badge.tsx` | Auth method badge ([OAuth] / [API Key]) |
 | `Input` | `ui/input.tsx` | API Key text input |
 | `SegmentedControl` | `connection/segmented-control.tsx` | Provider selector (Anthropic / OpenAI) |
@@ -210,7 +211,7 @@ Accent reserved for: OAuth login buttons ("Login with Claude", "Login with Codex
 |  Label: "API Key"                             |
 |  [ sk-ant-...                          (eye)] |
 |                                               |
-|  [       Connect        ]      (full-width)  |
+|  [    Connect API Key    ]    (full-width)    |
 +----------------------------------------------+
 ```
 
@@ -246,7 +247,7 @@ Accent reserved for: OAuth login buttons ("Login with Claude", "Login with Codex
 |---------|------|
 | Primary CTA (Anthropic OAuth) | "Login with Claude" |
 | Primary CTA (OpenAI OAuth) | "Login with Codex" |
-| Primary CTA (API Key) | "Connect" |
+| Primary CTA (API Key) | "Connect API Key" |
 | Primary CTA (connected) | "Go to Chat" |
 | Tab label: OAuth | "OAuth" |
 | Tab label: API Key | "API Key" |
