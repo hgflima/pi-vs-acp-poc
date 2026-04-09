@@ -114,7 +114,8 @@ export function resolvePiProvider(provider: Provider): PiProvider {
 // so the next resolveCredential() call in setup.ts (60s buffer) detects expiry and triggers
 // refreshOpenAICodexToken/refreshAnthropicToken. Returns { before, after } epoch-ms pair on
 // success, or null if no OAuth credential is stored for this provider. Consumed by Plan 02's
-// POST /api/auth/oauth/debug/force-expire endpoint (D-07: always enabled, no NODE_ENV gate).
+// POST /api/auth/oauth/debug/force-expire endpoint. Dev-only: handler in oauth.ts gated by
+// NODE_ENV !== 'production'.
 export function forceExpireOAuth(provider: Provider): { before: number; after: number } | null {
   const entry = store.get(provider)
   if (!entry || !entry.oauth) return null

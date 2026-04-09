@@ -160,8 +160,13 @@ oauthRoutes.get("/status", (c) => {
 // chat request triggers resolveCredential's refresh path (60s buffer). Exercises the end-to-end
 // refresh cycle (mutex, refresh{Anthropic,OpenAICodex}Token, storeOAuthTokens, new access token
 // into pi-agent-core mid-stream) without waiting for the natural ~6h token lifetime.
-// D-07: Always enabled (no environment gate) — POC is local-only, single-user, in-memory, no deploy.
+// Security: handler is gated behind NODE_ENV !== "production" so this never ships enabled in
+// a production build, even though the POC is local-only today.
 oauthRoutes.post("/debug/force-expire", (c) => {
+  if (process.env.NODE_ENV === "production") {
+    return c.json({ error: "Debug endpoint disabled in production" }, 404)
+  }
+
   const provider = c.req.query("provider") as Provider | undefined
   if (!provider || !["anthropic", "openai"].includes(provider)) {
     return c.json(
