@@ -3,6 +3,17 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <!--
+      Content-Security-Policy: baseline hardening for the POC.
+      - 'unsafe-inline' in script-src is required by Vite HMR during dev; accepted for POC,
+        TODO-hardening: tighten once we have a prod build pipeline with hashed scripts.
+      - connect-src allows ws:// and http:// localhost for HMR + the Hono backend proxy.
+      - img-src allows https: for remote images in rendered markdown.
+    -->
+    <meta
+      http-equiv="Content-Security-Policy"
+      content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; connect-src 'self' ws://localhost:* http://localhost:*; img-src 'self' data: https:; font-src 'self' data:;"
+    />
     <title>Pi AI Chat</title>
   </head>
   <body>
