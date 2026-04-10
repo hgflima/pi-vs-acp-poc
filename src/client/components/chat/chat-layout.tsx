@@ -41,6 +41,20 @@ export function ChatLayout() {
     }
   }, [chatId, runtime.runtime])
 
+  // If the backend tells us the ACP session died mid-chat (subprocess crash,
+  // server restart, etc.), rotate to a fresh chatId so the NEXT message
+  // starts a new session. The old UI messages stay visible.
+  useEffect(() => {
+    if (!error || runtime.runtime !== "acp") return
+    const sessionDead =
+      /subprocess exited|session terminated|session not initialized|failed to start acp session/i.test(
+        error,
+      )
+    if (sessionDead) {
+      rotateChatId()
+    }
+  }, [error, runtime.runtime, rotateChatId])
+
   const dispatchSend = useCallback(
     (content: string) => {
       if (runtime.runtime === "acp") {
