@@ -1,0 +1,10 @@
+{
+  "claude-acp": {
+    "command": "claude-agent-acp",
+    "args": []
+  },
+  "codex-acp": {
+    "command": "codex-acp",
+    "args": []
+  }
+}

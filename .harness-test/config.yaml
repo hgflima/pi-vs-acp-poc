@@ -1,0 +1,141 @@
+version: '1.0'
+auth:
+  method: subscription
+  api_key_env: ANTHROPIC_API_KEY
+project_root: /Users/henriquelima/Documents/dev/personal/pi-ai-poc
+components:
+- component_type: claude_md
+  path: /Users/henriquelima/Documents/dev/personal/pi-ai-poc/CLAUDE.md
+  executor: sdk
+- component_type: skill
+  path: 
+    /Users/henriquelima/Documents/dev/personal/pi-ai-poc/.claude/skills/architecture-designer/SKILL.md
+  executor: sdk
+- component_type: skill
+  path: 
+    /Users/henriquelima/Documents/dev/personal/pi-ai-poc/.claude/skills/customer-journey-to-be/SKILL.md
+  executor: sdk
+- component_type: skill
+  path: 
+    /Users/henriquelima/Documents/dev/personal/pi-ai-poc/.claude/skills/product-brief/SKILL.md
+  executor: sdk
+- component_type: hook
+  path: 
+    /Users/henriquelima/Documents/dev/personal/pi-ai-poc/.claude/settings.json
+  executor: sdk
+- component_type: hook
+  path: 
+    /Users/henriquelima/Documents/dev/personal/pi-ai-poc/.claude/settings.json
+  executor: sdk
+- component_type: hook
+  path: 
+    /Users/henriquelima/Documents/dev/personal/pi-ai-poc/.claude/settings.json
+  executor: sdk
+- component_type: subagent
+  path: 
+    /Users/henriquelima/Documents/dev/personal/pi-ai-poc/.claude/agents/gsd-advisor-researcher.md
+  executor: sdk
+- component_type: subagent
+  path: 
+    /Users/henriquelima/Documents/dev/personal/pi-ai-poc/.claude/agents/gsd-assumptions-analyzer.md
+  executor: sdk
+- component_type: subagent
+  path: 
+    /Users/henriquelima/Documents/dev/personal/pi-ai-poc/.claude/agents/gsd-codebase-mapper.md
+  executor: sdk
+- component_type: subagent
+  path: 
+    /Users/henriquelima/Documents/dev/personal/pi-ai-poc/.claude/agents/gsd-debugger.md
+  executor: sdk
+- component_type: subagent
+  path: 
+    /Users/henriquelima/Documents/dev/personal/pi-ai-poc/.claude/agents/gsd-executor.md
+  executor: sdk
+- component_type: subagent
+  path: 
+    /Users/henriquelima/Documents/dev/personal/pi-ai-poc/.claude/agents/gsd-integration-checker.md
+  executor: sdk
+- component_type: subagent
+  path: 
+    /Users/henriquelima/Documents/dev/personal/pi-ai-poc/.claude/agents/gsd-nyquist-auditor.md
+  executor: sdk
+- component_type: subagent
+  path: 
+    /Users/henriquelima/Documents/dev/personal/pi-ai-poc/.claude/agents/gsd-phase-researcher.md
+  executor: sdk
+- component_type: subagent
+  path: 
+    /Users/henriquelima/Documents/dev/personal/pi-ai-poc/.claude/agents/gsd-plan-checker.md
+  executor: sdk
+- component_type: subagent
+  path: 
+    /Users/henriquelima/Documents/dev/personal/pi-ai-poc/.claude/agents/gsd-planner.md
+  executor: sdk
+- component_type: subagent
+  path: 
+    /Users/henriquelima/Documents/dev/personal/pi-ai-poc/.claude/agents/gsd-project-researcher.md
+  executor: sdk
+- component_type: subagent
+  path: 
+    /Users/henriquelima/Documents/dev/personal/pi-ai-poc/.claude/agents/gsd-research-synthesizer.md
+  executor: sdk
+- component_type: subagent
+  path: 
+    /Users/henriquelima/Documents/dev/personal/pi-ai-poc/.claude/agents/gsd-roadmapper.md
+  executor: sdk
+- component_type: subagent
+  path: 
+    /Users/henriquelima/Documents/dev/personal/pi-ai-poc/.claude/agents/gsd-ui-auditor.md
+  executor: sdk
+- component_type: subagent
+  path: 
+    /Users/henriquelima/Documents/dev/personal/pi-ai-poc/.claude/agents/gsd-ui-checker.md
+  executor: sdk
+- component_type: subagent
+  path: 
+    /Users/henriquelima/Documents/dev/personal/pi-ai-poc/.claude/agents/gsd-ui-researcher.md
+  executor: sdk
+- component_type: subagent
+  path: 
+    /Users/henriquelima/Documents/dev/personal/pi-ai-poc/.claude/agents/gsd-user-profiler.md
+  executor: sdk
+- component_type: subagent
+  path: 
+    /Users/henriquelima/Documents/dev/personal/pi-ai-poc/.claude/agents/gsd-verifier.md
+  executor: sdk
+- component_type: subagent
+  path: 
+    /Users/henriquelima/Documents/dev/personal/pi-ai-poc/.claude/agents/ui-brander.md
+  executor: sdk
+- component_type: subagent
+  path: 
+    /Users/henriquelima/Documents/dev/personal/pi-ai-poc/.claude/agents/ui-designer.md
+  executor: sdk
+- component_type: subagent
+  path: 
+    /Users/henriquelima/Documents/dev/personal/pi-ai-poc/.claude/agents/ui-pencil-screen.md
+  executor: sdk
+- component_type: subagent
+  path: 
+    /Users/henriquelima/Documents/dev/personal/pi-ai-poc/.claude/agents/ui-prompter.md
+  executor: sdk
+- component_type: subagent
+  path: 
+    /Users/henriquelima/Documents/dev/personal/pi-ai-poc/.claude/agents/ui-researcher.md
+  executor: sdk
+- component_type: subagent
+  path: 
+    /Users/henriquelima/Documents/dev/personal/pi-ai-poc/.claude/agents/ui-scanner.md
+  executor: sdk
+- component_type: subagent
+  path: 
+    /Users/henriquelima/Documents/dev/personal/pi-ai-poc/.claude/agents/ui-specifier.md
+  executor: sdk
+- component_type: memory
+  path: 
+    /Users/henriquelima/.claude/projects/-Users-henriquelima-Documents-dev-personal-pi-ai-poc/memory
+  executor: cli
+defaults:
+  model: claude-sonnet-4-6
+  executor: sdk
+  timeout: 60

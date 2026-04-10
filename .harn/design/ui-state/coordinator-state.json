@@ -1,0 +1,28 @@
+{
+  "last_run": "2026-04-03T00:00:00Z",
+  "project_status": {
+    "phase": "specification",
+    "tokens_defined": true,
+    "screens_total": 3,
+    "screens_specified": 3,
+    "components_total": 23,
+    "components_specified": 23
+  },
+  "agent_sessions": {
+    "init": { "last_run": "2026-04-03T00:00:00Z", "status": "complete" },
+    "setup-tokens": { "last_run": "2026-04-03T00:00:00Z", "status": "complete" },
+    "design-screens": { "last_run": "2026-04-03T00:00:00Z", "status": "complete" },
+    "define-components": { "last_run": "2026-04-03T00:00:00Z", "status": "complete" }
+  },
+  "screens": [
+    { "id": "SCR-01", "name": "Connection", "route": "/", "status": "draft" },
+    { "id": "SCR-02", "name": "Chat", "route": "/chat", "status": "draft" },
+    { "id": "SCR-03", "name": "Harness Config", "route": "modal", "status": "draft" }
+  ],
+  "patterns": [
+    { "id": "PAT-01", "name": "Centered Card", "screens": ["SCR-01"] },
+    { "id": "PAT-02", "name": "Chat Layout", "screens": ["SCR-02"] },
+    { "id": "PAT-03", "name": "Tool Call Card", "screens": ["SCR-02"] },
+    { "id": "PAT-04", "name": "Modal Dialog", "screens": ["SCR-03"] }
+  ]
+}
