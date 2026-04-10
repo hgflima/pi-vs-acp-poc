@@ -5,6 +5,7 @@ import { oauthRoutes } from "./routes/oauth"
 import { chatRoutes } from "./routes/chat"
 import { modelRoutes } from "./routes/models"
 import { harnessRoutes } from "./routes/harness"
+import { runtimeRoutes } from "./routes/runtime"
 
 const app = new Hono()
 
@@ -47,6 +48,7 @@ app.route("/api/auth/oauth", oauthRoutes)
 app.route("/api/chat", chatRoutes)
 app.route("/api/models", modelRoutes)
 app.route("/api/harness", harnessRoutes)
+app.route("/api/runtime", runtimeRoutes)
 
 // Health check
 app.get("/api/health", (c) => c.json({ status: "ok" }))
