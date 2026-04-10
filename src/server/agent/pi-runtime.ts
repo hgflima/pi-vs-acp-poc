@@ -116,6 +116,10 @@ export class PiRuntime implements Runtime {
     }
     opts.signal.addEventListener("abort", abortHandler)
 
+    if (opts.history && opts.history.length > 0) {
+      agent.replaceMessages(opts.history)
+    }
+
     agent.prompt(opts.message).catch((err: unknown) => {
       const message = err instanceof Error ? err.message : String(err)
       push({ type: "error", message })
