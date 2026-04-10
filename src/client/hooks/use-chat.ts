@@ -185,7 +185,9 @@ export function useChat() {
   const sendMessage = useCallback(
     async (
       content: string,
-      config: { model: string; provider: "anthropic" | "openai" }
+      config:
+        | { runtime?: "pi"; model: string; provider: "anthropic" | "openai" }
+        | { runtime: "acp"; acpAgent: string }
     ) => {
       dispatch({ type: "ADD_USER_MESSAGE", content })
       dispatch({ type: "START_STREAMING" })
@@ -193,15 +195,21 @@ export function useChat() {
       const controller = new AbortController()
       abortControllerRef.current = controller
 
+      const body =
+        config.runtime === "acp"
+          ? { runtime: "acp" as const, message: content, acpAgent: config.acpAgent }
+          : {
+              runtime: "pi" as const,
+              message: content,
+              model: config.model,
+              provider: config.provider,
+            }
+
       try {
         const response = await fetch("/api/chat", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            message: content,
-            model: config.model,
-            provider: config.provider,
-          }),
+          body: JSON.stringify(body),
           signal: controller.signal,
         })
 

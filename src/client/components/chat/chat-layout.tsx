@@ -2,6 +2,7 @@ import { useCallback } from "react"
 import { useChat } from "@/client/hooks/use-chat"
 import { useAgent } from "@/client/hooks/use-agent"
 import { useHarness } from "@/client/hooks/use-harness"
+import { useRuntime } from "@/client/hooks/use-runtime"
 import { ChatHeader } from "./chat-header"
 import { ChatInput } from "./chat-input"
 import { MessageList } from "./message-list"
@@ -14,28 +15,39 @@ export function ChatLayout() {
     useChat()
   const agent = useAgent()
   const { harness } = useHarness()
+  const runtime = useRuntime()
 
-  const handleSend = useCallback(
+  const dispatchSend = useCallback(
     (content: string) => {
-      if (!agent.model) return // guard against no model selected
+      if (runtime.runtime === "acp") {
+        if (!runtime.acpAgent) return
+        sendMessage(content, { runtime: "acp", acpAgent: runtime.acpAgent })
+        return
+      }
+      if (!agent.model) return
       sendMessage(content, {
+        runtime: "pi",
         model: agent.model,
         provider: agent.provider,
       })
     },
-    [sendMessage, agent.model, agent.provider],
+    [sendMessage, runtime.runtime, runtime.acpAgent, agent.model, agent.provider],
+  )
+
+  const handleSend = useCallback(
+    (content: string) => {
+      dispatchSend(content)
+    },
+    [dispatchSend],
   )
 
   const handleRetry = useCallback(() => {
     const lastUserMsg = [...messages].reverse().find((m) => m.role === "user")
-    if (lastUserMsg && lastUserMsg.role === "user" && agent.model) {
+    if (lastUserMsg && lastUserMsg.role === "user") {
       clearError()
-      sendMessage(lastUserMsg.content, {
-        model: agent.model,
-        provider: agent.provider,
-      })
+      dispatchSend(lastUserMsg.content)
     }
-  }, [messages, clearError, sendMessage, agent.model, agent.provider])
+  }, [messages, clearError, dispatchSend])
 
   const handleNewChat = useCallback(() => {
     clearMessages()
@@ -75,6 +87,20 @@ export function ChatLayout() {
         onModelSwitch={handleModelSwitch}
         onAuthenticate={agent.authenticate}
         harnessApplied={harness.applied}
+        runtime={runtime.runtime}
+        acpAgent={runtime.acpAgent}
+        acpStatus={runtime.acpStatus}
+        acpLoading={runtime.acpLoading}
+        acpError={runtime.acpError}
+        onRuntimeSwitch={(mode) => {
+          clearMessages()
+          runtime.setRuntime(mode)
+        }}
+        onAcpAgentSwitch={(id) => {
+          clearMessages()
+          runtime.setAcpAgent(id)
+        }}
+        onRefreshAcpStatus={runtime.refreshAcpStatus}
       />
       <div className="flex-1 overflow-hidden">
         {messages.length === 0 && !streaming ? (

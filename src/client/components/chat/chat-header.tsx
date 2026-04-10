@@ -8,7 +8,10 @@ import {
   TooltipProvider,
 } from "@/client/components/ui/tooltip"
 import { AgentModelPopover } from "@/client/components/config/agent-model-popover"
+import { RuntimeToggle } from "@/client/components/config/runtime-toggle"
 import type { AgentId, ModelInfo, Provider } from "@/client/lib/types"
+import type { RuntimeMode } from "@/client/hooks/use-runtime"
+import type { AcpStatus } from "@/client/lib/api"
 
 interface ChatHeaderProps {
   onNewChat: () => void
@@ -27,6 +30,15 @@ interface ChatHeaderProps {
   onAuthenticate: (apiKey: string) => Promise<boolean>
   // Harness
   harnessApplied: boolean
+  // Runtime
+  runtime: RuntimeMode
+  acpAgent: string | null
+  acpStatus: AcpStatus
+  acpLoading: boolean
+  acpError: string | null
+  onRuntimeSwitch: (mode: RuntimeMode) => void
+  onAcpAgentSwitch: (id: string) => void
+  onRefreshAcpStatus: () => void
 }
 
 function renderAgentIcon(iconName: string) {
@@ -51,6 +63,14 @@ export function ChatHeader({
   onModelSwitch,
   onAuthenticate,
   harnessApplied,
+  runtime,
+  acpAgent,
+  acpStatus,
+  acpLoading,
+  acpError,
+  onRuntimeSwitch,
+  onAcpAgentSwitch,
+  onRefreshAcpStatus,
 }: ChatHeaderProps) {
   const popoverTrigger = (
     <span className="flex items-center gap-1.5 hover:bg-accent rounded-md px-2 py-1 transition-colors">
@@ -64,20 +84,32 @@ export function ChatHeader({
     <TooltipProvider>
       <header className="flex items-center justify-between h-14 px-4 border-b">
         <div className="flex items-center gap-2">
-          <AgentModelPopover
-            current={agentCurrent}
-            model={agentModel}
-            availableModels={availableModels}
-            loading={agentLoading}
-            needsAuth={needsAuth}
-            provider={agentProvider}
-            connectedAgents={connectedAgents}
-            onAgentSwitch={onAgentSwitch}
-            onModelSwitch={onModelSwitch}
-            onAuthenticate={onAuthenticate}
-            trigger={popoverTrigger}
+          <RuntimeToggle
+            runtime={runtime}
+            acpAgent={acpAgent}
+            acpStatus={acpStatus}
+            acpLoading={acpLoading}
+            acpError={acpError}
+            onRuntimeSwitch={onRuntimeSwitch}
+            onAcpAgentSwitch={onAcpAgentSwitch}
+            onRefreshAcpStatus={onRefreshAcpStatus}
           />
-          {agentModel && (
+          {runtime === "pi" && (
+            <AgentModelPopover
+              current={agentCurrent}
+              model={agentModel}
+              availableModels={availableModels}
+              loading={agentLoading}
+              needsAuth={needsAuth}
+              provider={agentProvider}
+              connectedAgents={connectedAgents}
+              onAgentSwitch={onAgentSwitch}
+              onModelSwitch={onModelSwitch}
+              onAuthenticate={onAuthenticate}
+              trigger={popoverTrigger}
+            />
+          )}
+          {runtime === "pi" && agentModel && (
             <span className="inline-flex h-5 items-center rounded-full bg-secondary px-2 text-xs font-medium text-secondary-foreground">
               {agentModel}
             </span>

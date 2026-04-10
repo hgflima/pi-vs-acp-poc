@@ -95,3 +95,13 @@ export async function loadHarness(directory: string): Promise<HarnessResult> {
 export async function clearHarnessApi(): Promise<void> {
   await fetch(`${API_BASE}/harness/clear`, { method: "POST" })
 }
+
+export type AcpStatus = Record<string, boolean>
+
+export async function fetchAcpStatus(): Promise<AcpStatus> {
+  const res = await fetch(`${API_BASE}/runtime/acp/status`)
+  if (!res.ok) {
+    throw new Error(`Failed to fetch ACP status: ${res.status}`)
+  }
+  return res.json()
+}
