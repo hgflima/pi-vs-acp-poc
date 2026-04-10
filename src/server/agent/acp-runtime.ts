@@ -258,7 +258,7 @@ export class AcpRuntime implements Runtime {
     const writable = Writable.toWeb(proc.stdin!) as WritableStream<Uint8Array>
     const readable = Readable.toWeb(proc.stdout!) as ReadableStream<Uint8Array>
     const stream = ndJsonStream(writable, readable)
-    const connection = new ClientSideConnection(client, stream)
+    const connection = new ClientSideConnection(() => client, stream)
 
     // Set up timers
     resetStallTimer()
