@@ -1,5 +1,4 @@
-import { AcpSession } from "./acp-session"
-import type { AcpAgentSpec } from "./acp-runtime"
+import { AcpSession, type AcpAgentSpec } from "./acp-session"
 
 interface RegistryEntry {
   session: AcpSession

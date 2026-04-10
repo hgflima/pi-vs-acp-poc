@@ -6,6 +6,7 @@ import { chatRoutes } from "./routes/chat"
 import { modelRoutes } from "./routes/models"
 import { harnessRoutes } from "./routes/harness"
 import { runtimeRoutes } from "./routes/runtime"
+import * as acpRegistry from "./agent/acp-session-registry"
 
 const app = new Hono()
 
@@ -67,5 +68,23 @@ serve({ fetch: app.fetch, port, hostname }, (info) => {
   }
   console.log(`Backend running on http://127.0.0.1:${info.port}`)
 })
+
+// Graceful shutdown — drain ACP sessions (kill subprocesses, cleanup tempdirs)
+// before the node process exits. Without this, orphan claude-agent-acp /
+// codex-acp subprocesses leak on SIGTERM / SIGINT.
+let shuttingDown = false
+const shutdown = async (sig: string): Promise<void> => {
+  if (shuttingDown) return
+  shuttingDown = true
+  console.log(`[shutdown] ${sig} received, closing ACP sessions`)
+  try {
+    await acpRegistry.closeAll()
+  } catch (err) {
+    console.error("[shutdown] error closing acp sessions:", err)
+  }
+  process.exit(0)
+}
+process.on("SIGTERM", () => void shutdown("SIGTERM"))
+process.on("SIGINT", () => void shutdown("SIGINT"))
 
 export { app }

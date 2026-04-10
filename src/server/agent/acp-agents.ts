@@ -3,7 +3,7 @@ import { readFileSync, existsSync } from "node:fs"
 import path from "node:path"
 import { execFile } from "node:child_process"
 import { promisify } from "node:util"
-import type { AcpAgentSpec } from "./acp-runtime"
+import type { AcpAgentSpec } from "./acp-session"
 
 const execFileP = promisify(execFile)
 

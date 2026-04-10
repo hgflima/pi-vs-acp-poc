@@ -13,7 +13,12 @@ import {
   type RequestPermissionResponse,
 } from "@agentclientprotocol/sdk"
 import type { RuntimeEvent } from "./runtime"
-import type { AcpAgentSpec } from "./acp-runtime"
+
+export interface AcpAgentSpec {
+  command: string
+  args?: string[]
+  env?: Record<string, string>
+}
 
 const MAX_RESULT_LENGTH = 10240
 const STALL_TIMEOUT_MS = 60_000
