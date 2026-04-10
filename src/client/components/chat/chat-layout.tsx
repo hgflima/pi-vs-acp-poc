@@ -1,8 +1,9 @@
-import { useCallback } from "react"
+import { useCallback, useEffect, useState } from "react"
 import { useChat } from "@/client/hooks/use-chat"
 import { useAgent } from "@/client/hooks/use-agent"
 import { useHarness } from "@/client/hooks/use-harness"
 import { useRuntime } from "@/client/hooks/use-runtime"
+import { deleteAcpSession } from "@/client/lib/api"
 import { ChatHeader } from "./chat-header"
 import { ChatInput } from "./chat-input"
 import { MessageList } from "./message-list"
@@ -10,18 +11,41 @@ import { EmptyState } from "./empty-state"
 import { ErrorDisplay } from "./error-display"
 import type { AgentId } from "@/client/lib/types"
 
+function newChatId(): string {
+  return typeof crypto !== "undefined" && typeof crypto.randomUUID === "function"
+    ? crypto.randomUUID()
+    : `chat-${Date.now()}-${Math.random().toString(36).slice(2, 10)}`
+}
+
 export function ChatLayout() {
   const { messages, streaming, error, sendMessage, stopGeneration, clearMessages, clearError } =
     useChat()
   const agent = useAgent()
   const { harness } = useHarness()
   const runtime = useRuntime()
+  const [chatId, setChatId] = useState<string>(() => newChatId())
+
+  const rotateChatId = useCallback(() => {
+    setChatId(newChatId())
+  }, [])
+
+  // Cleanup server-side ACP session when chatId changes or component unmounts.
+  // Captures the current chatId + runtime via closure; runs with OLD values
+  // after they change, which is exactly when the old session must be released.
+  useEffect(() => {
+    const currentRuntime = runtime.runtime
+    return () => {
+      if (currentRuntime === "acp") {
+        void deleteAcpSession(chatId)
+      }
+    }
+  }, [chatId, runtime.runtime])
 
   const dispatchSend = useCallback(
     (content: string) => {
       if (runtime.runtime === "acp") {
         if (!runtime.acpAgent) return
-        sendMessage(content, { runtime: "acp", acpAgent: runtime.acpAgent })
+        sendMessage(content, { runtime: "acp", acpAgent: runtime.acpAgent, chatId })
         return
       }
       if (!agent.model) return
@@ -31,7 +55,7 @@ export function ChatLayout() {
         provider: agent.provider,
       })
     },
-    [sendMessage, runtime.runtime, runtime.acpAgent, agent.model, agent.provider],
+    [sendMessage, runtime.runtime, runtime.acpAgent, agent.model, agent.provider, chatId],
   )
 
   const handleSend = useCallback(
@@ -51,7 +75,8 @@ export function ChatLayout() {
 
   const handleNewChat = useCallback(() => {
     clearMessages()
-  }, [clearMessages])
+    rotateChatId()
+  }, [clearMessages, rotateChatId])
 
   const handleAgentSwitch = useCallback((id: AgentId) => {
     clearMessages()
@@ -94,10 +119,12 @@ export function ChatLayout() {
         acpError={runtime.acpError}
         onRuntimeSwitch={(mode) => {
           clearMessages()
+          rotateChatId()
           runtime.setRuntime(mode)
         }}
         onAcpAgentSwitch={(id) => {
           clearMessages()
+          rotateChatId()
           runtime.setAcpAgent(id)
         }}
         onRefreshAcpStatus={runtime.refreshAcpStatus}

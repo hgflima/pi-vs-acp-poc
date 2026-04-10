@@ -187,7 +187,7 @@ export function useChat() {
       content: string,
       config:
         | { runtime?: "pi"; model: string; provider: "anthropic" | "openai" }
-        | { runtime: "acp"; acpAgent: string }
+        | { runtime: "acp"; acpAgent: string; chatId: string }
     ) => {
       dispatch({ type: "ADD_USER_MESSAGE", content })
       dispatch({ type: "START_STREAMING" })
@@ -197,7 +197,12 @@ export function useChat() {
 
       const body =
         config.runtime === "acp"
-          ? { runtime: "acp" as const, message: content, acpAgent: config.acpAgent }
+          ? {
+              runtime: "acp" as const,
+              message: content,
+              acpAgent: config.acpAgent,
+              chatId: config.chatId,
+            }
           : {
               runtime: "pi" as const,
               message: content,

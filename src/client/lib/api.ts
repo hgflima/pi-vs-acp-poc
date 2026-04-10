@@ -105,3 +105,14 @@ export async function fetchAcpStatus(): Promise<AcpStatus> {
   }
   return res.json()
 }
+
+export async function deleteAcpSession(chatId: string): Promise<void> {
+  try {
+    await fetch(`${API_BASE}/chat/session/${encodeURIComponent(chatId)}`, {
+      method: "DELETE",
+      keepalive: true,
+    })
+  } catch {
+    // best-effort: reaper cleans up orphaned sessions after idle timeout
+  }
+}
