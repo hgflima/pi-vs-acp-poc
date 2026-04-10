@@ -1,0 +1,48 @@
+# Dependencies
+node_modules/
+
+# Build output
+dist/
+build/
+
+# TypeScript incremental build info
+*.tsbuildinfo
+
+# Vite cache
+.vite/
+
+# Test coverage
+coverage/
+
+# Environment
+.env
+.env.local
+.env.*.local
+
+# Logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Editor state (keep room-temp, IDE-specific stuff out — user configs are tracked)
+*.swp
+*.swo
+
+# Harness throwaway scratch files
+.tmp.*
+
+# Claude Code local state (paralell agent worktrees = 5GB, local permissions)
+.claude/worktrees/
+.claude/settings.local.json
+
+# Claude Octopus crash artifacts
+.claude-octopus/state.json.corrupt.*
+
+# Serena MCP cache
+.serena/cache/
