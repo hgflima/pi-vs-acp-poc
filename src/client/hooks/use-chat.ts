@@ -2,6 +2,43 @@ import { useReducer, useRef, useCallback } from "react"
 import type { Message, AssistantMessage, TextSegment, ToolSegment, ToolCardVariant } from "@/client/lib/types"
 import { parseSSEStream } from "@/client/lib/stream-parser"
 
+type Provider = "anthropic" | "openai"
+
+// Build a pi-agent-core AgentMessage from a client-side Message so PI runs
+// can carry conversation history. Assistant messages are reconstructed with
+// placeholder usage/stopReason fields — the frontend doesn't track those
+// because it never round-trips them.
+function toAgentHistoryMessage(
+  m: Message,
+  provider: Provider,
+  model: string,
+): Record<string, unknown> {
+  if (m.role === "user") {
+    return { role: "user", content: m.content, timestamp: m.timestamp }
+  }
+  const text = m.segments
+    .filter((seg): seg is TextSegment => seg.type === "text")
+    .map((seg) => seg.content)
+    .join("")
+  return {
+    role: "assistant",
+    content: text ? [{ type: "text", text }] : [],
+    api: provider === "anthropic" ? "anthropic-messages" : "openai-completions",
+    provider,
+    model,
+    usage: {
+      input: 0,
+      output: 0,
+      cacheRead: 0,
+      cacheWrite: 0,
+      totalTokens: 0,
+      cost: { input: 0, output: 0, cacheRead: 0, cacheWrite: 0, total: 0 },
+    },
+    stopReason: "stop",
+    timestamp: m.timestamp,
+  }
+}
+
 interface ChatState {
   messages: Message[]
   streaming: boolean
@@ -181,6 +218,8 @@ function chatReducer(state: ChatState, action: ChatAction): ChatState {
 export function useChat() {
   const [state, dispatch] = useReducer(chatReducer, initialState)
   const abortControllerRef = useRef<AbortController | null>(null)
+  const messagesRef = useRef<Message[]>(state.messages)
+  messagesRef.current = state.messages
 
   const sendMessage = useCallback(
     async (
@@ -189,6 +228,7 @@ export function useChat() {
         | { runtime?: "pi"; model: string; provider: "anthropic" | "openai" }
         | { runtime: "acp"; acpAgent: string; chatId: string }
     ) => {
+      const priorMessages = messagesRef.current
       dispatch({ type: "ADD_USER_MESSAGE", content })
       dispatch({ type: "START_STREAMING" })
 
@@ -208,6 +248,9 @@ export function useChat() {
               message: content,
               model: config.model,
               provider: config.provider,
+              history: priorMessages.map((m) =>
+                toAgentHistoryMessage(m, config.provider, config.model),
+              ),
             }
 
       try {
