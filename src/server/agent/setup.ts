@@ -1,4 +1,5 @@
 import { Agent } from "@mariozechner/pi-agent-core"
+import type { BeforeToolCallContext, BeforeToolCallResult } from "@mariozechner/pi-agent-core"
 import { getModel } from "@mariozechner/pi-ai"
 import { refreshAnthropicToken, refreshOpenAICodexToken } from "@mariozechner/pi-ai/oauth"
 import type { OAuthCredentials } from "@mariozechner/pi-ai"
@@ -65,9 +66,13 @@ interface CreateAgentOptions {
   provider: Provider
   modelId: string
   systemPrompt?: string
+  beforeToolCall?: (
+    context: BeforeToolCallContext,
+    signal?: AbortSignal,
+  ) => Promise<BeforeToolCallResult | undefined>
 }
 
-export function createAgent({ provider, modelId, systemPrompt }: CreateAgentOptions): Agent {
+export function createAgent({ provider, modelId, systemPrompt, beforeToolCall }: CreateAgentOptions): Agent {
   const model = getModel(resolvePiProvider(provider), modelId)
 
   // If no explicit systemPrompt, check for active harness
@@ -80,5 +85,6 @@ export function createAgent({ provider, modelId, systemPrompt }: CreateAgentOpti
       tools: pocTools,
     },
     getApiKey: (p) => resolveCredential(toStoreProvider(p)),
+    beforeToolCall,
   })
 }

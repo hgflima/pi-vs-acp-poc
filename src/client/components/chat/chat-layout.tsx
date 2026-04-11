@@ -3,7 +3,7 @@ import { useChat } from "@/client/hooks/use-chat"
 import { useAgent } from "@/client/hooks/use-agent"
 import { useHarness } from "@/client/hooks/use-harness"
 import { useRuntime } from "@/client/hooks/use-runtime"
-import { deleteAcpSession } from "@/client/lib/api"
+import { deleteAcpSession, setSessionMode } from "@/client/lib/api"
 import { ChatHeader } from "./chat-header"
 import { ChatInput } from "./chat-input"
 import { MessageList } from "./message-list"
@@ -18,8 +18,20 @@ function newChatId(): string {
 }
 
 export function ChatLayout() {
-  const { messages, streaming, error, sendMessage, stopGeneration, clearMessages, clearError } =
-    useChat()
+  const {
+    messages,
+    streaming,
+    error,
+    modeState,
+    setOptimisticModeId,
+    markModeUnavailable,
+    sendMessage,
+    stopGeneration,
+    clearMessages,
+    clearError,
+    pendingPrompts,
+    respondToPendingPrompt,
+  } = useChat()
   const agent = useAgent()
   const { harness } = useHarness()
   const runtime = useRuntime()
@@ -67,6 +79,7 @@ export function ChatLayout() {
         runtime: "pi",
         model: agent.model,
         provider: agent.provider,
+        chatSessionId: chatId,
       })
     },
     [sendMessage, runtime.runtime, runtime.acpAgent, agent.model, agent.provider, chatId],
@@ -142,12 +155,29 @@ export function ChatLayout() {
           runtime.setAcpAgent(id)
         }}
         onRefreshAcpStatus={runtime.refreshAcpStatus}
+        modeState={modeState}
+        onCycleMode={(nextModeId) => {
+          const previous = modeState?.currentModeId
+          setOptimisticModeId(nextModeId)
+          void setSessionMode(runtime.runtime, chatId, nextModeId).then((res) => {
+            if (!res.ok) {
+              markModeUnavailable(nextModeId)
+              if (previous) setOptimisticModeId(previous)
+              console.error("setMode failed:", res.error)
+            }
+          })
+        }}
       />
       <div className="flex-1 overflow-hidden">
         {messages.length === 0 && !streaming ? (
           <EmptyState onSuggestionClick={handleSuggestionClick} />
         ) : (
-          <MessageList messages={messages} streaming={streaming} />
+          <MessageList
+            messages={messages}
+            streaming={streaming}
+            pendingPrompts={pendingPrompts}
+            onRespondToPrompt={respondToPendingPrompt}
+          />
         )}
       </div>
       {error && (

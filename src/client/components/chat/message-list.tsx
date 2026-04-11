@@ -1,14 +1,19 @@
 import { useRef, useEffect } from "react"
 import type { Message } from "@/client/lib/types"
+import type { PendingPrompt } from "@/client/hooks/use-interactive-prompts"
 import { UserMessage } from "./user-message"
 import { AssistantMessage } from "./assistant-message"
+import { PermissionPrompt } from "./permission-prompt"
+import { ElicitationPrompt } from "./elicitation-prompt"
 
 interface MessageListProps {
   messages: Message[]
   streaming: boolean
+  pendingPrompts?: Map<string, PendingPrompt>
+  onRespondToPrompt?: (id: string, response: Record<string, unknown>) => Promise<boolean>
 }
 
-export function MessageList({ messages, streaming }: MessageListProps) {
+export function MessageList({ messages, streaming, pendingPrompts, onRespondToPrompt }: MessageListProps) {
   const scrollContainerRef = useRef<HTMLDivElement>(null)
   const bottomRef = useRef<HTMLDivElement>(null)
   const userScrolledUp = useRef(false)
@@ -62,6 +67,29 @@ export function MessageList({ messages, streaming }: MessageListProps) {
             <AssistantMessage key={index} message={message} />
           ),
         )}
+        {pendingPrompts && onRespondToPrompt &&
+          Array.from(pendingPrompts.values()).map((p) => {
+            if (p.kind === "permission") {
+              return (
+                <PermissionPrompt
+                  key={p.id}
+                  id={p.id}
+                  toolCallId={p.toolCallId}
+                  options={p.options}
+                  onRespond={onRespondToPrompt}
+                />
+              )
+            }
+            return (
+              <ElicitationPrompt
+                key={p.id}
+                id={p.id}
+                message={p.message}
+                requestedSchema={p.requestedSchema}
+                onRespond={onRespondToPrompt}
+              />
+            )
+          })}
         <div ref={bottomRef} />
       </div>
     </div>

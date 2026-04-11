@@ -6,7 +6,8 @@
     "dev": "concurrently -n fe,be -c blue,green \"npm run dev:frontend\" \"npm run dev:backend\"",
     "dev:frontend": "vite",
     "dev:backend": "tsx watch src/server/index.ts",
-    "build": "vite build"
+    "build": "vite build",
+    "typecheck": "tsc --noEmit"
   },
   "dependencies": {
     "@agentclientprotocol/sdk": "^0.18.2",

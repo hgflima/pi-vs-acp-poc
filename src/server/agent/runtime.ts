@@ -1,4 +1,9 @@
 import type { AgentMessage } from "@mariozechner/pi-agent-core"
+import type {
+  SessionMode,
+  PermissionOption,
+  ElicitationSchema,
+} from "@agentclientprotocol/sdk"
 
 export type RuntimeEvent =
   | { type: "text_delta"; delta: string }
@@ -8,11 +13,16 @@ export type RuntimeEvent =
   | { type: "tool_end"; id: string; result: string; status: "done" | "error" }
   | { type: "error"; message: string }
   | { type: "done" }
+  | { type: "session_mode_state"; availableModes: SessionMode[]; currentModeId: string }
+  | { type: "permission_request"; id: string; toolCallId: string; options: PermissionOption[] }
+  | { type: "elicitation_request"; id: string; message: string; requestedSchema: ElicitationSchema }
+  | { type: "prompt_expired"; id: string }
 
 export interface RuntimePromptOptions {
   message: string
   history?: AgentMessage[]
   signal: AbortSignal
+  chatSessionId?: string
 }
 
 export interface Runtime {

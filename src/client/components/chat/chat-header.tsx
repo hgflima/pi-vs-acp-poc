@@ -9,9 +9,11 @@ import {
 } from "@/client/components/ui/tooltip"
 import { AgentModelPopover } from "@/client/components/config/agent-model-popover"
 import { RuntimeToggle } from "@/client/components/config/runtime-toggle"
+import { ModeChip } from "@/client/components/chat/mode-chip"
 import type { AgentId, ModelInfo, Provider } from "@/client/lib/types"
 import type { RuntimeMode } from "@/client/hooks/use-runtime"
 import type { AcpStatus } from "@/client/lib/api"
+import type { ChatModeState } from "@/client/hooks/use-chat"
 
 interface ChatHeaderProps {
   onNewChat: () => void
@@ -39,6 +41,9 @@ interface ChatHeaderProps {
   onRuntimeSwitch: (mode: RuntimeMode) => void
   onAcpAgentSwitch: (id: string) => void
   onRefreshAcpStatus: () => void
+  // Mode chip
+  modeState: ChatModeState | null
+  onCycleMode: (nextModeId: string) => void
 }
 
 function renderAgentIcon(iconName: string) {
@@ -71,6 +76,8 @@ export function ChatHeader({
   onRuntimeSwitch,
   onAcpAgentSwitch,
   onRefreshAcpStatus,
+  modeState,
+  onCycleMode,
 }: ChatHeaderProps) {
   const popoverTrigger = (
     <span className="flex items-center gap-1.5 hover:bg-accent rounded-md px-2 py-1 transition-colors">
@@ -114,6 +121,7 @@ export function ChatHeader({
               {agentModel}
             </span>
           )}
+          <ModeChip modeState={modeState} onCycle={onCycleMode} />
           {harnessApplied && (
             <Tooltip>
               <TooltipTrigger

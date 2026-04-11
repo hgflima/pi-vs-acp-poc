@@ -5,6 +5,7 @@ import { writeRuntimeEventToSSE } from "../lib/runtime-sse"
 import { PiRuntime } from "../agent/pi-runtime"
 import { getAcpAgent } from "../agent/acp-agents"
 import * as acpRegistry from "../agent/acp-session-registry"
+import { hasPending, resolvePrompt, type PromptOutcome } from "../agent/permission-bridge"
 import type { AgentMessage } from "@mariozechner/pi-agent-core"
 
 type Provider = "anthropic" | "openai"
@@ -18,6 +19,7 @@ interface PiChatBody extends ChatBodyBase {
   runtime?: "pi"
   provider: Provider
   model: string
+  chatSessionId: string
 }
 interface AcpChatBody extends ChatBodyBase {
   runtime: "acp"
@@ -65,6 +67,9 @@ function validateChatBody(raw: unknown):
   if (typeof b.model !== "string" || b.model.length === 0) {
     return { ok: false, error: { code: 400, message: "model required when runtime=\"pi\"" } }
   }
+  if (typeof b.chatSessionId !== "string" || b.chatSessionId.trim() === "") {
+    return { ok: false, error: { code: 400, message: "chatSessionId required when runtime=\"pi\"" } }
+  }
   return {
     ok: true,
     body: {
@@ -73,6 +78,7 @@ function validateChatBody(raw: unknown):
       history: b.history,
       provider: b.provider,
       model: b.model,
+      chatSessionId: b.chatSessionId,
     },
   }
 }
@@ -140,6 +146,7 @@ chatRoutes.post("/", async (c) => {
         message,
         history,
         signal: controller.signal,
+        chatSessionId: body.chatSessionId,
       })) {
         await writeRuntimeEventToSSE(ev, stream)
       }
@@ -160,6 +167,30 @@ chatRoutes.post("/", async (c) => {
 chatRoutes.delete("/session/:chatId", async (c) => {
   const chatId = c.req.param("chatId")
   await acpRegistry.close(chatId)
+  return c.json({ ok: true })
+})
+
+chatRoutes.post("/respond", async (c) => {
+  let raw: unknown
+  try {
+    raw = await c.req.json()
+  } catch {
+    return c.json({ error: "invalid json" }, 400)
+  }
+  if (!raw || typeof raw !== "object") {
+    return c.json({ error: "expected { id, response }" }, 400)
+  }
+  const { id, response } = raw as { id?: unknown; response?: unknown }
+  if (typeof id !== "string" || response == null || typeof response !== "object") {
+    return c.json({ error: "expected { id: string, response: object }" }, 400)
+  }
+  if (!hasPending(id)) {
+    return c.json({ error: "prompt not found" }, 404)
+  }
+  const resolved = resolvePrompt(id, response as PromptOutcome)
+  if (!resolved) {
+    return c.json({ error: "invalid response shape" }, 400)
+  }
   return c.json({ ok: true })
 })
 

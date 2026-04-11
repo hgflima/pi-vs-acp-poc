@@ -106,6 +106,79 @@ export async function fetchAcpStatus(): Promise<AcpStatus> {
   return res.json()
 }
 
+export async function respondToPrompt(
+  id: string,
+  response: Record<string, unknown>,
+): Promise<{ ok: boolean; status: number }> {
+  const res = await fetch(`${API_BASE}/chat/respond`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ id, response }),
+  })
+  return { ok: res.ok, status: res.status }
+}
+
+export async function setAcpSessionMode(
+  chatId: string,
+  modeId: string,
+): Promise<{ ok: boolean; error?: string }> {
+  try {
+    const res = await fetch(`${API_BASE}/acp/${encodeURIComponent(chatId)}/mode`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ modeId }),
+    })
+    if (!res.ok) {
+      let error = `setMode failed: ${res.status}`
+      try {
+        const data = await res.json()
+        if (typeof data?.error === "string") error = data.error
+      } catch {
+        /* ignore */
+      }
+      return { ok: false, error }
+    }
+    return { ok: true }
+  } catch (err) {
+    return { ok: false, error: err instanceof Error ? err.message : String(err) }
+  }
+}
+
+export async function setPiSessionMode(
+  chatSessionId: string,
+  modeId: string,
+): Promise<{ ok: boolean; error?: string }> {
+  try {
+    const res = await fetch(`${API_BASE}/pi/${encodeURIComponent(chatSessionId)}/mode`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ modeId }),
+    })
+    if (!res.ok) {
+      let error = `setMode failed: ${res.status}`
+      try {
+        const data = await res.json()
+        if (typeof data?.error === "string") error = data.error
+      } catch {
+        /* ignore */
+      }
+      return { ok: false, error }
+    }
+    return { ok: true }
+  } catch (err) {
+    return { ok: false, error: err instanceof Error ? err.message : String(err) }
+  }
+}
+
+export async function setSessionMode(
+  runtime: "pi" | "acp",
+  chatSessionId: string,
+  modeId: string,
+): Promise<{ ok: boolean; error?: string }> {
+  if (runtime === "acp") return setAcpSessionMode(chatSessionId, modeId)
+  return setPiSessionMode(chatSessionId, modeId)
+}
+
 export async function deleteAcpSession(chatId: string): Promise<void> {
   try {
     await fetch(`${API_BASE}/chat/session/${encodeURIComponent(chatId)}`, {

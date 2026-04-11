@@ -1,6 +1,14 @@
 import { useReducer, useRef, useCallback } from "react"
 import type { Message, AssistantMessage, TextSegment, ToolSegment, ToolCardVariant } from "@/client/lib/types"
+import type { SessionMode } from "@agentclientprotocol/sdk"
 import { parseSSEStream } from "@/client/lib/stream-parser"
+import { useInteractivePrompts } from "./use-interactive-prompts"
+
+export interface ChatModeState {
+  availableModes: SessionMode[]
+  currentModeId: string
+  unavailableModes: Set<string>
+}
 
 type Provider = "anthropic" | "openai"
 
@@ -43,6 +51,7 @@ interface ChatState {
   messages: Message[]
   streaming: boolean
   error: string | null
+  modeState: ChatModeState | null
 }
 
 type ChatAction =
@@ -56,11 +65,15 @@ type ChatAction =
   | { type: "SET_ERROR"; message: string }
   | { type: "CLEAR_ERROR" }
   | { type: "CLEAR_MESSAGES" }
+  | { type: "SET_MODE_STATE"; availableModes: SessionMode[]; currentModeId: string }
+  | { type: "SET_CURRENT_MODE_ID"; currentModeId: string }
+  | { type: "MARK_MODE_UNAVAILABLE"; modeId: string }
 
 const initialState: ChatState = {
   messages: [],
   streaming: false,
   error: null,
+  modeState: null,
 }
 
 function toolNameToVariant(toolName: string): ToolCardVariant {
@@ -210,6 +223,34 @@ function chatReducer(state: ChatState, action: ChatAction): ChatState {
     case "CLEAR_MESSAGES":
       return { ...initialState }
 
+    case "SET_MODE_STATE":
+      return {
+        ...state,
+        modeState: {
+          availableModes: action.availableModes,
+          currentModeId: action.currentModeId,
+          unavailableModes: state.modeState?.unavailableModes ?? new Set<string>(),
+        },
+      }
+
+    case "SET_CURRENT_MODE_ID": {
+      if (!state.modeState) return state
+      return {
+        ...state,
+        modeState: { ...state.modeState, currentModeId: action.currentModeId },
+      }
+    }
+
+    case "MARK_MODE_UNAVAILABLE": {
+      if (!state.modeState) return state
+      const unavailableModes = new Set(state.modeState.unavailableModes)
+      unavailableModes.add(action.modeId)
+      return {
+        ...state,
+        modeState: { ...state.modeState, unavailableModes },
+      }
+    }
+
     default:
       return state
   }
@@ -220,12 +261,17 @@ export function useChat() {
   const abortControllerRef = useRef<AbortController | null>(null)
   const messagesRef = useRef<Message[]>(state.messages)
   messagesRef.current = state.messages
+  const interactivePrompts = useInteractivePrompts()
+  const handleStreamEventRef = useRef(interactivePrompts.handleStreamEvent)
+  handleStreamEventRef.current = interactivePrompts.handleStreamEvent
+  const clearPromptsRef = useRef(interactivePrompts.clear)
+  clearPromptsRef.current = interactivePrompts.clear
 
   const sendMessage = useCallback(
     async (
       content: string,
       config:
-        | { runtime?: "pi"; model: string; provider: "anthropic" | "openai" }
+        | { runtime?: "pi"; model: string; provider: "anthropic" | "openai"; chatSessionId: string }
         | { runtime: "acp"; acpAgent: string; chatId: string }
     ) => {
       const priorMessages = messagesRef.current
@@ -248,6 +294,7 @@ export function useChat() {
               message: content,
               model: config.model,
               provider: config.provider,
+              chatSessionId: config.chatSessionId,
               history: priorMessages.map((m) =>
                 toAgentHistoryMessage(m, config.provider, config.model),
               ),
@@ -306,6 +353,18 @@ export function useChat() {
               break
             case "done":
               break
+            case "permission_request":
+            case "elicitation_request":
+            case "prompt_expired":
+              handleStreamEventRef.current(event)
+              break
+            case "session_mode_state":
+              dispatch({
+                type: "SET_MODE_STATE",
+                availableModes: event.availableModes,
+                currentModeId: event.currentModeId,
+              })
+              break
           }
         }
       } catch (err) {
@@ -319,6 +378,7 @@ export function useChat() {
         }
       } finally {
         dispatch({ type: "STOP_STREAMING" })
+        clearPromptsRef.current()
         abortControllerRef.current = null
       }
     },
@@ -338,13 +398,27 @@ export function useChat() {
     dispatch({ type: "CLEAR_ERROR" })
   }, [])
 
+  const setOptimisticModeId = useCallback((modeId: string) => {
+    dispatch({ type: "SET_CURRENT_MODE_ID", currentModeId: modeId })
+  }, [])
+
+  const markModeUnavailable = useCallback((modeId: string) => {
+    dispatch({ type: "MARK_MODE_UNAVAILABLE", modeId })
+  }, [])
+
   return {
     messages: state.messages,
     streaming: state.streaming,
     error: state.error,
+    modeState: state.modeState,
+    setOptimisticModeId,
+    markModeUnavailable,
     sendMessage,
     stopGeneration,
     clearMessages,
     clearError,
+    pendingPrompts: interactivePrompts.pending,
+    respondToPendingPrompt: interactivePrompts.respond,
+    clearPendingPrompts: interactivePrompts.clear,
   }
 }

@@ -167,4 +167,6 @@ export const listFilesTool: AgentTool = {
   },
 }
 
-export const pocTools = [bashTool, readFileTool, listFilesTool]
+import { askUserQuestionTool } from "./ask-user-tool"
+
+export const pocTools = [bashTool, readFileTool, listFilesTool, askUserQuestionTool]

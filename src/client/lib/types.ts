@@ -56,6 +56,12 @@ export interface AssistantMessage {
 export type Message = UserMessage | AssistantMessage
 
 // --- SSE Events (for Phase 2+, define now per D-15) ---
+import type {
+  SessionMode,
+  PermissionOption,
+  ElicitationSchema,
+} from "@agentclientprotocol/sdk"
+
 export type SSEEvent =
   | { type: "text_delta"; data: string }
   | { type: "tool_start"; tool: string; id: string; params: Record<string, unknown> }
@@ -64,6 +70,10 @@ export type SSEEvent =
   | { type: "thinking_delta"; data: string }
   | { type: "error"; message: string }
   | { type: "done" }
+  | { type: "session_mode_state"; availableModes: SessionMode[]; currentModeId: string }
+  | { type: "permission_request"; id: string; toolCallId: string; options: PermissionOption[] }
+  | { type: "elicitation_request"; id: string; message: string; requestedSchema: ElicitationSchema }
+  | { type: "prompt_expired"; id: string }
 
 // --- Agent Configuration (Phase 4) ---
 export type AgentId = "claude-code" | "codex"

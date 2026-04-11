@@ -3,6 +3,8 @@ import { Hono } from "hono"
 import { authRoutes } from "./routes/auth"
 import { oauthRoutes } from "./routes/oauth"
 import { chatRoutes } from "./routes/chat"
+import { piRoutes } from "./routes/pi"
+import { acpRoutes } from "./routes/acp"
 import { modelRoutes } from "./routes/models"
 import { harnessRoutes } from "./routes/harness"
 import { runtimeRoutes } from "./routes/runtime"
@@ -48,6 +50,8 @@ app.use("*", async (c, next) => {
 app.route("/api/auth", authRoutes)
 app.route("/api/auth/oauth", oauthRoutes)
 app.route("/api/chat", chatRoutes)
+app.route("/api/pi", piRoutes)
+app.route("/api/acp", acpRoutes)
 app.route("/api/models", modelRoutes)
 app.route("/api/harness", harnessRoutes)
 app.route("/api/runtime", runtimeRoutes)

@@ -45,5 +45,40 @@ export async function writeRuntimeEventToSSE(
     case "done":
       await stream.writeSSE({ event: "done", data: "{}" })
       return
+    case "session_mode_state":
+      await stream.writeSSE({
+        event: "session_mode_state",
+        data: JSON.stringify({
+          availableModes: ev.availableModes,
+          currentModeId: ev.currentModeId,
+        }),
+      })
+      return
+    case "permission_request":
+      await stream.writeSSE({
+        event: "permission_request",
+        data: JSON.stringify({
+          id: ev.id,
+          toolCallId: ev.toolCallId,
+          options: ev.options,
+        }),
+      })
+      return
+    case "elicitation_request":
+      await stream.writeSSE({
+        event: "elicitation_request",
+        data: JSON.stringify({
+          id: ev.id,
+          message: ev.message,
+          requestedSchema: ev.requestedSchema,
+        }),
+      })
+      return
+    case "prompt_expired":
+      await stream.writeSSE({
+        event: "prompt_expired",
+        data: JSON.stringify({ id: ev.id }),
+      })
+      return
   }
 }

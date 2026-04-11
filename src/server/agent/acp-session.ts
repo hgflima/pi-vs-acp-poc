@@ -9,8 +9,21 @@ import {
   type SessionNotification,
   type RequestPermissionRequest,
   type RequestPermissionResponse,
+  type SessionModeState,
+  type ElicitationRequest,
+  type ElicitationResponse,
+  type ElicitationSchema,
 } from "@agentclientprotocol/sdk"
 import type { RuntimeEvent } from "./runtime"
+import {
+  requestPermission as bridgeRequestPermission,
+  requestElicitation as bridgeRequestElicitation,
+  checkAllowAlwaysCache,
+  cacheAllowAlways,
+  clearAllowAlwaysCache,
+} from "./permission-bridge"
+
+const ELICITATION_METHOD = "session/elicitation"
 
 export interface AcpAgentSpec {
   command: string
@@ -96,6 +109,12 @@ function mapSessionUpdate(update: AcpSessionUpdate): RuntimeEvent | null {
   }
 }
 
+function isCurrentModeUpdate(
+  update: AcpSessionUpdate,
+): update is AcpSessionUpdate & { sessionUpdate: "current_mode_update"; currentModeId: string } {
+  return update.sessionUpdate === "current_mode_update"
+}
+
 export class AcpSession {
   private proc: ChildProcess | null = null
   private connection: ClientSideConnection | null = null
@@ -107,12 +126,34 @@ export class AcpSession {
   private currentQueue: RuntimeEvent[] | null = null
   private notifyFn: (() => void) | null = null
   private currentStallTimer: NodeJS.Timeout | null = null
+  private currentAbortSignal: AbortSignal | null = null
+
+  private modeState: SessionModeState | null = null
+  private initialModeEmitted = false
 
   private readonly client: Client = {
     sessionUpdate: async (params: SessionNotification): Promise<void> => {
       this.resetStallTimer()
       if (!this.currentQueue) return
-      const ev = mapSessionUpdate(params.update)
+      const update = params.update
+      if (isCurrentModeUpdate(update)) {
+        if (this.modeState) {
+          this.modeState = {
+            ...this.modeState,
+            currentModeId: update.currentModeId,
+          }
+        }
+        if (this.modeState) {
+          this.currentQueue.push({
+            type: "session_mode_state",
+            availableModes: this.modeState.availableModes,
+            currentModeId: this.modeState.currentModeId,
+          })
+          this.wake()
+        }
+        return
+      }
+      const ev = mapSessionUpdate(update)
       if (!ev) return
       this.currentQueue.push(ev)
       this.wake()
@@ -120,16 +161,111 @@ export class AcpSession {
     requestPermission: async (
       params: RequestPermissionRequest,
     ): Promise<RequestPermissionResponse> => {
-      const first = params.options?.[0]
-      if (first) {
-        return { outcome: { outcome: "selected", optionId: first.optionId } }
+      const toolCallId = params.toolCall.toolCallId
+      const options = params.options
+      const toolKey = params.toolCall.title ?? params.toolCall.kind ?? null
+      const sessionKey = this.sessionId
+      if (toolKey && sessionKey && checkAllowAlwaysCache(sessionKey, toolKey)) {
+        const allowOption =
+          options.find((o) => o.kind === "allow_always") ??
+          options.find((o) => o.kind === "allow_once")
+        if (allowOption) {
+          return {
+            outcome: { outcome: "selected", optionId: allowOption.optionId },
+          }
+        }
       }
-      return { outcome: { outcome: "cancelled" } }
+      try {
+        const outcome = await bridgeRequestPermission(
+          toolCallId,
+          options,
+          this.currentAbortSignal ?? undefined,
+          (pendingId) => {
+            if (this.currentQueue) {
+              this.currentQueue.push({
+                type: "permission_request",
+                id: pendingId,
+                toolCallId,
+                options,
+              })
+              this.wake()
+            }
+          },
+        )
+        if (
+          outcome.outcome === "selected" &&
+          toolKey &&
+          sessionKey
+        ) {
+          const picked = options.find((o) => o.optionId === outcome.optionId)
+          if (picked?.kind === "allow_always") {
+            cacheAllowAlways(sessionKey, toolKey)
+          }
+        }
+        return { outcome }
+      } catch {
+        return { outcome: { outcome: "cancelled" } }
+      }
+    },
+    extMethod: async (
+      method: string,
+      params: Record<string, unknown>,
+    ): Promise<Record<string, unknown>> => {
+      if (method === ELICITATION_METHOD) {
+        const req = params as unknown as ElicitationRequest
+        const message = req.message
+        const schema =
+          req.mode === "form"
+            ? (req.requestedSchema as ElicitationSchema)
+            : ({ type: "object" } as ElicitationSchema)
+        try {
+          const response = await bridgeRequestElicitation(
+            message,
+            schema,
+            this.currentAbortSignal ?? undefined,
+            (pendingId) => {
+              if (this.currentQueue) {
+                this.currentQueue.push({
+                  type: "elicitation_request",
+                  id: pendingId,
+                  message,
+                  requestedSchema: schema,
+                })
+                this.wake()
+              }
+            },
+          )
+          return response as unknown as Record<string, unknown>
+        } catch {
+          const cancelled: ElicitationResponse = {
+            action: { action: "cancel" },
+          }
+          return cancelled as unknown as Record<string, unknown>
+        }
+      }
+      throw new Error(`unsupported ext method: ${method}`)
     },
   }
 
   get isDead(): boolean {
     return this._isDead
+  }
+
+  getModeState(): SessionModeState | null {
+    return this.modeState
+  }
+
+  async setMode(modeId: string): Promise<void> {
+    if (!this.connection || !this.sessionId) {
+      throw new Error("session not initialized")
+    }
+    await this.connection.setSessionMode({
+      sessionId: this.sessionId,
+      modeId,
+    })
+    if (this.modeState) {
+      this.modeState = { ...this.modeState, currentModeId: modeId }
+    }
   }
 
   async init(agent: AcpAgentSpec): Promise<void> {
@@ -163,12 +299,20 @@ export class AcpSession {
     const stream = ndJsonStream(writable, readable)
     this.connection = new ClientSideConnection(() => this.client, stream)
 
-    await this.connection.initialize({ protocolVersion: PROTOCOL_VERSION })
+    await this.connection.initialize({
+      protocolVersion: PROTOCOL_VERSION,
+      clientCapabilities: {
+        elicitation: { form: {} },
+      },
+    })
     const sessionResp = await this.connection.newSession({
       cwd: PROJECT_HOME,
       mcpServers: [],
     })
     this.sessionId = sessionResp.sessionId
+    if (sessionResp.modes) {
+      this.modeState = sessionResp.modes
+    }
   }
 
   async *prompt(
@@ -192,6 +336,16 @@ export class AcpSession {
 
     this.currentQueue = []
     this.notifyFn = null
+    this.currentAbortSignal = signal
+
+    if (this.modeState && !this.initialModeEmitted) {
+      this.currentQueue.push({
+        type: "session_mode_state",
+        availableModes: this.modeState.availableModes,
+        currentModeId: this.modeState.currentModeId,
+      })
+      this.initialModeEmitted = true
+    }
 
     const onAbort = () => {
       if (this.connection && this.sessionId) {
@@ -250,6 +404,7 @@ export class AcpSession {
       }
       this.currentQueue = null
       this.notifyFn = null
+      this.currentAbortSignal = null
       await runPromise.catch(() => {
         /* settled */
       })
@@ -262,6 +417,9 @@ export class AcpSession {
     if (this.currentStallTimer) {
       clearTimeout(this.currentStallTimer)
       this.currentStallTimer = null
+    }
+    if (this.sessionId) {
+      clearAllowAlwaysCache(this.sessionId)
     }
     await this.killCascade()
   }

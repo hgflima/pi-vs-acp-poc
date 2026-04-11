@@ -1,7 +1,20 @@
-import type { AgentEvent } from "@mariozechner/pi-agent-core"
+import type {
+  AgentEvent,
+  BeforeToolCallContext,
+  BeforeToolCallResult,
+} from "@mariozechner/pi-agent-core"
+import type { RequestPermissionOutcome } from "@agentclientprotocol/sdk"
 import { createAgent } from "./setup"
 import type { Runtime, RuntimeEvent, RuntimePromptOptions } from "./runtime"
 import type { Provider } from "../lib/credentials"
+import {
+  DEFAULT_PI_MODES,
+  WRITE_CLASS_TOOLS,
+  READ_CLASS_TOOLS,
+  getMode,
+} from "./session-mode"
+import { requestPermission } from "./permission-bridge"
+import { piRuntimeStore } from "./pi-runtime-context"
 
 interface PiRuntimeOptions {
   provider: Provider
@@ -80,11 +93,30 @@ function mapAgentEvent(event: AgentEvent): RuntimeEvent[] {
   }
 }
 
+const PROMPT_PERMISSION_OPTIONS = [
+  { optionId: "allow_once", name: "Allow once", kind: "allow_once" as const },
+  { optionId: "allow_always", name: "Allow always", kind: "allow_always" as const },
+  { optionId: "reject_once", name: "Reject", kind: "reject_once" as const },
+]
+
+const BLOCKED_BY_PLAN: BeforeToolCallResult = {
+  block: true,
+  reason: "plan mode: read-only",
+}
+
+const BLOCKED_BY_USER: BeforeToolCallResult = {
+  block: true,
+  reason: "user rejected tool call",
+}
+
 export class PiRuntime implements Runtime {
   constructor(private readonly opts: PiRuntimeOptions) {}
 
   async *prompt(opts: RuntimePromptOptions): AsyncIterable<RuntimeEvent> {
-    const agent = createAgent({ provider: this.opts.provider, modelId: this.opts.modelId })
+    const chatSessionId = opts.chatSessionId
+    if (!chatSessionId) {
+      throw new Error("PI runtime requires chatSessionId — route validation should have caught this")
+    }
     const queue: RuntimeEvent[] = []
     let finished = false
     let notify: (() => void) | null = null
@@ -101,6 +133,74 @@ export class PiRuntime implements Runtime {
       queue.push(ev)
       wake()
     }
+
+    const buildBeforeToolCall = (): ((
+      context: BeforeToolCallContext,
+      signal?: AbortSignal,
+    ) => Promise<BeforeToolCallResult | undefined>) | undefined => {
+      const modeId = getMode(chatSessionId)
+      if (modeId === "bypassPermissions") return undefined
+
+      return async (context, signal) => {
+        const toolName = context.toolCall.name
+        const isWriteClass = WRITE_CLASS_TOOLS.has(toolName)
+        const isReadClass = READ_CLASS_TOOLS.has(toolName)
+        const currentMode = getMode(chatSessionId)
+
+        if (currentMode === "bypassPermissions") return undefined
+
+        // Read-class tools auto-allow in default and acceptEdits (silent, no prompt).
+        if (isReadClass && (currentMode === "default" || currentMode === "acceptEdits")) {
+          return undefined
+        }
+
+        if (currentMode === "plan") {
+          if (isWriteClass) return BLOCKED_BY_PLAN
+          return undefined
+        }
+        if (currentMode === "acceptEdits") {
+          // Non-bash write-class → allow silently. Bash / unknown → prompt.
+          if (isWriteClass && toolName !== "bash") return undefined
+        }
+
+        // Prompt via permission bridge.
+        let outcome: RequestPermissionOutcome
+        try {
+          outcome = await requestPermission(
+            context.toolCall.id,
+            [...PROMPT_PERMISSION_OPTIONS],
+            signal,
+            (id) => {
+              push({
+                type: "permission_request",
+                id,
+                toolCallId: context.toolCall.id,
+                options: [...PROMPT_PERMISSION_OPTIONS],
+              })
+            },
+          )
+        } catch (err) {
+          const msg = err instanceof Error ? err.message : String(err)
+          if (msg.includes("timed out")) {
+            push({ type: "prompt_expired", id: context.toolCall.id })
+          }
+          return { block: true, reason: msg }
+        }
+
+        if (outcome.outcome === "cancelled") return BLOCKED_BY_USER
+        const selected = outcome.optionId
+        if (selected === "reject_once" || selected === "reject_always") {
+          return BLOCKED_BY_USER
+        }
+        return undefined
+      }
+    }
+
+    const agent = createAgent({
+      provider: this.opts.provider,
+      modelId: this.opts.modelId,
+      beforeToolCall: buildBeforeToolCall(),
+    })
 
     const unsubscribe = agent.subscribe((event: AgentEvent) => {
       for (const ev of mapAgentEvent(event)) {
@@ -120,11 +220,21 @@ export class PiRuntime implements Runtime {
       agent.replaceMessages(opts.history)
     }
 
-    agent.prompt(opts.message).catch((err: unknown) => {
-      const message = err instanceof Error ? err.message : String(err)
-      push({ type: "error", message })
-      push({ type: "done" })
-      finished = true
+    if (chatSessionId) {
+      push({
+        type: "session_mode_state",
+        availableModes: DEFAULT_PI_MODES,
+        currentModeId: getMode(chatSessionId),
+      })
+    }
+
+    piRuntimeStore.run({ push }, () => {
+      agent.prompt(opts.message).catch((err: unknown) => {
+        const message = err instanceof Error ? err.message : String(err)
+        push({ type: "error", message })
+        push({ type: "done" })
+        finished = true
+      })
     })
 
     try {
