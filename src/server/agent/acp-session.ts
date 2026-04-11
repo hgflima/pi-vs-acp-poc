@@ -1,7 +1,5 @@
 import { spawn, type ChildProcess } from "node:child_process"
-import { mkdtempSync, rmSync } from "node:fs"
-import { tmpdir } from "node:os"
-import path from "node:path"
+import { PROJECT_HOME } from "../lib/project-home"
 import { Readable, Writable } from "node:stream"
 import {
   ClientSideConnection,
@@ -102,7 +100,6 @@ export class AcpSession {
   private proc: ChildProcess | null = null
   private connection: ClientSideConnection | null = null
   private sessionId: string | null = null
-  private tempDir: string | null = null
   private closed = false
   private _isDead = false
   private deadReason: string | null = null
@@ -136,16 +133,14 @@ export class AcpSession {
   }
 
   async init(agent: AcpAgentSpec): Promise<void> {
-    this.tempDir = mkdtempSync(path.join(tmpdir(), "pi-ai-poc-acp-"))
     try {
       this.proc = spawn(agent.command, agent.args ?? [], {
         stdio: ["pipe", "pipe", "pipe"],
         env: { ...process.env, ...(agent.env ?? {}) },
-        cwd: this.tempDir,
+        cwd: PROJECT_HOME,
       })
     } catch (err) {
       const message = err instanceof Error ? err.message : String(err)
-      this.cleanupTempDir()
       throw new Error(`failed to spawn ${agent.command}: ${message}`)
     }
 
@@ -170,7 +165,7 @@ export class AcpSession {
 
     await this.connection.initialize({ protocolVersion: PROTOCOL_VERSION })
     const sessionResp = await this.connection.newSession({
-      cwd: this.tempDir,
+      cwd: PROJECT_HOME,
       mcpServers: [],
     })
     this.sessionId = sessionResp.sessionId
@@ -269,7 +264,6 @@ export class AcpSession {
       this.currentStallTimer = null
     }
     await this.killCascade()
-    this.cleanupTempDir()
   }
 
   private async killCascade(): Promise<void> {
@@ -341,15 +335,5 @@ export class AcpSession {
     this._isDead = true
     this.deadReason = reason
     this.wake()
-  }
-
-  private cleanupTempDir(): void {
-    if (!this.tempDir) return
-    try {
-      rmSync(this.tempDir, { recursive: true, force: true })
-    } catch {
-      /* ignore */
-    }
-    this.tempDir = null
   }
 }
