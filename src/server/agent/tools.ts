@@ -4,11 +4,12 @@ import { execFile } from "child_process"
 import { promisify } from "util"
 import fs from "fs"
 import path from "path"
+import { PROJECT_HOME } from "../lib/project-home"
 
 const execFileAsync = promisify(execFile)
 
 // Canonicalize workspace root once at module load. All file tools are scoped here.
-const WORKSPACE_ROOT = fs.realpathSync(process.cwd())
+const WORKSPACE_ROOT = fs.realpathSync(PROJECT_HOME)
 
 // Denylist of sensitive path segments. If any segment of the final resolved
 // path (relative to the workspace root) matches, the operation is rejected.
