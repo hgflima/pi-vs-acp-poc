@@ -7,6 +7,7 @@ import { modelRoutes } from "./routes/models"
 import { harnessRoutes } from "./routes/harness"
 import { runtimeRoutes } from "./routes/runtime"
 import * as acpRegistry from "./agent/acp-session-registry"
+import { PROJECT_HOME } from "./lib/project-home"
 
 const app = new Hono()
 
@@ -67,6 +68,7 @@ serve({ fetch: app.fetch, port, hostname }, (info) => {
     process.exit(1)
   }
   console.log(`Backend running on http://127.0.0.1:${info.port}`)
+  console.log(`[project-home] active: ${PROJECT_HOME}`)
 })
 
 // Graceful shutdown — drain ACP sessions (kill subprocesses, cleanup tempdirs)
