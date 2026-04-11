@@ -4,6 +4,7 @@ import path from "node:path"
 import { execFile } from "node:child_process"
 import { promisify } from "node:util"
 import type { AcpAgentSpec } from "./acp-session"
+import { PROJECT_HOME } from "../lib/project-home"
 
 const execFileP = promisify(execFile)
 
@@ -15,7 +16,7 @@ const DEFAULT_AGENTS: AcpAgentMap = {
   "codex-acp": { command: "codex-acp", args: [] },
 }
 
-const CONFIG_PATH = path.join(process.cwd(), ".harn", "config", "acp-agents.json")
+const CONFIG_PATH = path.join(PROJECT_HOME, ".harn", "config", "acp-agents.json")
 
 function parseEnvMap(raw: string | undefined): AcpAgentMap | null {
   if (!raw) return null
