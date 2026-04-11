@@ -6,5 +6,9 @@
   "codex-acp": {
     "command": "codex-acp",
     "args": []
+  },
+  "gemini-acp": {
+    "command": "gemini",
+    "args": ["--acp"]
   }
 }

@@ -14,6 +14,7 @@ export type AcpAgentMap = Record<AcpAgentId, AcpAgentSpec>
 const DEFAULT_AGENTS: AcpAgentMap = {
   "claude-acp": { command: "claude-agent-acp", args: [] },
   "codex-acp": { command: "codex-acp", args: [] },
+  "gemini-acp": { command: "gemini", args: ["--acp"] },
 }
 
 const CONFIG_PATH = path.join(PROJECT_HOME, ".harn", "config", "acp-agents.json")
