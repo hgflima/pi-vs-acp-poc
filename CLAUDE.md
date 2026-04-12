@@ -50,9 +50,13 @@ Vite faz proxy de `/api` → `http://localhost:3001`.
 - **Agent switching:** nova instância de Agent a cada troca (contexto via history, não estado)
 - **shadcn/ui components** ficam em `src/client/components/ui/` — copiados, não importados de lib
 
-## Permissions & Interactive Prompts
+## Browser Automation
 
-- **permission-bridge** (`src/server/agent/permission-bridge.ts`) é registry in-process compartilhado entre ACP e PI runtimes; chaveado por `promptId` com timeout de 5min e cache `allow_always` por `(toolKey, sessionKey)`.
-- **4 novos SSE events:** `session_mode_state`, `permission_request`, `elicitation_request`, `prompt_expired`. Cliente responde via `POST /api/chat/respond` (stateless, lookup por id).
-- **ModeChip** (`src/client/components/chat/mode-chip.tsx`) renderiza modos advertidos pelo runtime ativo. ACP muda modo via `POST /api/acp/:chatId/mode`; PI via `POST /api/pi/:chatSessionId/mode`.
-- **askUserQuestion tool** (`src/server/agent/ask-user-tool.ts`) permite que o PI runtime dispare elicitation inline; reusa o bridge e o mesmo wire shape do ACP.
+Use `agent-browser` for web automation. Run `agent-browser --help` for all commands.
+
+Core workflow:
+
+1. `agent-browser open <url>` - Navigate to page
+2. `agent-browser snapshot -i` - Get interactive elements with refs (@e1, @e2)
+3. `agent-browser click @e1` / `fill @e2 "text"` - Interact using refs
+4. Re-snapshot after page changes
