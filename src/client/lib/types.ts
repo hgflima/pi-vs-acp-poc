@@ -74,6 +74,48 @@ export type SSEEvent =
   | { type: "permission_request"; id: string; toolCallId: string; options: PermissionOption[] }
   | { type: "elicitation_request"; id: string; message: string; requestedSchema: ElicitationSchema }
   | { type: "prompt_expired"; id: string }
+  | { type: "available_commands"; commands: AvailableCommand[] }
+  | { type: "file_changed"; path: string; changeType: "created" | "modified" | "deleted" }
+
+// --- Available Commands & Autocomplete ---
+export type AvailableCommandSource = "acp" | "filesystem"
+export type AvailableCommandType = "skill" | "command" | "built-in"
+
+export interface AvailableCommand {
+  name: string
+  description?: string
+  source: AvailableCommandSource
+  type: AvailableCommandType
+}
+
+export type AutocompleteItemType = "skill" | "command" | "built-in" | "file" | "subagent"
+
+export interface AutocompleteItem {
+  label: string
+  description?: string
+  type: AutocompleteItemType
+  icon?: string
+}
+
+// --- Chat Attachments ---
+export interface ChatAttachment {
+  id: string
+  filename: string
+  mimeType: string
+  content: string // base64 for images, text for files
+  size: number
+  preview?: string // thumbnail data URL for images
+}
+
+// --- Agent Status ---
+export type AgentStatusType = "idle" | "thinking" | "reasoning" | "tool_execution" | "error"
+
+export interface AgentStatus {
+  type: AgentStatusType
+  toolName?: string // during tool_execution
+  startedAt?: number // timestamp for timer
+  error?: string
+}
 
 // --- Agent Configuration (Phase 4) ---
 export type AgentId = "claude-code" | "codex"
@@ -107,6 +149,89 @@ export interface ModelInfo {
 }
 
 // --- Harness Types (Phase 4) ---
+export type HarnessItemType = "skills" | "commands" | "rules" | "hooks" | "subagents"
+
+export interface HarnessItem {
+  name: string
+  type: HarnessItemType
+  path: string
+  content?: string
+  description?: string
+  metadata?: Record<string, unknown>
+}
+
+// --- Native discovery types (mirrors src/server/agent/discovery/types.ts) ---
+export type DiscoveredItemType = "skill" | "command" | "subagent"
+export type DiscoveredScope = "personal" | "project" | "plugin" | "bundled" | "enterprise"
+export type DiscoveryHarness = "claude" | "codex" | "gemini"
+
+export interface DiscoveredItem {
+  name: string
+  type: DiscoveredItemType
+  scope: DiscoveredScope
+  harness: DiscoveryHarness
+  origin: string
+  description: string
+  argumentHint?: string
+  userInvocable: boolean
+  path: string
+  mtimeMs: number
+  pluginKey?: string
+  pluginName?: string
+}
+
+export type ShadowReason =
+  | "skill-over-command"
+  | "lower-scope"
+  | "duplicate-plugin-install"
+  | "user-override-bundled"
+
+export interface ShadowedItem {
+  item: DiscoveredItem
+  shadowedBy: DiscoveredItem
+  reason: ShadowReason
+}
+
+export interface DiscoverySource {
+  path: string
+  scope: DiscoveredScope
+  exists: boolean
+  itemsFound: number
+  pluginKey?: string
+  pluginName?: string
+}
+
+export interface DiscoveryError {
+  path: string
+  message: string
+  kind: "oversized" | "malformed" | "unreadable"
+}
+
+export interface DiscoveryResult {
+  items: DiscoveredItem[]
+  shadowed?: ShadowedItem[]
+  sources: DiscoverySource[]
+  errors: DiscoveryError[]
+  generatedAt: number
+}
+
+export interface PluginStatus {
+  pluginKey: string
+  pluginName: string
+  installPath: string
+  enabled: boolean
+  enabledBy: string | null
+  scope: "user" | "local" | "project"
+}
+
+export type LegacyHarnessItems = HarnessItem[]
+
+export interface FetchHarnessItemsOptions {
+  agent?: DiscoveryHarness
+  scope?: DiscoveredScope | "all"
+  includeShadowed?: boolean
+}
+
 export interface HarnessFile {
   content: string
   size: number
@@ -121,7 +246,10 @@ export interface HarnessResult {
   claudeMd: HarnessFile | null
   agentsMd: HarnessFile | null
   skills: HarnessDir | null
+  commands: HarnessDir | null
+  rules: HarnessDir | null
   hooks: HarnessDir | null
+  subagents: HarnessDir | null
   errors: Array<{ file: string; error: string }>
 }
 

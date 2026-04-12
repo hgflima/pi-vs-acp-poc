@@ -1,4 +1,4 @@
-import { createContext, useContext, useState, useCallback, type ReactNode } from "react"
+import { createContext, useContext, useState, useCallback, useEffect, useRef, type ReactNode } from "react"
 import type { HarnessState, HarnessResult } from "@/client/lib/types"
 import { loadHarness as loadHarnessApi, clearHarnessApi } from "@/client/lib/api"
 
@@ -8,6 +8,7 @@ interface HarnessContextValue {
   error: string | null
   loadHarness: (directory: string) => Promise<HarnessResult | null>
   clearHarness: () => Promise<void>
+  harnessRevision: number
 }
 
 const HarnessContext = createContext<HarnessContextValue | null>(null)
@@ -20,6 +21,7 @@ export function HarnessProvider({ children }: { children: ReactNode }) {
   })
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const [harnessRevision, setHarnessRevision] = useState(0)
 
   const loadHarness = useCallback(async (directory: string): Promise<HarnessResult | null> => {
     setLoading(true)
@@ -48,12 +50,56 @@ export function HarnessProvider({ children }: { children: ReactNode }) {
     setError(null)
   }, [])
 
+  // File watcher SSE — re-fetch harness data on file changes
+  const eventSourceRef = useRef<EventSource | null>(null)
+  const directoryRef = useRef<string | null>(null)
+  directoryRef.current = harness.directory
+
+  useEffect(() => {
+    if (!harness.applied || !harness.directory) {
+      // Clean up existing connection if harness is cleared
+      if (eventSourceRef.current) {
+        eventSourceRef.current.close()
+        eventSourceRef.current = null
+      }
+      return
+    }
+
+    // Open SSE connection to watcher
+    const es = new EventSource("/api/harness/watch")
+    eventSourceRef.current = es
+
+    es.addEventListener("file_changed", () => {
+      // Re-fetch harness data when files change
+      const dir = directoryRef.current
+      if (dir) {
+        loadHarnessApi(dir)
+          .then((result) => {
+            setHarness({ applied: true, directory: dir, result })
+          })
+          .catch(() => {
+            // Silently ignore re-fetch errors
+          })
+      }
+    })
+
+    es.addEventListener("discovery_invalidated", () => {
+      setHarnessRevision((prev) => prev + 1)
+    })
+
+    return () => {
+      es.close()
+      eventSourceRef.current = null
+    }
+  }, [harness.applied, harness.directory])
+
   const contextValue: HarnessContextValue = {
     harness,
     loading,
     error,
     loadHarness,
     clearHarness,
+    harnessRevision,
   }
 
   return (
