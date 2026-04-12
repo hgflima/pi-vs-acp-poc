@@ -95,6 +95,9 @@ export interface AutocompleteItem {
   description?: string
   type: AutocompleteItemType
   icon?: string
+  scope?: DiscoveredScope
+  pluginName?: string
+  argumentHint?: string
 }
 
 // --- Chat Attachments ---

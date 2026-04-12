@@ -9,6 +9,7 @@ import { ChatInput } from "./chat-input"
 import { MessageList } from "./message-list"
 import { EmptyState } from "./empty-state"
 import { ErrorDisplay } from "./error-display"
+import { Statusline } from "./statusline"
 import type { AgentId } from "@/client/lib/types"
 
 function newChatId(): string {
@@ -68,10 +69,10 @@ export function ChatLayout() {
   }, [error, runtime.runtime, rotateChatId])
 
   const dispatchSend = useCallback(
-    (content: string) => {
+    (content: string, extras?: { fileRefs?: string[]; attachments?: import("@/client/lib/types").ChatAttachment[] }) => {
       if (runtime.runtime === "acp") {
         if (!runtime.acpAgent) return
-        sendMessage(content, { runtime: "acp", acpAgent: runtime.acpAgent, chatId })
+        sendMessage(content, { runtime: "acp", acpAgent: runtime.acpAgent, chatId }, extras)
         return
       }
       if (!agent.model) return
@@ -80,14 +81,14 @@ export function ChatLayout() {
         model: agent.model,
         provider: agent.provider,
         chatSessionId: chatId,
-      })
+      }, extras)
     },
     [sendMessage, runtime.runtime, runtime.acpAgent, agent.model, agent.provider, chatId],
   )
 
   const handleSend = useCallback(
-    (content: string) => {
-      dispatchSend(content)
+    (content: string, extras?: { fileRefs?: string[]; attachments?: import("@/client/lib/types").ChatAttachment[] }) => {
+      dispatchSend(content, extras)
     },
     [dispatchSend],
   )
@@ -194,6 +195,13 @@ export function ChatLayout() {
             disabled={false}
           />
         </div>
+      </div>
+      <div className="max-w-3xl mx-auto w-full px-4">
+        <Statusline
+          streaming={streaming}
+          error={error}
+          messages={messages}
+        />
       </div>
     </div>
   )
