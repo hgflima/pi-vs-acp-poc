@@ -2,7 +2,8 @@ import { Hono } from "hono"
 import { streamSSE } from "hono/streaming"
 import path from "path"
 import fs from "fs/promises"
-import { watch, type FSWatcher } from "node:fs"
+import os from "node:os"
+import chokidar, { type FSWatcher } from "chokidar"
 import { execFile } from "child_process"
 import { promisify } from "util"
 import { discoverHarness } from "../agent/harness"
@@ -396,9 +397,42 @@ harnessRoutes.post("/sync", async (c) => {
 
 // --- File watcher SSE ---
 
-const WATCH_DIRS = [".agents", ".claude", ".codex", ".gemini"]
-const WATCH_FILES = ["AGENTS.md"]
-const DEBOUNCE_MS = 300
+const FILE_DEBOUNCE_MS = 300
+const DISCOVERY_DEBOUNCE_MS = 200
+
+function buildWatchPaths(dir: string): { paths: string[]; claudeHomeDir: string } {
+  const claudeHomeDir = path.join(os.homedir(), ".claude")
+  const paths: string[] = [
+    // Legacy .agents/-style watch tree
+    path.join(dir, ".agents"),
+    path.join(dir, ".claude"),
+    path.join(dir, ".codex"),
+    path.join(dir, ".gemini"),
+    path.join(dir, "AGENTS.md"),
+    // Native paths (project scope)
+    path.join(dir, ".claude", "skills"),
+    path.join(dir, ".claude", "commands"),
+    path.join(dir, ".claude", "agents"),
+    path.join(dir, ".claude", "settings.json"),
+    path.join(dir, ".claude", "settings.local.json"),
+    // Native paths (user scope)
+    path.join(claudeHomeDir, "skills"),
+    path.join(claudeHomeDir, "commands"),
+    path.join(claudeHomeDir, "agents"),
+    path.join(claudeHomeDir, "settings.json"),
+    path.join(claudeHomeDir, "plugins", "installed_plugins.json"),
+  ]
+  return { paths, claudeHomeDir }
+}
+
+function classifyDiscoveryScope(absPath: string, dir: string, claudeHomeDir: string): string | null {
+  const projectClaude = path.join(dir, ".claude")
+  const projectAgents = path.join(dir, ".agents")
+  if (absPath === projectClaude || absPath.startsWith(projectClaude + path.sep)) return "project"
+  if (absPath === projectAgents || absPath.startsWith(projectAgents + path.sep)) return "project"
+  if (absPath === claudeHomeDir || absPath.startsWith(claudeHomeDir + path.sep)) return "personal"
+  return null
+}
 
 harnessRoutes.get("/watch", async (c) => {
   if (!activeDirectory) {
@@ -408,15 +442,18 @@ harnessRoutes.get("/watch", async (c) => {
   const dir = activeDirectory
 
   return streamSSE(c, async (stream) => {
-    const watchers: FSWatcher[] = []
-    let debounceTimer: NodeJS.Timeout | null = null
-    let pending: Map<string, string> = new Map() // path -> action
+    const { paths: watchPaths, claudeHomeDir } = buildWatchPaths(dir)
+    let watcher: FSWatcher | null = null
+    let fileDebounceTimer: NodeJS.Timeout | null = null
+    let discoveryDebounceTimer: NodeJS.Timeout | null = null
+    let pendingFiles: Map<string, string> = new Map() // relPath -> action
+    const pendingScopes = new Set<string>()
     let closed = false
 
-    const flush = async () => {
+    const flushFiles = async () => {
       if (closed) return
-      const events = Array.from(pending.entries())
-      pending = new Map()
+      const events = Array.from(pendingFiles.entries())
+      pendingFiles = new Map()
       for (const [filePath, action] of events) {
         try {
           await stream.writeSSE({
@@ -431,52 +468,50 @@ harnessRoutes.get("/watch", async (c) => {
       }
     }
 
-    const onChange = (relativePath: string) => {
+    const flushDiscovery = async () => {
       if (closed) return
-      // Determine action by checking file existence
-      const fullPath = path.join(dir, relativePath)
-      fs.stat(fullPath)
-        .then(() => {
-          pending.set(relativePath, "modified")
-        })
-        .catch(() => {
-          pending.set(relativePath, "deleted")
-        })
-        .finally(() => {
-          if (debounceTimer) clearTimeout(debounceTimer)
-          debounceTimer = setTimeout(() => void flush(), DEBOUNCE_MS)
-        })
-    }
-
-    // Watch directories
-    for (const watchDir of WATCH_DIRS) {
-      const fullDir = path.join(dir, watchDir)
+      if (pendingScopes.size === 0) return
+      const scopes = Array.from(pendingScopes)
+      pendingScopes.clear()
+      invalidateDiscoveryCache()
       try {
-        await fs.stat(fullDir) // check exists
-        const watcher = watch(fullDir, { recursive: true }, (_event, filename) => {
-          if (filename) onChange(path.join(watchDir, filename))
+        await stream.writeSSE({
+          event: "discovery_invalidated",
+          data: JSON.stringify({ type: "discovery_invalidated", scopes }),
         })
-        watcher.on("error", () => { /* ignore errors on individual watchers */ })
-        watchers.push(watcher)
       } catch {
-        // Directory doesn't exist — skip
+        closed = true
       }
     }
 
-    // Watch individual files
-    for (const watchFile of WATCH_FILES) {
-      const fullPath = path.join(dir, watchFile)
-      try {
-        await fs.stat(fullPath)
-        const watcher = watch(fullPath, () => {
-          onChange(watchFile)
-        })
-        watcher.on("error", () => { /* ignore */ })
-        watchers.push(watcher)
-      } catch {
-        // File doesn't exist — skip
+    const onChange = (absPath: string, action: "modified" | "deleted") => {
+      if (closed) return
+      // Legacy: emit file_changed with project-relative paths when inside dir
+      if (absPath === dir || absPath.startsWith(dir + path.sep)) {
+        const rel = path.relative(dir, absPath)
+        if (rel) pendingFiles.set(rel, action)
+        if (fileDebounceTimer) clearTimeout(fileDebounceTimer)
+        fileDebounceTimer = setTimeout(() => void flushFiles(), FILE_DEBOUNCE_MS)
+      }
+      // New: discovery scope invalidation
+      const scope = classifyDiscoveryScope(absPath, dir, claudeHomeDir)
+      if (scope) {
+        pendingScopes.add(scope)
+        if (discoveryDebounceTimer) clearTimeout(discoveryDebounceTimer)
+        discoveryDebounceTimer = setTimeout(() => void flushDiscovery(), DISCOVERY_DEBOUNCE_MS)
       }
     }
+
+    watcher = chokidar.watch(watchPaths, {
+      ignoreInitial: true,
+      persistent: true,
+    })
+    watcher.on("add", (p) => onChange(p, "modified"))
+    watcher.on("change", (p) => onChange(p, "modified"))
+    watcher.on("unlink", (p) => onChange(p, "deleted"))
+    watcher.on("addDir", (p) => onChange(p, "modified"))
+    watcher.on("unlinkDir", (p) => onChange(p, "deleted"))
+    watcher.on("error", () => { /* fail-soft: chokidar handles missing paths internally */ })
 
     // Send initial keepalive
     try {
@@ -485,12 +520,14 @@ harnessRoutes.get("/watch", async (c) => {
       closed = true
     }
 
-    // Keep connection alive and clean up on close
+    // Clean up on close
     stream.onAbort(() => {
       closed = true
-      if (debounceTimer) clearTimeout(debounceTimer)
-      for (const w of watchers) {
-        try { w.close() } catch { /* ignore */ }
+      if (fileDebounceTimer) clearTimeout(fileDebounceTimer)
+      if (discoveryDebounceTimer) clearTimeout(discoveryDebounceTimer)
+      if (watcher) {
+        watcher.close().catch(() => { /* ignore */ })
+        watcher = null
       }
     })
 
