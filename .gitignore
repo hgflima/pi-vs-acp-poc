@@ -44,5 +44,9 @@ Thumbs.db
 # Claude Octopus crash artifacts
 .claude-octopus/state.json.corrupt.*
 
-# Serena MCP cache
+# Serena MCP cache and onboarding memories (local-only)
 .serena/cache/
+.serena/memories/
+
+# Claude Code rules synced from skills/plugins (local-only)
+.claude/rules/
