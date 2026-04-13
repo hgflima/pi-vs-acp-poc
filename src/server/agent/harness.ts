@@ -17,7 +17,10 @@ export interface HarnessResult {
   claudeMd: HarnessFile | null
   agentsMd: HarnessFile | null
   skills: HarnessDir | null
+  commands: HarnessDir | null
+  rules: HarnessDir | null
   hooks: HarnessDir | null
+  subagents: HarnessDir | null
   errors: Array<{ file: string; error: string }>
 }
 
@@ -26,7 +29,10 @@ export async function discoverHarness(dirPath: string): Promise<HarnessResult> {
     claudeMd: null,
     agentsMd: null,
     skills: null,
+    commands: null,
+    rules: null,
     hooks: null,
+    subagents: null,
     errors: [],
   }
 
@@ -64,6 +70,30 @@ export async function discoverHarness(dirPath: string): Promise<HarnessResult> {
     // Directory not found
   }
 
+  // Check for commands directory
+  const commandsDir = path.join(dirPath, ".claude", "commands")
+  try {
+    const entries = await fs.readdir(commandsDir, { withFileTypes: true })
+    const commandFiles = entries.filter((e) => e.isFile()).map((e) => e.name)
+    if (commandFiles.length > 0) {
+      result.commands = { count: commandFiles.length, names: commandFiles }
+    }
+  } catch {
+    // Directory not found
+  }
+
+  // Check for rules directory
+  const rulesDir = path.join(dirPath, ".claude", "rules")
+  try {
+    const entries = await fs.readdir(rulesDir, { withFileTypes: true })
+    const ruleFiles = entries.filter((e) => e.isFile()).map((e) => e.name)
+    if (ruleFiles.length > 0) {
+      result.rules = { count: ruleFiles.length, names: ruleFiles }
+    }
+  } catch {
+    // Directory not found
+  }
+
   // Check for hooks directory
   const hooksDir = path.join(dirPath, ".claude", "hooks")
   try {
@@ -71,6 +101,18 @@ export async function discoverHarness(dirPath: string): Promise<HarnessResult> {
     const hookFiles = entries.filter((e) => e.isFile()).map((e) => e.name)
     if (hookFiles.length > 0) {
       result.hooks = { count: hookFiles.length, names: hookFiles }
+    }
+  } catch {
+    // Directory not found
+  }
+
+  // Check for subagents directory
+  const subagentsDir = path.join(dirPath, ".claude", "subagents")
+  try {
+    const entries = await fs.readdir(subagentsDir, { withFileTypes: true })
+    const subagentDirs = entries.filter((e) => e.isDirectory()).map((e) => e.name)
+    if (subagentDirs.length > 0) {
+      result.subagents = { count: subagentDirs.length, names: subagentDirs }
     }
   } catch {
     // Directory not found
@@ -97,9 +139,21 @@ export function buildSystemPrompt(harness: HarnessResult | null): string {
   if (harness.skills && harness.skills.names.length > 0) {
     prompt += "\n\n## Available Skills\n\n" + harness.skills.names.map((s) => `- ${s}`).join("\n")
   }
+  // Commands: list names
+  if (harness.commands && harness.commands.names.length > 0) {
+    prompt += "\n\n## Available Commands\n\n" + harness.commands.names.map((c) => `- ${c}`).join("\n")
+  }
+  // Rules: list names
+  if (harness.rules && harness.rules.names.length > 0) {
+    prompt += "\n\n## Active Rules\n\n" + harness.rules.names.map((r) => `- ${r}`).join("\n")
+  }
   // Hooks: informational only (list names, don't execute)
   if (harness.hooks && harness.hooks.names.length > 0) {
     prompt += "\n\n## Available Hooks\n\n" + harness.hooks.names.map((h) => `- ${h}`).join("\n")
+  }
+  // Subagents: list names
+  if (harness.subagents && harness.subagents.names.length > 0) {
+    prompt += "\n\n## Available Subagents\n\n" + harness.subagents.names.map((s) => `- ${s}`).join("\n")
   }
 
   return prompt
