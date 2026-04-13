@@ -56,7 +56,24 @@ ls_specific_settings: {}
 # list of additional paths to ignore in this project.
 # Same syntax as gitignore, so you can use * and **.
 # Note: global ignored_paths from serena_config.yml are also applied additively.
-ignored_paths: []
+ignored_paths:
+  - "node_modules/**"
+  - "dist/**"
+  - "build/**"
+  - ".vite/**"
+  - "coverage/**"
+  - "*.tsbuildinfo"
+  - "package-lock.json"
+  - "pnpm-lock.yaml"
+  - ".env*"
+  - "*.log"
+  - ".tmp.*"
+  - ".claude/worktrees/**"
+  - ".serena/cache/**"
+  - ".git/**"
+  - ".harn/**"
+  - ".planning/**"
+  - ".agents/**"
 
 # whether the project is in read-only mode
 # If set to true, all editing tools will be disabled and attempts to use them will result in an error
@@ -131,7 +148,32 @@ default_modes:
 
 # initial prompt for the project. It will always be given to the LLM upon activating the project
 # (contrary to the memories, which are loaded on demand).
-initial_prompt: ""
+initial_prompt: |
+  ## Pi AI Chat — Project Rules
+
+  ### Structure
+  - Frontend: React 19 + Vite 6 + Tailwind 4 + shadcn/ui in `src/client/`
+  - Backend: Hono on Node.js (port 3001) in `src/server/`
+  - Dual agent runtimes: PiRuntime (pi-ai-core) and AcpRuntime (ACP SDK)
+
+  ### Architecture
+  - Layered frontend-backend with SSE streaming
+  - Both runtimes implement shared `Runtime` interface
+  - Backend is required proxy — API keys never in frontend
+  - No persistence — single-user, local-only
+
+  ### Critical Rules
+  - NEVER expose API keys in frontend code
+  - shadcn/ui components are locally copied in `src/client/components/ui/`
+  - Path alias: `@/` resolves to `./src`
+  - TypeScript strict mode enforced
+
+  ### Navigation
+  - Use `get_symbols_overview` to map file structure before reading
+  - Use `find_symbol` with name_path patterns to drill into specific code
+  - Use `find_referencing_symbols` to trace dependencies
+  - Read memories under `architecture/` for detailed domain docs
+  - Type hub: `src/client/lib/types.ts` — central Message, ToolSegment, RuntimeEvent types
 
 # time budget (seconds) per tool call for the retrieval of additional symbol information
 # such as docstrings or parameter information.
