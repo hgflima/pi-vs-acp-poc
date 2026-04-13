@@ -17,6 +17,7 @@ export type RuntimeEvent =
   | { type: "permission_request"; id: string; toolCallId: string; options: PermissionOption[] }
   | { type: "elicitation_request"; id: string; message: string; requestedSchema: ElicitationSchema }
   | { type: "prompt_expired"; id: string }
+  | { type: "available_commands"; commands: Array<{ name: string; description?: string; source: "acp"; type: "skill" | "command" | "built-in" }> }
 
 export interface RuntimePromptOptions {
   message: string

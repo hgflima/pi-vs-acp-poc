@@ -104,6 +104,18 @@ function mapSessionUpdate(update: AcpSessionUpdate): RuntimeEvent | null {
       }
       return { type: "tool_update", id: update.toolCallId, data: text }
     }
+    case "available_commands_update": {
+      const cmds = (update as unknown as { availableCommands: Array<{ name: string; description?: string }> }).availableCommands
+      return {
+        type: "available_commands",
+        commands: cmds.map((cmd) => ({
+          name: cmd.name,
+          description: cmd.description,
+          source: "acp" as const,
+          type: "command" as const,
+        })),
+      }
+    }
     default:
       return null
   }

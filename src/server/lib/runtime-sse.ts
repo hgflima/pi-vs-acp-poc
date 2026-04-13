@@ -80,5 +80,11 @@ export async function writeRuntimeEventToSSE(
         data: JSON.stringify({ id: ev.id }),
       })
       return
+    case "available_commands":
+      await stream.writeSSE({
+        event: "available_commands",
+        data: JSON.stringify({ commands: ev.commands }),
+      })
+      return
   }
 }
