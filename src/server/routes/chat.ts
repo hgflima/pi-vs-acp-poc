@@ -1,19 +1,30 @@
 import { Hono } from "hono"
 import { streamSSE } from "hono/streaming"
+import * as fs from "node:fs/promises"
+import * as path from "node:path"
 import { hasAnyCredential } from "../lib/credentials"
 import { writeRuntimeEventToSSE } from "../lib/runtime-sse"
 import { PiRuntime } from "../agent/pi-runtime"
 import { getAcpAgent } from "../agent/acp-agents"
 import * as acpRegistry from "../agent/acp-session-registry"
 import { hasPending, resolvePrompt, type PromptOutcome } from "../agent/permission-bridge"
+import { PROJECT_HOME } from "../lib/project-home"
 import type { AgentMessage } from "@mariozechner/pi-agent-core"
 
 type Provider = "anthropic" | "openai"
+
+interface AttachmentBody {
+  content: string
+  filename: string
+  mimeType: string
+}
 
 interface ChatBodyBase {
   message: unknown
   history?: unknown
   runtime?: unknown
+  fileRefs?: string[]
+  attachments?: AttachmentBody[]
 }
 interface PiChatBody extends ChatBodyBase {
   runtime?: "pi"
@@ -39,6 +50,36 @@ function validateChatBody(raw: unknown):
   if (typeof b.message !== "string" || b.message.length === 0) {
     return { ok: false, error: { code: 400, message: "message required (string)" } }
   }
+  // Parse optional fileRefs
+  let fileRefs: string[] | undefined
+  if (b.fileRefs !== undefined) {
+    if (!Array.isArray(b.fileRefs) || b.fileRefs.length > 5) {
+      return { ok: false, error: { code: 400, message: "fileRefs must be an array of max 5 strings" } }
+    }
+    for (const ref of b.fileRefs) {
+      if (typeof ref !== "string") continue
+      if (ref.includes("..") || path.isAbsolute(ref)) {
+        return { ok: false, error: { code: 400, message: `Invalid file ref: ${ref}` } }
+      }
+    }
+    fileRefs = b.fileRefs.filter((r): r is string => typeof r === "string")
+  }
+  // Parse optional attachments
+  let attachments: AttachmentBody[] | undefined
+  if (b.attachments !== undefined) {
+    if (!Array.isArray(b.attachments) || b.attachments.length > 10) {
+      return { ok: false, error: { code: 400, message: "attachments must be an array of max 10 items" } }
+    }
+    attachments = []
+    for (const att of b.attachments) {
+      if (!att || typeof att !== "object") continue
+      const a = att as Record<string, unknown>
+      if (typeof a.content !== "string" || typeof a.filename !== "string" || typeof a.mimeType !== "string") {
+        return { ok: false, error: { code: 400, message: "Each attachment must have content, filename, and mimeType" } }
+      }
+      attachments.push({ content: a.content as string, filename: a.filename as string, mimeType: a.mimeType as string })
+    }
+  }
   const runtime = b.runtime ?? "pi"
   if (runtime !== "pi" && runtime !== "acp") {
     return { ok: false, error: { code: 400, message: "runtime must be \"pi\" or \"acp\"" } }
@@ -57,6 +98,8 @@ function validateChatBody(raw: unknown):
         message: b.message,
         acpAgent: b.acpAgent,
         chatId: b.chatId,
+        fileRefs,
+        attachments,
       },
     }
   }
@@ -79,8 +122,55 @@ function validateChatBody(raw: unknown):
       provider: b.provider,
       model: b.model,
       chatSessionId: b.chatSessionId,
+      fileRefs,
+      attachments,
     },
   }
+}
+
+const MAX_FILE_REF_SIZE = 100 * 1024 // 100KB per file
+
+function isPathSafe(filePath: string): boolean {
+  // Reject absolute paths and directory traversal
+  if (path.isAbsolute(filePath)) return false
+  if (filePath.includes("..")) return false
+  // Reject null bytes
+  if (filePath.includes("\0")) return false
+  return true
+}
+
+function formatAttachments(attachments: AttachmentBody[]): string {
+  const parts: string[] = []
+  for (const att of attachments) {
+    if (att.mimeType.startsWith("image/")) {
+      parts.push(`--- Attachment: ${att.filename} (${att.mimeType}) ---\n[Image attachment: ${att.filename}]\nBase64 data: ${att.content}\n--- End attachment ---`)
+    } else {
+      parts.push(`--- Attachment: ${att.filename} (${att.mimeType}) ---\n${att.content}\n--- End attachment ---`)
+    }
+  }
+  return parts.join("\n\n")
+}
+
+async function resolveFileRefs(refs: string[]): Promise<string> {
+  const cwd = process.cwd()
+  const parts: string[] = []
+
+  for (const ref of refs) {
+    if (!isPathSafe(ref)) continue
+    const fullPath = path.resolve(cwd, ref)
+    // Double-check resolved path is within cwd
+    if (!fullPath.startsWith(cwd + path.sep) && fullPath !== cwd) continue
+    try {
+      const stat = await fs.stat(fullPath)
+      if (stat.size > MAX_FILE_REF_SIZE) continue
+      const content = await fs.readFile(fullPath, "utf-8")
+      parts.push(`--- File: ${ref} ---\n${content}\n--- End file ---`)
+    } catch {
+      // File not found or unreadable — skip silently
+    }
+  }
+
+  return parts.join("\n\n")
 }
 
 const chatRoutes = new Hono()
@@ -105,7 +195,15 @@ chatRoutes.post("/", async (c) => {
       return c.json({ error: `failed to start acp session: ${message}` }, 500)
     }
     const chatId = body.chatId
-    const message = body.message as string
+    let message = body.message as string
+    if (body.fileRefs && body.fileRefs.length > 0) {
+      const fileContext = await resolveFileRefs(body.fileRefs)
+      if (fileContext) message = `${fileContext}\n\n${message}`
+    }
+    if (body.attachments && body.attachments.length > 0) {
+      const attContext = formatAttachments(body.attachments)
+      if (attContext) message = `${attContext}\n\n${message}`
+    }
     return streamSSE(c, async (stream) => {
       const controller = new AbortController()
       stream.onAbort(() => controller.abort())
@@ -135,7 +233,15 @@ chatRoutes.post("/", async (c) => {
   }
   const runtime = new PiRuntime({ provider: body.provider, modelId: body.model })
   const history = Array.isArray(body.history) ? (body.history as AgentMessage[]) : undefined
-  const message = body.message as string
+  let message = body.message as string
+  if (body.fileRefs && body.fileRefs.length > 0) {
+    const fileContext = await resolveFileRefs(body.fileRefs)
+    if (fileContext) message = `${fileContext}\n\n${message}`
+  }
+  if (body.attachments && body.attachments.length > 0) {
+    const attContext = formatAttachments(body.attachments)
+    if (attContext) message = `${attContext}\n\n${message}`
+  }
 
   return streamSSE(c, async (stream) => {
     const controller = new AbortController()

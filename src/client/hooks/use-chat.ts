@@ -1,5 +1,5 @@
 import { useReducer, useRef, useCallback } from "react"
-import type { Message, AssistantMessage, TextSegment, ToolSegment, ToolCardVariant } from "@/client/lib/types"
+import type { Message, AssistantMessage, TextSegment, ToolSegment, ToolCardVariant, ChatAttachment, AvailableCommand } from "@/client/lib/types"
 import type { SessionMode } from "@agentclientprotocol/sdk"
 import { parseSSEStream } from "@/client/lib/stream-parser"
 import { useInteractivePrompts } from "./use-interactive-prompts"
@@ -52,6 +52,7 @@ interface ChatState {
   streaming: boolean
   error: string | null
   modeState: ChatModeState | null
+  availableCommands: AvailableCommand[]
 }
 
 type ChatAction =
@@ -68,12 +69,14 @@ type ChatAction =
   | { type: "SET_MODE_STATE"; availableModes: SessionMode[]; currentModeId: string }
   | { type: "SET_CURRENT_MODE_ID"; currentModeId: string }
   | { type: "MARK_MODE_UNAVAILABLE"; modeId: string }
+  | { type: "SET_AVAILABLE_COMMANDS"; commands: AvailableCommand[] }
 
 const initialState: ChatState = {
   messages: [],
   streaming: false,
   error: null,
   modeState: null,
+  availableCommands: [],
 }
 
 function toolNameToVariant(toolName: string): ToolCardVariant {
@@ -251,6 +254,9 @@ function chatReducer(state: ChatState, action: ChatAction): ChatState {
       }
     }
 
+    case "SET_AVAILABLE_COMMANDS":
+      return { ...state, availableCommands: action.commands }
+
     default:
       return state
   }
@@ -272,7 +278,8 @@ export function useChat() {
       content: string,
       config:
         | { runtime?: "pi"; model: string; provider: "anthropic" | "openai"; chatSessionId: string }
-        | { runtime: "acp"; acpAgent: string; chatId: string }
+        | { runtime: "acp"; acpAgent: string; chatId: string },
+      options?: { fileRefs?: string[]; attachments?: ChatAttachment[] }
     ) => {
       const priorMessages = messagesRef.current
       dispatch({ type: "ADD_USER_MESSAGE", content })
@@ -281,6 +288,12 @@ export function useChat() {
       const controller = new AbortController()
       abortControllerRef.current = controller
 
+      const fileRefs = options?.fileRefs
+      const attachments = options?.attachments?.map((a) => ({
+        content: a.content,
+        filename: a.filename,
+        mimeType: a.mimeType,
+      }))
       const body =
         config.runtime === "acp"
           ? {
@@ -288,6 +301,8 @@ export function useChat() {
               message: content,
               acpAgent: config.acpAgent,
               chatId: config.chatId,
+              ...(fileRefs && { fileRefs }),
+              ...(attachments && attachments.length > 0 && { attachments }),
             }
           : {
               runtime: "pi" as const,
@@ -298,6 +313,8 @@ export function useChat() {
               history: priorMessages.map((m) =>
                 toAgentHistoryMessage(m, config.provider, config.model),
               ),
+              ...(fileRefs && { fileRefs }),
+              ...(attachments && attachments.length > 0 && { attachments }),
             }
 
       try {
@@ -365,6 +382,12 @@ export function useChat() {
                 currentModeId: event.currentModeId,
               })
               break
+            case "available_commands":
+              dispatch({
+                type: "SET_AVAILABLE_COMMANDS",
+                commands: event.commands,
+              })
+              break
           }
         }
       } catch (err) {
@@ -411,6 +434,7 @@ export function useChat() {
     streaming: state.streaming,
     error: state.error,
     modeState: state.modeState,
+    availableCommands: state.availableCommands,
     setOptimisticModeId,
     markModeUnavailable,
     sendMessage,
