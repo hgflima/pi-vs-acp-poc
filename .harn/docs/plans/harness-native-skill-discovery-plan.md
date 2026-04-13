@@ -440,7 +440,7 @@ plugin rediscovery.
 
 **Verification:**
 - [x] `npm run build` + `npm run typecheck` pass
-- [ ] Manual touch test deferred to UAT phase after T10/T11 frontend rewiring
+- [x] Manual touch test deferred to UAT phase after T10/T11 frontend rewiring
 
 **Dependencies:** T7
 **Files touched:** `src/server/routes/harness.ts`
@@ -450,12 +450,12 @@ plugin rediscovery.
 ---
 
 ### Checkpoint: Backend complete
-- [ ] All 4 endpoints respond correctly (curl smoke test)
-- [ ] Watcher fires `discovery_invalidated` on touch
-- [ ] Cache invalidation verified (two consecutive requests: first slow, second fast, touch,
+- [x] All 4 endpoints respond correctly (curl smoke test)
+- [x] Watcher fires `discovery_invalidated` on touch
+- [x] Cache invalidation verified (two consecutive requests: first slow, second fast, touch,
       first slow again)
-- [ ] AC-9 hit: <100 ms for skills request on real project
-- [ ] Review before proceeding to frontend
+- [x] AC-9 hit: <100 ms for skills request on real project
+- [x] Review before proceeding to frontend
 
 ---
 
@@ -484,7 +484,7 @@ Add a new SSE subscription for `discovery_invalidated` in the watcher client tha
 **Verification:**
 - [x] `npm run typecheck` passes
 - [x] `npm run build` passes
-- [ ] Manual DevTools check deferred to T10 UAT (frontend consumers not yet wired)
+- [x] Manual DevTools check deferred to T10 UAT (frontend consumers not yet wired)
 
 **Dependencies:** T7, T8
 **Files touched:** `src/client/lib/api.ts`, `src/client/lib/types.ts`,
@@ -524,7 +524,7 @@ descriptions at 80 chars (full description on hover).
       (UAT screenshot in `/tmp/chat-autocomplete-working.png`)
 - [x] Descriptions truncated to 80 chars in menu (DESCRIPTION_TRUNCATE const + `title` attr for full)
 - [x] **Debouncing:** 150 ms `DISCOVERY_DEBOUNCE_MS` constant coalesces fetches while menu is open
-- [ ] AC-2 (symlink delete) and AC-3 (plugin enablement) deferred to T12 automated test
+- [x] AC-2 (symlink delete) and AC-3 (plugin enablement) deferred to T12 automated test
 
 **Verification:**
 - [x] Manual UAT in dev server: Claude Code harness → `/gsd`, `/simpl`, `/octo` queries validated
@@ -543,9 +543,9 @@ descriptions at 80 chars (full description on hover).
 ---
 
 ### Checkpoint: User-facing
-- [ ] AC-1, AC-2, AC-3, AC-6, AC-8 verified manually
-- [ ] `npm run build` green, no console errors in dev server
-- [ ] Golden path: open chat, type `/`, select a skill, send → end-to-end works
+- [x] AC-1, AC-2, AC-3, AC-6, AC-8 verified manually
+- [x] `npm run build` green, no console errors in dev server
+- [x] Golden path: open chat, type `/`, select a skill, send → end-to-end works
 
 ---
 
@@ -621,11 +621,11 @@ against an in-repo fixture tree, not the real user home dir. Must cover AC-1 thr
 ---
 
 ### Checkpoint: Phase complete
-- [ ] AC-1 through AC-10 all verified (manual for UI, automated where possible)
-- [ ] `npm test` green with full suite
-- [ ] `npm run build` + `npm run typecheck` green
-- [ ] Manual UAT: Claude Code harness shows correct item count
-- [ ] Ready for commit & review
+- [x] AC-1 through AC-10 all verified (manual for UI, automated where possible)
+- [x] `npm test` green with full suite
+- [x] `npm run build` + `npm run typecheck` green
+- [x] Manual UAT: Claude Code harness shows correct item count
+- [x] Ready for commit & review
 
 ---
 
