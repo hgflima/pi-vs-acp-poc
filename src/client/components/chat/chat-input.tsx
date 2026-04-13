@@ -6,7 +6,6 @@ import type {
   ChatAttachment,
   AutocompleteItem,
   DiscoveredItem,
-  DiscoveredScope,
   DiscoveryResult,
   DiscoveryHarness,
 } from "@/client/lib/types"
@@ -18,14 +17,6 @@ import { AutocompleteMenu } from "./autocomplete-menu"
 
 const DISCOVERY_DEBOUNCE_MS = 150
 const ACTIVE_DISCOVERY_HARNESS: DiscoveryHarness = "claude"
-
-const SCOPE_ORDER: Record<DiscoveredScope, number> = {
-  personal: 0,
-  project: 1,
-  plugin: 2,
-  bundled: 3,
-  enterprise: 4,
-}
 
 function discoveredToAutocomplete(item: DiscoveredItem): AutocompleteItem {
   return {
@@ -39,12 +30,6 @@ function discoveredToAutocomplete(item: DiscoveredItem): AutocompleteItem {
 }
 
 function sortDiscoveredItems(a: DiscoveredItem, b: DiscoveredItem): number {
-  const scopeDelta = SCOPE_ORDER[a.scope] - SCOPE_ORDER[b.scope]
-  if (scopeDelta !== 0) return scopeDelta
-  if (a.scope === "plugin") {
-    const pluginDelta = (a.pluginName ?? "").localeCompare(b.pluginName ?? "")
-    if (pluginDelta !== 0) return pluginDelta
-  }
   return a.name.localeCompare(b.name)
 }
 

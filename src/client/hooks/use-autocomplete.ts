@@ -82,7 +82,7 @@ export function useAutocomplete({
       return item.type === "file" || item.type === "subagent"
     })
 
-    if (!query) return modeItems.slice(0, MAX_ITEMS)
+    if (!query) return modeItems
 
     return modeItems
       .filter(

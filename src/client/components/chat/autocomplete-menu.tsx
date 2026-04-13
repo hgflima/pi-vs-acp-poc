@@ -1,9 +1,8 @@
-import { Fragment, useRef, useEffect } from "react"
+import { useRef, useEffect } from "react"
 import { cn } from "@/client/lib/utils"
 import type {
   AutocompleteItem,
   AutocompleteItemType,
-  DiscoveredScope,
 } from "@/client/lib/types"
 
 interface AutocompleteMenuProps {
@@ -22,23 +21,7 @@ const TYPE_BADGES: Record<AutocompleteItemType, { label: string; className: stri
   subagent: { label: "@", className: "bg-pink-500/20 text-pink-400" },
 }
 
-const SCOPE_LABEL: Record<DiscoveredScope, string> = {
-  personal: "Personal",
-  project: "Project",
-  plugin: "Plugin",
-  bundled: "Bundled",
-  enterprise: "Enterprise",
-}
-
-const DESCRIPTION_TRUNCATE = 80
-
-function scopeHeaderLabel(item: AutocompleteItem): string | null {
-  if (!item.scope) return null
-  if (item.scope === "plugin") {
-    return item.pluginName ? `Plugin: ${item.pluginName}` : "Plugin"
-  }
-  return SCOPE_LABEL[item.scope]
-}
+const DESCRIPTION_TRUNCATE = 140
 
 function truncate(text: string, max: number): string {
   return text.length > max ? `${text.slice(0, max - 1).trimEnd()}…` : text
@@ -67,30 +50,20 @@ export function AutocompleteMenu({
     ? { bottom: `${position.bottom}px`, left: `${position.left}px` }
     : undefined
 
-  let lastGroupKey: string | null = null
-
   return (
     <div
       ref={listRef}
       role="listbox"
       style={style}
       className={cn(
-        "absolute z-50 w-80 max-h-[320px] overflow-y-auto",
+        "absolute z-50 max-h-[320px] overflow-y-auto",
         "rounded-md border bg-popover text-popover-foreground shadow-md",
-        !position && "bottom-full left-0 mb-2",
+        !position && "bottom-full left-0 right-0 mb-2",
       )}
     >
       {items.map((item, index) => {
         const badge = TYPE_BADGES[item.type]
         const isSelected = index === selectedIndex
-
-        const header = scopeHeaderLabel(item)
-        const groupKey =
-          item.scope === "plugin"
-            ? `plugin:${item.pluginName ?? ""}`
-            : item.scope ?? "_"
-        const showHeader = header !== null && groupKey !== lastGroupKey
-        if (header !== null) lastGroupKey = groupKey
 
         const fullDescription = item.description ?? ""
         const displayDescription = fullDescription
@@ -98,20 +71,8 @@ export function AutocompleteMenu({
           : ""
 
         return (
-          <Fragment key={`${item.type}-${item.scope ?? "_"}-${item.label}`}>
-            {showHeader && (
-              <div
-                role="presentation"
-                className={cn(
-                  "sticky top-0 z-10 bg-popover/95 backdrop-blur",
-                  "px-3 pt-2 pb-1 text-[10px] font-semibold uppercase tracking-wider",
-                  "text-muted-foreground border-b border-border/50",
-                )}
-              >
-                {header}
-              </div>
-            )}
             <button
+              key={`${item.type}-${item.scope ?? "_"}-${item.label}`}
               ref={isSelected ? selectedRef : undefined}
               role="option"
               aria-selected={isSelected}
@@ -134,15 +95,14 @@ export function AutocompleteMenu({
                 {badge.label}
               </span>
               <div className="min-w-0 flex-1">
-                <span className="font-medium">{item.label}</span>
+                <div className="truncate font-medium">{item.label}</div>
                 {displayDescription && (
-                  <span className="ml-2 truncate text-xs text-muted-foreground">
+                  <div className="truncate text-xs text-muted-foreground">
                     {displayDescription}
-                  </span>
+                  </div>
                 )}
               </div>
             </button>
-          </Fragment>
         )
       })}
     </div>
