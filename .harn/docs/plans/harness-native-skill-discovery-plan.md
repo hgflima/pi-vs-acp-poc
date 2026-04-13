@@ -613,7 +613,7 @@ against an in-repo fixture tree, not the real user home dir. Must cover AC-1 thr
                    `test/fixtures/claude-discovery/**` static tree — uses tmpdir per test
                    following T4 precedent (documented in execution log).
 **Scope:** M
-**Commit:** _pending_
+**Commit:** `4bb89ab8`
 
 ---
 
@@ -797,7 +797,7 @@ point); T7 needs T4; T10 needs T9.
   `test/fixtures/claude-discovery/**` in-repo. Companion change: `tsconfig.node.json`
   adiciona `test` ao includes pra cobertura de typecheck. **Resultado:** 58/58 tests
   green (51 prior + 7 novos, 7 test files), typecheck limpo, build limpo (1.65s).
-  Commit: `_pending_`.
+  Commit: `4bb89ab8`.
 
 **Phase complete.** Todas as 13 tasks (T0–T13) executadas em commits atômicos. AC-1, AC-3,
 AC-5, AC-6, AC-9 cobertos por testes automatizados; AC-2 simplificado (FS reflection via
