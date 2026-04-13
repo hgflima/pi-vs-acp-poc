@@ -355,7 +355,10 @@ are skipped.
 ### Checkpoint: Discovery core
 - [x] T4 fixture test green with realistic project shape (7 scenarios + recursive commands bonus)
 - [x] `dispatchDiscovery("claude", ...)` routes to T4 and returns a sensible `DiscoveryResult`
-- [ ] Manual sanity check: run discovery against `pi-ai-poc` itself and eyeball the output (pending — recommend executing after T7 ships the HTTP surface)
+- [x] Manual sanity check: run discovery against `pi-ai-poc` itself and eyeball the output
+      (executed 2026-04-12: 398 items / 6 plugins / 24 sources / 57.7 ms latency / 1 expected
+      YAML error in third-party plugin / 2 legitimate shadows including a user-override of
+      bundled `debug` by personal `~/.claude/commands/debug.md`)
 
 ---
 
