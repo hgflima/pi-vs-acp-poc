@@ -16,14 +16,27 @@ import {
   type DiscoveredScope,
 } from "../agent/discovery"
 import { resolveEnabledClaudePlugins } from "../agent/discovery/claude-plugins"
+import { PROJECT_HOME } from "../lib/project-home"
 
 const execFileAsync = promisify(execFile)
 
 const harnessRoutes = new Hono()
 
-// In-memory harness storage (D-13: no file watching, persists until next load or restart)
+// activeDirectory is locked to PROJECT_HOME (resolved from CWD env var at startup).
+// See src/server/lib/project-home.ts. The Settings "Load" flow below only refreshes
+// activeHarness metadata — it can NOT switch the discovery root.
 let activeHarness: HarnessResult | null = null
-let activeDirectory: string | null = null
+let activeDirectory: string = PROJECT_HOME
+
+// Auto-discover at startup so discovery endpoints work without requiring a manual
+// Settings → Harness → Load click.
+discoverHarness(PROJECT_HOME)
+  .then((result) => {
+    activeHarness = result
+  })
+  .catch((err: unknown) => {
+    console.error("[harness] auto-discover failed:", err)
+  })
 
 export function getActiveHarness() {
   return activeHarness
@@ -68,34 +81,12 @@ function resolveItemPath(dir: string, type: ItemType, name: string): string {
   }
 }
 
-harnessRoutes.post("/load", async (c) => {
-  const { directory } = await c.req.json<{ directory: string }>()
-
-  if (!directory || typeof directory !== "string") {
-    return c.json({ error: "Directory path required" }, 400)
-  }
-
-  if (!path.isAbsolute(directory)) {
-    return c.json({ error: "Absolute directory path required" }, 400)
-  }
-
-  // Validate directory exists
-  try {
-    const stat = await fs.stat(directory)
-    if (!stat.isDirectory()) {
-      return c.json({ error: "Path is not a directory" }, 400)
-    }
-  } catch {
-    return c.json({ error: "Directory not found. Check the path and try again." }, 404)
-  }
-
-  const result = await discoverHarness(directory)
-
-  // Store in memory (D-13)
+// /load reloads activeHarness metadata for PROJECT_HOME. The `directory` field in
+// the request body is ignored — activeDirectory is locked to CWD/PROJECT_HOME.
+harnessRoutes.post("/load", async (_c) => {
+  const result = await discoverHarness(PROJECT_HOME)
   activeHarness = result
-  activeDirectory = directory
-
-  return c.json(result)
+  return _c.json(result)
 })
 
 harnessRoutes.get("/status", (c) => {
@@ -111,9 +102,10 @@ harnessRoutes.get("/status", (c) => {
   })
 })
 
+// /clear only forgets activeHarness metadata. activeDirectory stays locked
+// to PROJECT_HOME — clearing it would break every discovery endpoint.
 harnessRoutes.post("/clear", (c) => {
   activeHarness = null
-  activeDirectory = null
   return c.json({ status: "ok" })
 })
 
